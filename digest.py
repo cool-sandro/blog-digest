@@ -328,9 +328,38 @@ def generate_html(articles: list[dict], config: dict, debug: bool = False, run_s
     else:
         filename = f"digest-{datetime.now().strftime('%Y-%m-%d')}.html"
     (out_dir / filename).write_text(html)
-
     log.info(f"HTML written to {out_dir / filename}")
+
+    generate_index(out_dir)
     return out_dir
+
+
+def generate_index(out_dir: Path):
+    """Regenerate index.html listing all digest reports, newest first."""
+    env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
+    template = env.get_template("index.html")
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    reports = []
+    for f in sorted(out_dir.glob("digest-????-??-??.html"), reverse=True):
+        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD
+        try:
+            label = datetime.strptime(date_str, "%Y-%m-%d").strftime("%A, %B %d, %Y")
+        except ValueError:
+            label = date_str
+        reports.append({
+            "filename": f.name,
+            "label": label,
+            "is_today": date_str == today,
+        })
+
+    html = template.render(
+        reports=reports,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+    )
+    (out_dir / "index.html").write_text(html)
+    log.info(f"Index updated: {out_dir / 'index.html'} ({len(reports)} reports)")
 
 
 def git_push(output_dir: Path):
