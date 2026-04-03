@@ -8,6 +8,7 @@ and generates a static HTML page for GitHub Pages.
 import os
 import sys
 import json
+import time
 import hashlib
 import logging
 import argparse
@@ -56,6 +57,27 @@ def article_id(url: str) -> str:
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
 
+def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20) -> requests.Response:
+    """HTTP GET with exponential backoff on transient failures."""
+    delay = 2
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(
+                url,
+                timeout=timeout,
+                headers={"User-Agent": "BlogDigest/1.0 (RSS Aggregator)"},
+            )
+            resp.raise_for_status()
+            return resp
+        except requests.RequestException as e:
+            if attempt < max_retries - 1:
+                log.warning(f"Attempt {attempt + 1}/{max_retries} failed for {url}: {e}. Retrying in {delay}s…")
+                time.sleep(delay)
+                delay *= 2
+            else:
+                raise
+
+
 def fetch_feeds(config: dict) -> list[dict]:
     """Fetch all RSS feeds and return list of articles."""
     articles = []
@@ -69,7 +91,8 @@ def fetch_feeds(config: dict) -> list[dict]:
         log.info(f"Fetching feed: {name}")
 
         try:
-            feed = feedparser.parse(url)
+            resp = fetch_with_backoff(url)
+            feed = feedparser.parse(resp.content)
             count = 0
             for entry in feed.entries:
                 if count >= max_per_feed:
@@ -80,8 +103,7 @@ def fetch_feeds(config: dict) -> list[dict]:
                 for date_field in ("published_parsed", "updated_parsed"):
                     parsed = getattr(entry, date_field, None)
                     if parsed:
-                        from time import mktime
-                        published = datetime.fromtimestamp(mktime(parsed), tz=timezone.utc)
+                        published = datetime.fromtimestamp(time.mktime(parsed), tz=timezone.utc)
                         break
 
                 if published and published < cutoff:
@@ -311,9 +333,10 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
         cache[aid] = result
         processed.append(result)
 
-    # Prune old cache entries (keep last 7 days)
-    week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
-    cache = {k: v for k, v in cache.items() if v.get("published", "") >= week_ago or not v.get("published")}
+    # Prune old cache entries – keep at least 7 days, or longer if max_age_hours exceeds that
+    prune_hours = max(config["summary"]["max_age_hours"], 24 * 7)
+    prune_cutoff = (datetime.now(timezone.utc) - timedelta(hours=prune_hours)).isoformat()
+    cache = {k: v for k, v in cache.items() if v.get("published", "") >= prune_cutoff or not v.get("published")}
     save_cache(cache)
 
     return processed, stats

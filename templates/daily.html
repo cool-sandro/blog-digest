@@ -73,7 +73,37 @@
         .stat strong {
             color: var(--accent);
         }
+        /* ── Search bar ──────────────────────────────────────────── */
 
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
         /* ── Feed collapsible section ───────────────────────────── */
 
         details.feed-section {
@@ -342,6 +372,9 @@
                 <span class="stat"><strong>{{ articles_by_feed | length }}</strong> feeds</span>
                 <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
             </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
         </header>
 
         {% for feed_name, articles in articles_by_feed.items() %}
@@ -370,6 +403,8 @@
             </div>
         </details>
         {% endfor %}
+
+        <div id="no-results">No articles match your search.</div>
 
         {% if run_stats %}
         <details class="run-stats" open>
@@ -526,7 +561,39 @@
                 saveCollapsed(list);
             });
         });
+        // ── Search / filter ────────────────────────────────
 
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
         // ── Init ──────────────────────────────────────────────────
         applyRead();
     })();
