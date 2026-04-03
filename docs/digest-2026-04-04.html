@@ -73,7 +73,37 @@
         .stat strong {
             color: var(--accent);
         }
+        /* ── Search bar ──────────────────────────────────────────── */
 
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
         /* ── Feed collapsible section ───────────────────────────── */
 
         details.feed-section {
@@ -342,6 +372,9 @@
                 <span class="stat"><strong>4</strong> feeds</span>
                 <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
             </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
         </header>
 
         
@@ -578,31 +611,28 @@
         </details>
         
 
+        <div id="no-results">No articles match your search.</div>
+
         
         <details class="run-stats" open>
             <summary>Run statistics</summary>
             <div class="run-stats-grid">
                 <div class="run-stat-item">
                     <div class="label">Started</div>
-                    <div class="value">01:25:00</div>
+                    <div class="value">01:46:11</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Finished</div>
-                    <div class="value">01:36:52</div>
+                    <div class="value">01:46:25</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Duration</div>
-                    <div class="value">11m 51s</div>
-                </div>
-                
-                <div class="run-stat-item">
-                    <div class="label">Avg tokens/s</div>
-                    <div class="value">9.9</div>
+                    <div class="value">0m 13s</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Ollama</div>
-                    <div class="value">15 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
+                    <div class="value dim">0 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">OpenRouter</div>
@@ -610,7 +640,7 @@
                 </div>
                 <div class="run-stat-item">
                     <div class="label">From cache</div>
-                    <div class="value dim">0</div>
+                    <div class="value dim">15</div>
                 </div>
                 
                 <div class="run-stat-item">
@@ -623,7 +653,7 @@
         
 
         <footer>
-            Generated 2026-04-04 01:36 ·
+            Generated 2026-04-04 01:46 ·
             <a href="index.html" style="color: var(--accent);">← Archive</a> ·
             <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
         </footer>
@@ -733,7 +763,39 @@
                 saveCollapsed(list);
             });
         });
+        // ── Search / filter ────────────────────────────────
 
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
         // ── Init ──────────────────────────────────────────────────
         applyRead();
     })();
