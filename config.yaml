@@ -47,7 +47,7 @@ summary:
 
 # Output
 output:
-  directory: "./output"
+  directory: "./docs"
 
 # Schedule
 schedule:
