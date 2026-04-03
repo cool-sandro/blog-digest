@@ -15,6 +15,8 @@ feeds:
     url: "https://www.pulumi.com/blog/rss.xml"
   - name: "Stdeer Blog"
     url: "https://blog.stderr.at/index.xml"
+  - name: "Red Hat Cloud Blog"
+    url: "https://cloud.redhat.com/blog/rss.xml"
 
   # DevOps & Infrastructure
   - name: "Hacker News (Top)"

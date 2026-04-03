@@ -146,7 +146,8 @@ def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, float | 
     model = ollama_cfg["model"]
     max_words = config["summary"]["max_summary_length"]
 
-    prompt = f"""Summarize this blog post in {max_words} words or less. 
+    prompt = f"""Summarize this blog post in {max_words} words or less.
+Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text.
 Be concise and focus on the key takeaways. Write in English.
 
 Title: {title}
@@ -203,7 +204,7 @@ def summarize_openrouter(text: str, title: str, config: dict) -> tuple[str, None
                 "messages": [
                     {
                         "role": "system",
-                        "content": f"You summarize blog posts in {max_words} words or less. Be concise, focus on key takeaways. Write in English.",
+                        "content": f"You summarize blog posts in {max_words} words or less. Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text. Be concise, focus on key takeaways. Write in English.",
                     },
                     {
                         "role": "user",
@@ -218,6 +219,27 @@ def summarize_openrouter(text: str, title: str, config: dict) -> tuple[str, None
     except Exception as e:
         log.warning(f"OpenRouter failed: {e}")
         return None
+
+
+def clean_summary(text: str) -> str:
+    """Convert any leftover markdown in LLM output to plain HTML."""
+    import re
+    # Remove leading label like "Summary:" or "**Summary:**"
+    text = re.sub(r'^\s*\*{0,2}Summary:\*{0,2}\s*', '', text, flags=re.IGNORECASE)
+    # Convert **bold** and __bold__
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'__(.+?)__', r'<strong>\1</strong>', text)
+    # Convert *italic* and _italic_
+    text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
+    text = re.sub(r'_(.+?)_', r'<em>\1</em>', text)
+    # Convert markdown bullet/numbered list items into inline sentences
+    text = re.sub(r'^[\s]*[-*]\s+', '', text, flags=re.MULTILINE)
+    text = re.sub(r'^[\s]*\d+\.\s+', '', text, flags=re.MULTILINE)
+    # Collapse multiple blank lines into paragraph breaks; flatten single newlines to spaces
+    paragraphs = [' '.join(p.split('\n')).strip() for p in re.split(r'\n{2,}', text) if p.strip()]
+    if len(paragraphs) > 1:
+        return '</p><p class="summary">'.join(paragraphs)
+    return paragraphs[0] if paragraphs else text
 
 
 def summarize(text: str, title: str, config: dict) -> tuple[str, str, float | None]:
@@ -265,6 +287,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
 
         # Summarize
         summary, backend, tps = summarize(text, article["title"], config)
+        summary = clean_summary(summary)
 
         if backend == "Ollama":
             stats["ollama"] += 1
