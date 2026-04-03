@@ -14,6 +14,8 @@
             --accent: #58a6ff;
             --accent-subtle: #1f6feb22;
             --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,15 +28,16 @@
             padding: 2rem 1rem;
         }
 
+        /* Desktop: wider, two-column-friendly container */
         .container {
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
         }
 
         header {
             text-align: center;
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
             border-bottom: 1px solid var(--border);
         }
 
@@ -54,8 +57,9 @@
 
         .stats {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
             justify-content: center;
+            flex-wrap: wrap;
             margin-top: 1rem;
         }
 
@@ -63,7 +67,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.9rem;
             font-size: 0.85rem;
         }
 
@@ -71,44 +75,113 @@
             color: var(--accent);
         }
 
-        .feed-section {
-            margin-bottom: 2.5rem;
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
         }
 
-        .feed-section h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border);
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
         }
 
-        .feed-section h2::before {
-            content: "●";
-            font-size: 0.6rem;
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
         }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
 
         .article {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            transition: border-color 0.2s;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
         }
 
         .article:hover {
             border-color: var(--accent);
         }
 
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
         .article h3 {
-            font-size: 1rem;
+            font-size: 0.975rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
+            flex: 1;
         }
 
         .article h3 a {
@@ -120,22 +193,50 @@
             color: var(--accent);
         }
 
-        .article .date {
-            font-size: 0.8rem;
+        .article.is-read h3 a {
             color: var(--text-muted);
-            margin-bottom: 0.75rem;
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
         }
 
         .article .summary {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
             line-height: 1.7;
         }
 
         .article .read-more {
             display: inline-block;
-            margin-top: 0.75rem;
-            font-size: 0.8rem;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
             color: var(--accent);
             text-decoration: none;
         }
@@ -143,6 +244,8 @@
         .article .read-more:hover {
             text-decoration: underline;
         }
+
+        /* ── Run stats ──────────────────────────────────────────── */
 
         footer {
             text-align: center;
@@ -158,7 +261,7 @@
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 1.25rem 1.5rem;
-            margin-top: 3rem;
+            margin-top: 2.5rem;
         }
 
         details.run-stats summary {
@@ -212,10 +315,27 @@
             font-size: 0.85rem;
         }
 
-        @media (max-width: 600px) {
-            body { padding: 1rem 0.75rem; }
-            header h1 { font-size: 1.5rem; }
-            .stats { flex-direction: column; align-items: center; gap: 0.5rem; }
+        /* ── Responsive ─────────────────────────────────────────── */
+
+        @media (max-width: 640px) {
+            body { padding: 0.75rem 0.6rem; }
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (min-width: 900px) {
+            .articles-wrapper {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                padding-bottom: 1rem;
+            }
+            .articles-wrapper .article {
+                margin-bottom: 0;
+            }
         }
     </style>
 </head>
@@ -225,36 +345,50 @@
             <h1>📡 Blog Digest</h1>
             <p class="meta">Saturday, April 04, 2026</p>
             <div class="stats">
-                <span class="stat"><strong>15</strong> articles</span>
-                <span class="stat"><strong>4</strong> feeds</span>
+                <span class="stat"><strong>10</strong> articles</span>
+                <span class="stat"><strong>3</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
             </div>
         </header>
 
         
-        <section class="feed-section">
-            <h2>Kubernetes subreddit</h2>
-            
-            <div class="article">
-                <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sb9cvl/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Weekly: Share your victories thread</a></h3>
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(2)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
                 
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">Weekly Sharing Thread - A Platform for Celebrating Wins and Progress
+                <div class="article" data-id="01b132234cc6d69c">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sb9cvl/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Weekly: Share your victories thread</a></h3>
+                        <button class="btn-read" data-id="01b132234cc6d69c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">Weekly Sharing Thread - A Platform for Celebrating Wins and Progress
 
 This week's "Share Your Victories" thread is a prime opportunity to celebrate accomplishments, address challenges met head-on with determination, and share the progress you've made in your projects or personal endeavors. Whether it's coding success, a project completion, or just overcoming a minor hurdle, sharing these victories can provide motivation for others as well.
 
 This community-driven platform encourages open communication about successes and failures, creating an environment where everyone feels valued regardless of their skill level or the size of the contribution they've made to our shared online space. By joining in on this thread, you'll not only feel a sense of belonging but also be part of something much bigger than yourself – contributing to making this community one that celebrates wins and growth.
 
 Submit your victory stories by providing relevant links (where applicable) and including as many details as possible about what you've accomplished. Don't forget to share your thoughts on what motivated the accomplishment, how it impacted others in the community, or any tips for future success based on what you learned from this experience.</p>
-                <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sb9cvl/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sbbh0i/moving_from_local_tilt_to_cloudbased_devenv_for/" target="_blank" rel="noopener">Moving from local tilt to cloud-based dev-env for AI agents?</a></h3>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sb9cvl/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">The post addresses a common challenge faced by software developers working in AI-driven environments where parallel development and easy scalability of cloud-based environments are desired but not achieved. The author mentions issues with local Tilt, which requires resources to run multiple clusters locally, particularly problematic for teams that prefer to work on different branches simultaneously using worktrees. Transitioning from local to cloud deployment seems inevitable due to the need for parallelism in development and easy scalability of clusters.
+                <div class="article" data-id="03ed6e7d3e851d2f">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sbbh0i/moving_from_local_tilt_to_cloudbased_devenv_for/" target="_blank" rel="noopener">Moving from local tilt to cloud-based dev-env for AI agents?</a></h3>
+                        <button class="btn-read" data-id="03ed6e7d3e851d2f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">The post addresses a common challenge faced by software developers working in AI-driven environments where parallel development and easy scalability of cloud-based environments are desired but not achieved. The author mentions issues with local Tilt, which requires resources to run multiple clusters locally, particularly problematic for teams that prefer to work on different branches simultaneously using worktrees. Transitioning from local to cloud deployment seems inevitable due to the need for parallelism in development and easy scalability of clusters.
 
 The main questions highlighted are:
 1. Ease of provision and recycling of a single namespace cluster.
@@ -263,126 +397,87 @@ The main questions highlighted are:
 4. Support from solutions such as Metalbear, Signadot, Okteto, DevSpace, or Garden.io.
 
 The author provides examples and a link to their Stack Overflow post where they share the problem with local Tilt setup and ask for recommendations on how to address these issues in cloud-based environments, particularly focused on AI agent development teams.</p>
-                <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sbbh0i/moving_from_local_tilt_to_cloudbased_devenv_for/" target="_blank" rel="noopener">Read full article →</a>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sbbh0i/moving_from_local_tilt_to_cloudbased_devenv_for/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
             </div>
-            
-        </section>
+        </details>
         
-        <section class="feed-section">
-            <h2>Hacker News (Top)</h2>
-            
-            <div class="article">
-                <h3><a href="https://www.bbc.com/news/articles/ce8jzr423p9o" target="_blank" rel="noopener">Artemis II crew take 'spectacular' image of Earth</a></h3>
+        <details class="feed-section" data-feed="The New Stack">
+            <summary>
+                <span class="feed-dot"></span>
+                The New Stack
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="The New Stack"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
                 
-                <p class="date">2026-04-03</p>
+                <div class="article" data-id="03f6cc97e4319834">
+                    <div class="article-header">
+                        <h3><a href="https://thenewstack.io/vultr-nvidia-ai-infrastructure/" target="_blank" rel="noopener">Vultr says its Nvidia-powered AI infrastructure costs 50% to 90% less than hyperscalers</a></h3>
+                        <button class="btn-read" data-id="03f6cc97e4319834" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">Vultr is using Nvidia GPUs and AI agents like OpenClaw to automate infrastructure setup for developers at significantly lower costs compared to hyperscalers. Vultr’s platform offers preconfigured options that can be deployed with a simple click, including training on security policies, networking rules, and compliance requirements without the need for manual scripting. This approach allows platform engineering teams to build high-performance infrastructures efficiently, reducing consumption of expensive compute resources. The skills files created by these engineers are used as AI agents like OpenClaw perform specific operational tasks, automating configurations and ensuring that developers can focus on application development while maintaining security and compliance requirements.</p>
+                    <a class="read-more" href="https://thenewstack.io/vultr-nvidia-ai-infrastructure/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="summary">Artemis II, the second crewed mission of NASA's Orion spacecraft, captured a spectacular image of Earth from space that was described as "spectacular" by members of the crew. The photo, which included both day and night views, provided breathtaking perspective on our planet's beauty and complexity. The crew felt compelled to share this stunning moment with their families and friends back home. This celestial view underscored the importance of future exploration beyond Earth's borders and highlighted the potential of technology like Orion in pushing boundaries for scientific discovery. The reaction from the crew underscores how space missions can not only inspire but also connect people on a profound level, transcending physical distances to share experiences that transcend our everyday lives.</p>
-                <a class="read-more" href="https://www.bbc.com/news/articles/ce8jzr423p9o" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">This blog post discusses "iNaturalist," a platform that allows users to contribute field observations and identify species. Users can upload photos, videos, or notes about plants and animals they encounter in the wild. The data collected through this platform is used by scientists for research on biodiversity and conservation efforts.
-The article emphasizes the importance of citizen science in the age of big data and highlights how iNaturalist provides a way to collect accurate information without requiring experts. It also mentions that iNaturalist has over 13 million users, indicating its widespread use.
-The comments section of the post shares various positive reviews about the platform's ease of use and effectiveness for identifying species. Additionally, it touches on the challenges faced by scientists when trying to understand data from different sources and suggests how iNaturalist might be a useful resource in bridging these gaps.
-Overall, this blog post is aimed at encouraging readers to participate in citizen science projects like iNaturalist, as it offers valuable insights into biodiversity that are often overlooked.</p>
-                <a class="read-more" href="https://www.inaturalist.org/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://www.theguardian.com/world/2026/apr/03/us-fighter-jet-confirmed-shot-down-over-iran" target="_blank" rel="noopener">F-15E jet shot down over Iran</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">The F-15E jet, an American fighter aircraft, crashed into Iran's airspace over the Caspian Sea on April 3rd, resulting in debris being shot down by Iranian air defense systems. The incident occurred when a Russian warplane crossed through Iran's airspace without permission. It is believed that the crash was intentional, but this has yet to be confirmed. This event highlights the ongoing tensions between Iran and its neighboring countries, including Russia and the United States. The F-15E jet is one of the most advanced fighter jets in the world, used by both the US Air Force and Israel's IAF. The crash demonstrates the high-risk nature of combat operations on foreign territory and has sparked international discussions about missile defense systems and airspace regulations.</p>
-                <a class="read-more" href="https://www.theguardian.com/world/2026/apr/03/us-fighter-jet-confirmed-shot-down-over-iran" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://www.joanwestenberg.com/marc-andreessen-is-wrong-about-introspection/" target="_blank" rel="noopener">Marc Andreessen is wrong about introspection</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">Marc Andreessen's recent article criticizing introspection and self-reflection as unhelpful has been widely criticized on Hacker News, with many arguing that it is a simplistic view of human psychology. The author, who founded the tech company GitHub, believes that these practices can lead to tunnel vision and hinder progress by focusing too much on oneself. While he acknowledges the benefits of reflection in improving decision-making skills, he argues that they are not always necessary or useful for all situations.
-Despite this critique, many people still find introspection beneficial and believe it helps them make better choices and improve their lives. The article has sparked a heated debate about the role of introspection in modern society, highlighting the complexity of human psychology and the importance of finding balance between self-awareness and practical application of knowledge.</p>
-                <a class="read-more" href="https://www.joanwestenberg.com/marc-andreessen-is-wrong-about-introspection/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://text.blogosphere.app/" target="_blank" rel="noopener">Show HN: I built a frontpage for personal blogs</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">**Summary:**
-
-The author created a frontpage for personal blogs, combining the HN-inspired simplicity with dynamic features. The minimal version is fast and static, fetching recent posts across categories. The non-minimal version includes more advanced functionalities. Users can add their own blogs by submitting links, which will be reviewed and approved.
-
-**Key Takeaways:**
-- A simple but functional frontpage for personal blogs.
-- Fetches recent posts from various categories efficiently.
-- Reviews and approves new blog submissions to maintain quality.
-- Open for feedback, encouraging community input on the site's content.</p>
-                <a class="read-more" href="https://text.blogosphere.app/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-        </section>
-        
-        <section class="feed-section">
-            <h2>The New Stack</h2>
-            
-            <div class="article">
-                <h3><a href="https://thenewstack.io/vultr-nvidia-ai-infrastructure/" target="_blank" rel="noopener">Vultr says its Nvidia-powered AI infrastructure costs 50% to 90% less than hyperscalers</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">Vultr is using Nvidia GPUs and AI agents like OpenClaw to automate infrastructure setup for developers at significantly lower costs compared to hyperscalers. Vultr’s platform offers preconfigured options that can be deployed with a simple click, including training on security policies, networking rules, and compliance requirements without the need for manual scripting. This approach allows platform engineering teams to build high-performance infrastructures efficiently, reducing consumption of expensive compute resources. The skills files created by these engineers are used as AI agents like OpenClaw perform specific operational tasks, automating configurations and ensuring that developers can focus on application development while maintaining security and compliance requirements.</p>
-                <a class="read-more" href="https://thenewstack.io/vultr-nvidia-ai-infrastructure/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://thenewstack.io/ai-coding-tools-reckoning/" target="_blank" rel="noopener">“I started to lose my ability to code”: Developers grapple with the real cost of AI programming tools</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">The blog post discusses the complex and multifaceted transition of developers as they navigate the integration of artificial intelligence (AI) programming tools into their workflows. The author Paul Ford, a 51-year-old software developer, expresses both excitement for new AI capabilities like large language models (LLMs), such as Claude Code, which have enabled him to revive old projects and even complete abandoned ones, suggesting an increased level of enthusiasm in his coding. However, concerns about the potential loss of coding skills due to over-reliance on these tools are also prominent. Pia Torain, a software engineer for Point Health A.I., experienced this firsthand with her project completion after only four months of using AI prompts, stating she "started to lose my ability to code." This underscores the fear that as developers become more dependent on AI, they may struggle to regain their coding abilities. Junior developers and students alike are left questioning whether it is even necessary for them to continue pursuing these skills in a world where automated tools can perform many of the functions traditionally done by programmers.
+                <div class="article" data-id="ec28b39563b3f8b9">
+                    <div class="article-header">
+                        <h3><a href="https://thenewstack.io/ai-coding-tools-reckoning/" target="_blank" rel="noopener">“I started to lose my ability to code”: Developers grapple with the real cost of AI programming tools</a></h3>
+                        <button class="btn-read" data-id="ec28b39563b3f8b9" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">The blog post discusses the complex and multifaceted transition of developers as they navigate the integration of artificial intelligence (AI) programming tools into their workflows. The author Paul Ford, a 51-year-old software developer, expresses both excitement for new AI capabilities like large language models (LLMs), such as Claude Code, which have enabled him to revive old projects and even complete abandoned ones, suggesting an increased level of enthusiasm in his coding. However, concerns about the potential loss of coding skills due to over-reliance on these tools are also prominent. Pia Torain, a software engineer for Point Health A.I., experienced this firsthand with her project completion after only four months of using AI prompts, stating she "started to lose my ability to code." This underscores the fear that as developers become more dependent on AI, they may struggle to regain their coding abilities. Junior developers and students alike are left questioning whether it is even necessary for them to continue pursuing these skills in a world where automated tools can perform many of the functions traditionally done by programmers.
 
 The blog post also touches on other aspects of this shift, such as quality assurance, expert status, and the broader implications of rising AI usage. The discussion highlights an industry-wide reckoning with how the increasing power of AI programming agents is transforming work environments, leading to heightened concerns about developer burnout and the potential hollowing out of junior development pipelines.
 
 The post concludes by emphasizing that while coding faster may be beneficial in certain situations, it also comes at a cost of reduced quality and diminished expertise, as seen through the example of Claude Code's impact on older programmers. This complex interplay between speed, quality, and expert status underscores the challenges developers face as AI continues to reshape their roles.</p>
-                <a class="read-more" href="https://thenewstack.io/ai-coding-tools-reckoning/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://thenewstack.io/digital-experience-monitoring-workflow/" target="_blank" rel="noopener">Digital Experience Monitoring belongs in the modern developer workflow</a></h3>
+                    <a class="read-more" href="https://thenewstack.io/ai-coding-tools-reckoning/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="date">2026-04-03</p>
+                <div class="article" data-id="5a4dbcd873b85566">
+                    <div class="article-header">
+                        <h3><a href="https://thenewstack.io/digital-experience-monitoring-workflow/" target="_blank" rel="noopener">Digital Experience Monitoring belongs in the modern developer workflow</a></h3>
+                        <button class="btn-read" data-id="5a4dbcd873b85566" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">Digital Experience Monitoring (DEM) is crucial in the modern software development workflow because traditional observability methods often fail to capture user feedback effectively. DEM combines real user monitoring with frontend errors, performance metrics like Core Web Vitals, and mobile-specific signals such as startup time and crashes. Unlike controlled environments, it captures behavior across various devices, network conditions, and regions. This enables developers to see the actual impact of changes on users in real-time, reducing guesswork during debugging and ensuring that teams can make informed decisions faster. For instance, synthetic user journeys allow teams to validate experience questions like whether a change affects page load or interaction latency. By validating experience early, DEM helps catch regressions that might otherwise go unnoticed until later stages of the release process. This ensures smoother rollouts with fewer surprises during live updates and reduces the risk of emergency fixes post-launch. The integration of DEM into deployment strategies enhances safety and efficiency by measuring impact while changes are rolled out, allowing teams to pause or revert problematic features quickly without redeploying code. This approach decouples deployment from release, enabling targeted feature exposure and rapid performance monitoring with zero-risk rollbacks when issues arise. Overall, DEM streamlines the development cycle by providing continuous feedback on user experience across all stages of software delivery.</p>
+                    <a class="read-more" href="https://thenewstack.io/digital-experience-monitoring-workflow/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="summary">Digital Experience Monitoring (DEM) is crucial in the modern software development workflow because traditional observability methods often fail to capture user feedback effectively. DEM combines real user monitoring with frontend errors, performance metrics like Core Web Vitals, and mobile-specific signals such as startup time and crashes. Unlike controlled environments, it captures behavior across various devices, network conditions, and regions. This enables developers to see the actual impact of changes on users in real-time, reducing guesswork during debugging and ensuring that teams can make informed decisions faster. For instance, synthetic user journeys allow teams to validate experience questions like whether a change affects page load or interaction latency. By validating experience early, DEM helps catch regressions that might otherwise go unnoticed until later stages of the release process. This ensures smoother rollouts with fewer surprises during live updates and reduces the risk of emergency fixes post-launch. The integration of DEM into deployment strategies enhances safety and efficiency by measuring impact while changes are rolled out, allowing teams to pause or revert problematic features quickly without redeploying code. This approach decouples deployment from release, enabling targeted feature exposure and rapid performance monitoring with zero-risk rollbacks when issues arise. Overall, DEM streamlines the development cycle by providing continuous feedback on user experience across all stages of software delivery.</p>
-                <a class="read-more" href="https://thenewstack.io/digital-experience-monitoring-workflow/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://thenewstack.io/why-ai-feels-sluggish/" target="_blank" rel="noopener">The hidden reason your AI assistant feels so sluggish</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">The post highlights how traditional data warehousing architectures designed for batch reporting have become inadequate for modern application development and business analytics driven by AI-driven analysis. Key takeaways include:
+                <div class="article" data-id="e845ba982eb1e1bc">
+                    <div class="article-header">
+                        <h3><a href="https://thenewstack.io/why-ai-feels-sluggish/" target="_blank" rel="noopener">The hidden reason your AI assistant feels so sluggish</a></h3>
+                        <button class="btn-read" data-id="e845ba982eb1e1bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">The post highlights how traditional data warehousing architectures designed for batch reporting have become inadequate for modern application development and business analytics driven by AI-driven analysis. Key takeaways include:
 - The shift towards agent-based analytics has led to increased concurrency and short response times, unlike human-query-driven systems.
 - Traditional cloud databases optimized for throughput on infrequent queries struggle with the high concurrency and low latency required by AI models.
 - Postgres combined with an OLAP engine is becoming the default architecture due to its ability to handle both transactional workloads (Postgres) and analytical queries efficiently through a columnar OLAP model.
 - AI-powered features like natural language interfaces, autonomous analysis, and insights require tight integration between transactional writes and analytical reads, making them essential for rapid development of modern applications.</p>
-                <a class="read-more" href="https://thenewstack.io/why-ai-feels-sluggish/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://thenewstack.io/rag-pipeline-hybrid-search/" target="_blank" rel="noopener">The laptop return that broke a RAG pipeline</a></h3>
+                    <a class="read-more" href="https://thenewstack.io/why-ai-feels-sluggish/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">This blog post discusses an incident where a customer support agent using a RAG pipeline incorrectly returned the return policy for a laptop purchase three weeks earlier due to outdated information. The author highlights that while vector similarity can be useful for finding relevant documents, it does not guarantee correctness in specific contexts like user input timestamps and document scopes.
+                <div class="article" data-id="b99b7c97147006d9">
+                    <div class="article-header">
+                        <h3><a href="https://thenewstack.io/rag-pipeline-hybrid-search/" target="_blank" rel="noopener">The laptop return that broke a RAG pipeline</a></h3>
+                        <button class="btn-read" data-id="b99b7c97147006d9" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">This blog post discusses an incident where a customer support agent using a RAG pipeline incorrectly returned the return policy for a laptop purchase three weeks earlier due to outdated information. The author highlights that while vector similarity can be useful for finding relevant documents, it does not guarantee correctness in specific contexts like user input timestamps and document scopes.
 
 The key points are:
 1. Teams moving from RAG to production often fix hallucination issues with better embeddings.
@@ -395,29 +490,43 @@ The solution proposed involves using a hybrid search approach where:
 - It eliminates the need to filter out results explicitly in application code, potentially reducing costs and improving efficiency.
 
 In summary, this approach leverages the strengths of both vector similarity and structured data within a single query, providing more accurate and contextually correct answers without relying on flawed assumptions about document semantics.</p>
-                <a class="read-more" href="https://thenewstack.io/rag-pipeline-hybrid-search/" target="_blank" rel="noopener">Read full article →</a>
+                    <a class="read-more" href="https://thenewstack.io/rag-pipeline-hybrid-search/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
             </div>
-            
-        </section>
+        </details>
         
-        <section class="feed-section">
-            <h2>DevOps.com</h2>
-            
-            <div class="article">
-                <h3><a href="https://devops.com/latest-typosquatting-attack-targeting-vs-code-tools-hits-windsurf-ide/" target="_blank" rel="noopener">Latest Typosquatting Attack Targeting VS Code Tools Hits Windsurf IDE</a></h3>
+        <details class="feed-section" data-feed="DevOps.com">
+            <summary>
+                <span class="feed-dot"></span>
+                DevOps.com
+                <span class="feed-count">(3)</span>
+                <span class="feed-read-badge" data-feed-badge="DevOps.com"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
                 
-                <p class="date">2026-04-03</p>
+                <div class="article" data-id="f117879b2ee64a7f">
+                    <div class="article-header">
+                        <h3><a href="https://devops.com/latest-typosquatting-attack-targeting-vs-code-tools-hits-windsurf-ide/" target="_blank" rel="noopener">Latest Typosquatting Attack Targeting VS Code Tools Hits Windsurf IDE</a></h3>
+                        <button class="btn-read" data-id="f117879b2ee64a7f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">Cybersecurity researchers have discovered a malicious extension targeting the Windsurf IDE used by DevSecOps teams for developing applications using R programming language. The extension steals credentials and data after code is downloaded from Solana blockchain, making use of typosquatting tactics to appear legitimate. Persistence is established using hidden PowerShell code that schedules tasks, and this approach makes it nearly impossible to detect the attack via traditional command-and-control servers. While there has been a focus on securing applications being deployed, developers are now also primary targets for cybercriminals through tooling they use every day. Cybersecurity teams should conduct a thorough review of their DevSecOps practices and ensure that all extensions used by application developers come from trusted sources to secure software supply chains.</p>
+                    <a class="read-more" href="https://devops.com/latest-typosquatting-attack-targeting-vs-code-tools-hits-windsurf-ide/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="summary">Cybersecurity researchers have discovered a malicious extension targeting the Windsurf IDE used by DevSecOps teams for developing applications using R programming language. The extension steals credentials and data after code is downloaded from Solana blockchain, making use of typosquatting tactics to appear legitimate. Persistence is established using hidden PowerShell code that schedules tasks, and this approach makes it nearly impossible to detect the attack via traditional command-and-control servers. While there has been a focus on securing applications being deployed, developers are now also primary targets for cybercriminals through tooling they use every day. Cybersecurity teams should conduct a thorough review of their DevSecOps practices and ensure that all extensions used by application developers come from trusted sources to secure software supply chains.</p>
-                <a class="read-more" href="https://devops.com/latest-typosquatting-attack-targeting-vs-code-tools-hits-windsurf-ide/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://devops.com/ai-wont-replace-developers-but-it-is-changing-how-they-work/" target="_blank" rel="noopener">AI Won’t Replace Developers—But it is Changing How They Work</a></h3>
-                
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">AI-assisted tools are transforming software development workflows by enhancing productivity without fully replacing engineers. Key takeaways include:
+                <div class="article" data-id="8c64bf2fad104f71">
+                    <div class="article-header">
+                        <h3><a href="https://devops.com/ai-wont-replace-developers-but-it-is-changing-how-they-work/" target="_blank" rel="noopener">AI Won’t Replace Developers—But it is Changing How They Work</a></h3>
+                        <button class="btn-read" data-id="8c64bf2fad104f71" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">AI-assisted tools are transforming software development workflows by enhancing productivity without fully replacing engineers. Key takeaways include:
 
 1. **Enhanced Productivity**: Tools like GitHub Copilot reduce time spent on routine tasks such as testing, debugging, and refactoring.
 2. **Supports Quality and Reviews**: AI aids in maintaining code quality, improving readability, and surfacing potential issues early.
@@ -425,21 +534,25 @@ In summary, this approach leverages the strengths of both vector similarity and 
 4. **Responsible Usage**: AI should be used responsibly, reviewed, validated, and subject to organization's security, privacy, and governance standards. Disciplined usage is essential.
 
 AI tools are a force multiplier enhancing modern engineering practices rather than replacing human judgment or accountability.</p>
-                <a class="read-more" href="https://devops.com/ai-wont-replace-developers-but-it-is-changing-how-they-work/" target="_blank" rel="noopener">Read full article →</a>
-            </div>
-            
-            <div class="article">
-                <h3><a href="https://devops.com/microsoft-field-engineers-built-a-six-agent-research-pipeline-in-vs-code-that-fact-checks-its-own-output/" target="_blank" rel="noopener">Microsoft Field Engineers Built a Six-Agent Research Pipeline in VS Code That Fact-Checks Its Own Output</a></h3>
+                    <a class="read-more" href="https://devops.com/ai-wont-replace-developers-but-it-is-changing-how-they-work/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
-                <p class="date">2026-04-03</p>
-                
-                <p class="summary">Microsoft Field Engineers Diego Casati and Ray Kao built Project Nighthawk, a six-agent research system inside VS Code with GitHub Copilot to answer deep technical questions about Azure Kubernetes Service (AKS) and Azure Red Hat OpenShift (ARO). The system retrieves, correlates, verifies, and writes up the answer. It does what senior engineers would do after hours of focused research, in a fraction of the time, as shown by an automated report with consistent structure: TL;DR, technical deep dive, key findings, reference tables, and fact-check summary.
+                <div class="article" data-id="b59bc20be9611e3d">
+                    <div class="article-header">
+                        <h3><a href="https://devops.com/microsoft-field-engineers-built-a-six-agent-research-pipeline-in-vs-code-that-fact-checks-its-own-output/" target="_blank" rel="noopener">Microsoft Field Engineers Built a Six-Agent Research Pipeline in VS Code That Fact-Checks Its Own Output</a></h3>
+                        <button class="btn-read" data-id="b59bc20be9611e3d" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-03</p>
+                    
+                    <p class="summary">Microsoft Field Engineers Diego Casati and Ray Kao built Project Nighthawk, a six-agent research system inside VS Code with GitHub Copilot to answer deep technical questions about Azure Kubernetes Service (AKS) and Azure Red Hat OpenShift (ARO). The system retrieves, correlates, verifies, and writes up the answer. It does what senior engineers would do after hours of focused research, in a fraction of the time, as shown by an automated report with consistent structure: TL;DR, technical deep dive, key findings, reference tables, and fact-check summary.
 The paper's core insight — grounding matters more than model intelligence — applies to any team building internal agent systems. For example, Azure DevOps Remote MCP Server gives agents structured access to live data rather than relying on recall of training data, a principle behind Nighthawk's research process. The architecture decisions include agent separation over monolithic prompts and distinct roles for each agent: Classifier determines service type; Researcher searches repositories and cross-references documentation; Synthesizer writes the report; FactChecker verifies claims against cited sources.
 The solution leverages GitHub Copilot to produce a fact-checked, source-cited technical report with clear Mermaid diagrams. The system delivers an answer in 20-30 seconds, about half the time of a senior engineer's research after hours, for $5 per month.</p>
-                <a class="read-more" href="https://devops.com/microsoft-field-engineers-built-a-six-agent-research-pipeline-in-vs-code-that-fact-checks-its-own-output/" target="_blank" rel="noopener">Read full article →</a>
+                    <a class="read-more" href="https://devops.com/microsoft-field-engineers-built-a-six-agent-research-pipeline-in-vs-code-that-fact-checks-its-own-output/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
             </div>
-            
-        </section>
+        </details>
         
 
         
@@ -448,25 +561,20 @@ The solution leverages GitHub Copilot to produce a fact-checked, source-cited te
             <div class="run-stats-grid">
                 <div class="run-stat-item">
                     <div class="label">Started</div>
-                    <div class="value">01:03:14</div>
+                    <div class="value">01:15:59</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Finished</div>
-                    <div class="value">01:04:01</div>
+                    <div class="value">01:16:06</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Duration</div>
-                    <div class="value">0m 46s</div>
-                </div>
-                
-                <div class="run-stat-item">
-                    <div class="label">Avg tokens/s</div>
-                    <div class="value">11.3</div>
+                    <div class="value">0m 7s</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Ollama</div>
-                    <div class="value">2 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
+                    <div class="value dim">0 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">OpenRouter</div>
@@ -474,7 +582,7 @@ The solution leverages GitHub Copilot to produce a fact-checked, source-cited te
                 </div>
                 <div class="run-stat-item">
                     <div class="label">From cache</div>
-                    <div class="value dim">13</div>
+                    <div class="value dim">10</div>
                 </div>
                 
                 <div class="run-stat-item">
@@ -487,10 +595,120 @@ The solution leverages GitHub Copilot to produce a fact-checked, source-cited te
         
 
         <footer>
-            Generated 2026-04-04 01:04 ·
+            Generated 2026-04-04 01:16 ·
             <a href="index.html" style="color: var(--accent);">← Archive</a> ·
             <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
         </footer>
     </div>
+
+    <script>
+    (function () {
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
 </body>
 </html>
