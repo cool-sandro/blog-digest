@@ -1,0 +1,56 @@
+# Blog Digest Configuration
+# Add RSS feeds to track here
+
+feeds:
+  # Kubernetes & Cloud Native
+  - name: "Kubernetes Blog"
+    url: "https://kubernetes.io/feed.xml"
+  - name: "CNCF Blog"
+    url: "https://www.cncf.io/blog/feed/"
+  - name: "Kubernetes subreddit"
+    url: "https://www.reddit.com/r/kubernetes/.rss"
+  - name: "Learnk8s Blog"
+    url: "https://learnk8s.io/rss.xml"
+  - name: "Pulumi Blog"
+    url: "https://www.pulumi.com/blog/rss.xml"
+  - name: "Stdeer Blog"
+    url: "https://blog.stderr.at/index.xml"
+
+  # DevOps & Infrastructure
+  - name: "Hacker News (Top)"
+    url: "https://hnrss.org/best?count=20"
+  - name: "The New Stack"
+    url: "https://thenewstack.io/feed/"
+  - name: "DevOps.com"
+    url: "https://devops.com/feed/"
+
+# AI Settings
+ai:
+  # Ollama (local) - primary
+  ollama:
+    enabled: true
+    base_url: "http://localhost:11434"
+    model: "qwen2.5:1.5b"
+    timeout: 300  # seconds; larger models may need more time
+
+  # OpenRouter - fallback
+  openrouter:
+    enabled: false
+    # API key in .env file: OPENROUTER_API_KEY=...
+    model: "google/gemini-2.0-flash-001"
+
+# Summary settings
+summary:
+  max_articles_per_feed: 5
+  max_age_hours: 24
+  max_summary_length: 200  # words per article
+
+# Output
+output:
+  directory: "./output"
+
+# Schedule
+schedule:
+  cron: "0 7 * * *"          # standard cron format: min hour day month weekday
+  timezone: "Europe/Berlin"
+

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – {{ date }}</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+
+        .feed-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .feed-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feed-section h2::before {
+            content: "●";
+            font-size: 0.6rem;
+        }
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article .date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .article .summary {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 3rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 1rem 0.75rem; }
+            header h1 { font-size: 1.5rem; }
+            .stats { flex-direction: column; align-items: center; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">{{ date }}</p>
+            <div class="stats">
+                <span class="stat"><strong>{{ total_articles }}</strong> articles</span>
+                <span class="stat"><strong>{{ articles_by_feed | length }}</strong> feeds</span>
+            </div>
+        </header>
+
+        {% for feed_name, articles in articles_by_feed.items() %}
+        <section class="feed-section">
+            <h2>{{ feed_name }}</h2>
+            {% for article in articles %}
+            <div class="article">
+                <h3><a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a></h3>
+                {% if article.published %}
+                <p class="date">{{ article.published[:10] }}</p>
+                {% endif %}
+                <p class="summary">{{ article.summary }}</p>
+                <a class="read-more" href="{{ article.url }}" target="_blank" rel="noopener">Read full article →</a>
+            </div>
+            {% endfor %}
+        </section>
+        {% endfor %}
+
+        {% if run_stats %}
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">{{ run_stats.started_at }}</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">{{ run_stats.finished_at }}</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">{{ run_stats.duration }}</div>
+                </div>
+                {% if run_stats.avg_tps %}
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">{{ run_stats.avg_tps }}</div>
+                </div>
+                {% endif %}
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value{% if run_stats.ollama_articles == 0 %} dim{% endif %}">{{ run_stats.ollama_articles }} articles{% if run_stats.model_ollama %}<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">{{ run_stats.model_ollama }}</span>{% endif %}</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">OpenRouter</div>
+                    <div class="value{% if run_stats.openrouter_articles == 0 %} dim{% endif %}">{{ run_stats.openrouter_articles }} articles{% if run_stats.model_openrouter %}<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">{{ run_stats.model_openrouter }}</span>{% endif %}</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">{{ run_stats.cached_articles }}</div>
+                </div>
+                {% if run_stats.failed_articles > 0 %}
+                <div class="run-stat-item">
+                    <div class="label">Skipped</div>
+                    <div class="value dim">{{ run_stats.failed_articles }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </details>
+        {% endif %}
+
+        <footer>
+            Generated {{ generated_at }} · <a href="https://github.com" style="color: var(--accent);">blog-digest</a>
+        </footer>
+    </div>
+</body>
+</html>

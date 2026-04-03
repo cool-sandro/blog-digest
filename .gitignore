@@ -1,0 +1,7 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+.article_cache.json
+digest.log
+output/digest-debug.html
