@@ -21,10 +21,16 @@ feeds:
   # DevOps & Infrastructure
   - name: "Hacker News (Top)"
     url: "https://hnrss.org/best?count=20"
-  - name: "The New Stack"
-    url: "https://thenewstack.io/feed/"
-  - name: "DevOps.com"
-    url: "https://devops.com/feed/"
+  - name: "Fedora Magazine"
+    url: "https://fedoramagazine.org/feed/"
+  - name: "GCP Blog"
+    url: "https://cloudblog.withgoogle.com/rss"
+  - name: "Argo Project Blog"
+    url: "https://blog.argoproj.io/feed"
+  - name: "Grafana Blog"
+    url: "https://grafana.com/blog/index.xml"
+  - name: "OpenTelemtry Blog"
+    url: "https://opentelemetry.io/blog/index.xml"
 
 # AI Settings
 ai:
