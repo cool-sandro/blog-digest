@@ -430,11 +430,7 @@
                 {% endif %}
                 <div class="run-stat-item">
                     <div class="label">Ollama</div>
-                    <div class="value{% if run_stats.ollama_articles == 0 %} dim{% endif %}">{{ run_stats.ollama_articles }} articles{% if run_stats.model_ollama %}<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">{{ run_stats.model_ollama }}</span>{% endif %}</div>
-                </div>
-                <div class="run-stat-item">
-                    <div class="label">OpenRouter</div>
-                    <div class="value{% if run_stats.openrouter_articles == 0 %} dim{% endif %}">{{ run_stats.openrouter_articles }} articles{% if run_stats.model_openrouter %}<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">{{ run_stats.model_openrouter }}</span>{% endif %}</div>
+                    <div class="value{% if run_stats.ollama_articles == 0 %} dim{% endif %}">{{ run_stats.ollama_articles }} articles{% if run_stats.model %}<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">{{ run_stats.model }}</span>{% endif %}</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">From cache</div>

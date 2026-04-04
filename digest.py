@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Blog Digest - Daily AI-powered blog summarizer.
-Fetches RSS feeds, summarizes articles with local AI (Ollama) or OpenRouter,
+Fetches RSS feeds, summarizes articles with local Ollama,
 and generates a static HTML page for GitHub Pages.
 """
 
@@ -20,10 +20,7 @@ import yaml
 import feedparser
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
-
-load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -161,9 +158,6 @@ def fetch_full_article(url: str, max_chars: int = 5000) -> str:
 def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, float | None] | None:
     """Summarize using local Ollama. Returns (summary, tokens_per_sec) or None."""
     ollama_cfg = config["ai"]["ollama"]
-    if not ollama_cfg.get("enabled"):
-        return None
-
     base_url = ollama_cfg["base_url"]
     model = ollama_cfg["model"]
     max_words = config["summary"]["max_summary_length"]
@@ -200,48 +194,6 @@ Summary:"""
         return None
 
 
-def summarize_openrouter(text: str, title: str, config: dict) -> tuple[str, None] | None:
-    """Summarize using OpenRouter API. Returns (summary, None) or None."""
-    or_cfg = config["ai"]["openrouter"]
-    if not or_cfg.get("enabled"):
-        return None
-
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        log.warning("OPENROUTER_API_KEY not set")
-        return None
-
-    model = or_cfg["model"]
-    max_words = config["summary"]["max_summary_length"]
-
-    try:
-        resp = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": model,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": f"You summarize blog posts in {max_words} words or less. Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text. Be concise, focus on key takeaways. Write in English.",
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Title: {title}\n\nContent:\n{text[:4000]}",
-                    },
-                ],
-            },
-            timeout=60,
-        )
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"].strip(), None
-    except Exception as e:
-        log.warning(f"OpenRouter failed: {e}")
-        return None
-
 
 def clean_summary(text: str) -> str:
     """Convert any leftover markdown in LLM output to plain HTML."""
@@ -264,28 +216,22 @@ def clean_summary(text: str) -> str:
     return paragraphs[0] if paragraphs else text
 
 
-def summarize(text: str, title: str, config: dict) -> tuple[str, str, float | None]:
-    """Try Ollama first, fall back to OpenRouter. Returns (summary, backend, tps)."""
+def summarize(text: str, title: str, config: dict) -> tuple[str, float | None]:
+    """Summarize with Ollama. Returns (summary, tps)."""
     result = summarize_ollama(text, title, config)
     if result:
         summary, tps = result
         log.info(f"  Summarized with Ollama: {title[:50]}")
-        return summary, "Ollama", tps
+        return summary, tps
 
-    result = summarize_openrouter(text, title, config)
-    if result:
-        summary, _ = result
-        log.info(f"  Summarized with OpenRouter: {title[:50]}")
-        return summary, "OpenRouter", None
-
-    return "Summary unavailable – both Ollama and OpenRouter failed.", "none", None
+    return "Summary unavailable – Ollama failed.", None
 
 
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
     """Summarize articles, using cache to skip already processed ones."""
     cache = load_cache()
     processed = []
-    stats = {"ollama": 0, "openrouter": 0, "failed": 0, "cached": 0, "tps_samples": []}
+    stats = {"ollama": 0, "failed": 0, "cached": 0, "tps_samples": []}
 
     for article in articles:
         aid = article["id"]
@@ -308,15 +254,12 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             continue
 
         # Summarize
-        summary, backend, tps = summarize(text, article["title"], config)
+        summary, tps = summarize(text, article["title"], config)
         summary = clean_summary(summary)
 
-        if backend == "Ollama":
+        if tps is not None:
             stats["ollama"] += 1
-            if tps is not None:
-                stats["tps_samples"].append(tps)
-        elif backend == "OpenRouter":
-            stats["openrouter"] += 1
+            stats["tps_samples"].append(tps)
         else:
             stats["failed"] += 1
 
@@ -327,7 +270,6 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             "url": article["url"],
             "published": article["published"],
             "summary": summary,
-            "backend": backend,
         }
 
         cache[aid] = result
@@ -469,12 +411,10 @@ def main():
         "finished_at": end_time.strftime("%H:%M:%S"),
         "duration": duration_str,
         "ollama_articles": proc_stats["ollama"],
-        "openrouter_articles": proc_stats["openrouter"],
         "failed_articles": proc_stats["failed"],
         "cached_articles": proc_stats["cached"],
         "avg_tps": avg_tps,
-        "model_ollama": config["ai"]["ollama"]["model"] if config["ai"]["ollama"].get("enabled") else None,
-        "model_openrouter": config["ai"]["openrouter"]["model"] if config["ai"]["openrouter"].get("enabled") else None,
+        "model": config["ai"]["ollama"]["model"],
     }
 
     # 3. Generate HTML

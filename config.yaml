@@ -28,18 +28,10 @@ feeds:
 
 # AI Settings
 ai:
-  # Ollama (local) - primary
   ollama:
-    enabled: true
     base_url: "http://localhost:11434"
     model: "qwen2.5:1.5b"
     timeout: 300  # seconds; larger models may need more time
-
-  # OpenRouter - fallback
-  openrouter:
-    enabled: false
-    # API key in .env file: OPENROUTER_API_KEY=...
-    model: "google/gemini-2.0-flash-001"
 
 # Summary settings
 summary:
