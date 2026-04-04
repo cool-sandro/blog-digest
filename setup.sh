@@ -53,23 +53,17 @@ MODEL="${MODEL}"
 info "Pulling model: $MODEL  (this may take a few minutes)..."
 ollama pull "$MODEL"
 
-# ── 5. .env file ─────────────────────────────────────────────────────────────
-if [[ ! -f "$SCRIPT_DIR/.env" ]]; then
-    cp "$SCRIPT_DIR/.env.example" "$SCRIPT_DIR/.env"
-    warn ".env created from .env.example – add your OPENROUTER_API_KEY if needed."
-fi
-
-# ── 6. Cron job ──────────────────────────────────────────────────────────────
-CRON_CMD="TZ=$CRON_TZ $CRON_TIME $VENV_DIR/bin/python $SCRIPT_DIR/digest.py >> $SCRIPT_DIR/digest.log 2>&1"
+# ── 5. Cron job ──────────────────────────────────────────────────────────────
+CRON_CMD="$CRON_TIME $VENV_DIR/bin/python $SCRIPT_DIR/digest.py >> $SCRIPT_DIR/digest.log 2>&1"
 
 if crontab -l 2>/dev/null | grep -qF "digest.py"; then
     warn "Cron job already exists – skipping. Edit with: crontab -e"
 else
-    (crontab -l 2>/dev/null || true; echo "$CRON_CMD") | crontab -
-    info "Cron job added: $CRON_TIME"
+    (crontab -l 2>/dev/null || true; echo "TZ=$CRON_TZ"; echo "$CRON_CMD") | crontab -
+    info "Cron job added: $CRON_TIME (TZ=$CRON_TZ)"
 fi
 
-# ── 7. Test run ───────────────────────────────────────────────────────────────
+# ── 6. Test run ───────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}Setup complete!${RESET}"
 echo ""
