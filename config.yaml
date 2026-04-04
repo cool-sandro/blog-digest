@@ -38,6 +38,7 @@ ai:
     base_url: "http://localhost:11434"
     model: "qwen2.5:1.5b"
     timeout: 300  # seconds; larger models may need more time
+    thinking: false  # set true to enable extended thinking (supported by some models)
 
 # Summary settings
 summary:

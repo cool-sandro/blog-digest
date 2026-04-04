@@ -175,9 +175,13 @@ Summary:"""
 
     try:
         timeout = ollama_cfg.get("timeout", 300)
+        thinking = ollama_cfg.get("thinking", False)
+        payload = {"model": model, "prompt": prompt, "stream": False}
+        if not thinking:
+            payload["think"] = False
         resp = requests.post(
             f"{base_url}/api/generate",
-            json={"model": model, "prompt": prompt, "stream": False},
+            json=payload,
             timeout=timeout,
         )
         resp.raise_for_status()
