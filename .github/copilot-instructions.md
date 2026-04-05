@@ -9,7 +9,7 @@ Single-file Python tool (`digest.py`) that fetches RSS feeds, summarizes article
 - **`digest.py`** — entry point and all logic (fetching, summarizing, rendering)
 - **`config.yaml`** — feeds, AI backend settings, and summary tunables
 - **`templates/`** — Jinja2 HTML templates (`daily.html`, `index.html`)
-- **`docs/`** — output directory; `digest-YYYY-MM-DD.html` per run + `index.html`
+- **`docs/`** — output directory; `digest-YYYY-MM-DD-HH-MM.html` per run + `index.html`
 - **`.article_cache.json`** — SHA-256-keyed cache to avoid re-summarizing articles
 
 ## Stack
@@ -25,7 +25,7 @@ Single-file Python tool (`digest.py`) that fetches RSS feeds, summarizes article
 - New AI providers should follow the existing `summarize_ollama` pattern
 - Template changes go in `templates/`; never hardcode HTML in Python
 - Output files always target `docs/` for GitHub Pages compatibility
-- Run with: `python digest.py` (optionally `--date YYYY-MM-DD`)
+- Run with: `python digest.py` (optionally `--debug` to clear cache)
 
 ## Build & Test
 

@@ -6,8 +6,8 @@ A self-hosted, AI-powered daily blog summarizer. Fetches RSS feeds, summarizes a
 
 - Fetches any number of RSS/Atom feeds
 - Summarizes articles with a **local Ollama model** (no API costs)
-- Generates a dark-mode static HTML file per day (e.g. `docs/digest-2026-04-04.html`)
-- Caches processed articles to avoid re-summarizing on re-runs
+- Generates a dark-mode static HTML file per run (e.g. `docs/digest-2026-04-04-14-30.html`)
+- Caches processed articles to avoid re-summarizing on re-runs (`--debug` clears the cache for a fresh run)
 
 ## Requirements
 
@@ -66,9 +66,13 @@ summary:
 
 ## Output
 
-Each run writes `docs/digest-YYYY-MM-DD.html` and regenerates `docs/index.html`. Files are never overwritten, so missed days are preserved.
+Each run writes `docs/digest-YYYY-MM-DD-HH-MM.html` and regenerates `docs/index.html`. Multiple runs per day each produce their own file.
 
-The script automatically commits and pushes `docs/` after each run, making each digest available at `https://<user>.github.io/<repo>/digest-YYYY-MM-DD.html` when GitHub Pages is pointed at the `docs/` folder.
+The script automatically commits and pushes `docs/` after each run, making each digest available at `https://<user>.github.io/<repo>/digest-YYYY-MM-DD-HH-MM.html` when GitHub Pages is pointed at the `docs/` folder.
+
+Use `--debug` to clear the article cache so every article is re-summarized from scratch.
+
+Use `--debug --model <name>` to override the Ollama model for a single run, useful for comparing models side by side.
 
 ## Project structure
 

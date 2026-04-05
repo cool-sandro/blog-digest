@@ -288,7 +288,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
     return processed, stats
 
 
-def generate_html(articles: list[dict], config: dict, debug: bool = False, run_stats: dict | None = None):
+def generate_html(articles: list[dict], config: dict, run_stats: dict | None = None):
     """Generate the static HTML digest page."""
     env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
     template = env.get_template("daily.html")
@@ -314,11 +314,7 @@ def generate_html(articles: list[dict], config: dict, debug: bool = False, run_s
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    if debug:
-        filename = "digest-debug.html"
-        log.info("DEBUG mode – writing to digest-debug.html (not committed)")
-    else:
-        filename = f"digest-{datetime.now().strftime('%Y-%m-%d')}.html"
+    filename = f"digest-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.html"
     (out_dir / filename).write_text(html)
     log.info(f"HTML written to {out_dir / filename}")
 
@@ -334,16 +330,17 @@ def generate_index(out_dir: Path):
     today = datetime.now().strftime("%Y-%m-%d")
 
     reports = []
-    for f in sorted(out_dir.glob("digest-????-??-??.html"), reverse=True):
-        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD
+    for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
+        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
         try:
-            label = datetime.strptime(date_str, "%Y-%m-%d").strftime("%A, %B %d, %Y")
+            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
+            label = dt.strftime("%A, %B %d, %Y – %H:%M")
         except ValueError:
             label = date_str
         reports.append({
             "filename": f.name,
             "label": label,
-            "is_today": date_str == today,
+            "is_today": date_str[:10] == today,
         })
 
     html = template.render(
@@ -383,8 +380,16 @@ def git_push(output_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Blog Digest")
-    parser.add_argument("--debug", action="store_true", help="Write to digest-debug.html and skip git push")
+    parser.add_argument("--debug", action="store_true", help="Clear article cache before running (fresh summaries)")
+    parser.add_argument("--model", type=str, help="Override Ollama model (requires --debug)")
     args = parser.parse_args()
+
+    if args.model and not args.debug:
+        parser.error("--model can only be used with --debug")
+
+    if args.debug and CACHE_FILE.exists():
+        CACHE_FILE.unlink()
+        log.info("DEBUG mode – deleted article cache for fresh run")
 
     log.info("=" * 50)
     log.info("Blog Digest - Starting daily run")
@@ -392,6 +397,10 @@ def main():
 
     start_time = datetime.now()
     config = load_config()
+
+    if args.model:
+        config["ai"]["ollama"]["model"] = args.model
+        log.info(f"Model override: {args.model}")
 
     # 1. Fetch feeds
     articles = fetch_feeds(config)
@@ -422,11 +431,10 @@ def main():
     }
 
     # 3. Generate HTML
-    output_dir = generate_html(processed, config, debug=args.debug, run_stats=run_stats)
+    output_dir = generate_html(processed, config, run_stats=run_stats)
 
-    # 4. Push to GitHub Pages (skipped in debug mode)
-    if not args.debug:
-        git_push(output_dir)
+    # 4. Push to GitHub Pages
+    git_push(output_dir)
 
     log.info("Done!")
 
