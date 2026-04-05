@@ -37,7 +37,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # Install Ollama: https://ollama.com
-ollama pull qwen2.5:1.5b
+ollama pull llama3.2:3b
 
 python digest.py
 ```
