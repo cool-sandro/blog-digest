@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Sunday, April 05, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+
+        @media (max-width: 640px) {
+            body { padding: 0.75rem 0.6rem; }
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (min-width: 900px) {
+            .articles-wrapper {
+                padding-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Sunday, April 05, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>14</strong> articles</span>
+                <span class="stat"><strong>3</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="5ad2b052570b27e8">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd9saf/oracle_db_on_k8s/" target="_blank" rel="noopener">oracle db on k8s</a></h3>
+                        <button class="btn-read" data-id="5ad2b052570b27e8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The post inquires about the feasibility of running an Oracle Database on Kubernetes (K8s). The author is told that "No DBs in K8s" by many, but wants to know if this is outdated advice. The query is whether it's possible to successfully containerize and deploy an Oracle Database on a modern cluster, including bare metal environments.</p><p class="summary">The performance hit and licensing issues are common concerns, but the post suggests that these may have been mitigated with advancements in operators and infrastructure. However, the author wants to know if this has become a viable option.</p><p class="summary">Modern Kubernetes distributions and Oracle's own initiatives may make it possible to run an Oracle Database on K8s without significant performance or licensing problems.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">oracle db</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">database</span>
+                        
+                        <span class="label-tag">deployment</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd9saf/oracle_db_on_k8s/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="1a903a555e8fe442">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd7zyr/keda_gpu_scaler_autoscale_vllmtriton_inference/" target="_blank" rel="noopener">KEDA GPU Scaler – autoscale vLLM/Triton inference pods using real GPU utilization</a></h3>
+                        <button class="btn-read" data-id="1a903a555e8fe442" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A tool called KEDA-GPU scaler was created to simplify the process of scaling vLLM inference pods on Kubernetes. The existing method involved several steps, including deploying dcgm-exporter and Prometheus, writing PromQL queries that often broke when DCGM changed metric names, and debugging a lag in scaling. KEDA-GPU scaler addresses this by providing a single DaemonSet that reads GPU metrics directly from NVML and serves them to KEDA over gRPC. This allows for sub-second metrics, 3-line ScaledObject config, and scale-to-zero functionality without the need for native KEDA support.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">gpu</span>
+                        
+                        <span class="label-tag">scaling</span>
+                        
+                        <span class="label-tag">keda</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd7zyr/keda_gpu_scaler_autoscale_vllmtriton_inference/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="cb4c1b6547ecb873">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd1dyd/freemium_saas_on_k8s_automating/" target="_blank" rel="noopener">Freemium SaaS on K8s: Automating namespace-per-customer provisioning with GitLab CI, who's doing this?</a></h3>
+                        <button class="btn-read" data-id="cb4c1b6547ecb873" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A company running a production Kubernetes cluster is pivoting to a freemium SaaS model and needs to sanity-check its architecture. The goal is to automatically provision a complete isolated replica of the stack for each customer in their own namespace after signing up. This approach uses GitLab CI to trigger provisioning, Helm templating to generate manifests, Cert-manager for subdomain TLS, and CronJob to auto-clean up expired trials. However, there are concerns about scaling, cost efficiency, and handling "noisy neighbor" problems.</p><p class="summary">The company is currently using namespace-per-tenant isolation with soft isolation via NetworkPolicies and ResourceQuotas. They also use dedicated Postgres per tenant, isolated ingress subdomains, and custom domains via NGINX Ingress with wildcard certificates. The team wants to know about the trade-off between namespace isolation and multi-tenancy within single deployments for B2B SaaS freemium models.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">saas</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd1dyd/freemium_saas_on_k8s_automating/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="cb88b0542185d5b3">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Multi-node cluster on Ubuntu desktop for practice</a></h3>
+                        <button class="btn-read" data-id="cb88b0542185d5b3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Creating a multi-node cluster on a desktop running Ubuntu 24.04 LTS can be achieved using Docker, Kubernetes, and a few simple steps. To start, create a single node cluster with one control plane and three worker nodes. This is done by installing Docker, then pulling the Kubernetes images from the official repository. Next, run the command `docker-compose up -d` to deploy the cluster. The control plane can be accessed using `docker-compose exec -it kubeadmin -- kubectl get all`. For the worker nodes, create a configuration file with the node name and IP address in each node's Docker environment variables. Finally, restart the container to make the changes take effect.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ubuntu</span>
+                        
+                        <span class="label-tag">docker</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">multi-node cluster</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="cf197285b2216356">
+                    <div class="article-header">
+                        <h3><a href="https://apps.apple.com/nl/app/google-ai-edge-gallery/id6749645337" target="_blank" rel="noopener">Gemma 4 on iPhone</a></h3>
+                        <button class="btn-read" data-id="cf197285b2216356" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The article discusses the Google AI Edge Gallery app, Gemma 4, which can be installed on an iPhone to showcase AI-powered camera capabilities. The app allows users to see how different AI algorithms process images and videos in real-time. It features various AI models from Google, including object detection, face recognition, and scene understanding. Users can browse through the gallery to explore these AI applications. The app is designed for educational purposes, allowing developers to learn about AI and its applications in a visual and interactive way.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ios</span>
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">edge computing</span>
+                        
+                        <span class="label-tag">apple</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://apps.apple.com/nl/app/google-ai-edge-gallery/id6749645337" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="03af063eb381fee7">
+                    <div class="article-header">
+                        <h3><a href="https://help.openai.com/en/articles/20001106-codex-rate-card" target="_blank" rel="noopener">Codex pricing to align with API token usage, instead of per-message</a></h3>
+                        <button class="btn-read" data-id="03af063eb381fee7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">OpenAI has updated its Codex pricing model to reflect changes in usage patterns. The new pricing is based on API token usage, rather than per-message charges. This change aims to provide a more accurate representation of costs and make the pricing more transparent. As a result, users can now better estimate their monthly expenses and plan their usage accordingly. The update also includes a review of Codex's current rate card, which has been revised to reflect these changes.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">codex</span>
+                        
+                        <span class="label-tag">pricing</span>
+                        
+                        <span class="label-tag">openai</span>
+                        
+                        <span class="label-tag">api tokens</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://help.openai.com/en/articles/20001106-codex-rate-card" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6803337147321ddc">
+                    <div class="article-header">
+                        <h3><a href="https://www.bbc.com/news/videos/ce3d5gkd2geo" target="_blank" rel="noopener">Artemis II crew see first glimpse of far side of Moon [video]</a></h3>
+                        <button class="btn-read" data-id="6803337147321ddc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The Artemis II mission has provided the crew with their first glimpse of the far side of the Moon. The spacecraft, Orion, successfully completed a lunar flyby on its way to the Moon's vicinity. As it flew by, the crew caught their first views of the uncharted region of the Moon. This marks a significant milestone in the Artemis program, which aims to return humans to the Moon by 2025. The far side of the Moon has been largely unexplored due to its unique orientation and lack of visibility from Earth.</p><p class="summary">The success of this mission is crucial for future human exploration and potential lunar resource utilization. The crew's experience will help pave the way for future missions, which could include landing on the lunar surface. This achievement demonstrates the capabilities of the Orion spacecraft and its crew, marking an important step forward in space exploration.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">moon</span>
+                        
+                        <span class="label-tag">artemis program</span>
+                        
+                        <span class="label-tag">space exploration</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.bbc.com/news/videos/ce3d5gkd2geo" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="145aa752a569cc9e">
+                    <div class="article-header">
+                        <h3><a href="https://shkspr.mobi/blog/2026/04/someone-at-browserstack-is-leaking-users-email-address/" target="_blank" rel="noopener">Someone at BrowserStack is leaking users' email addresses</a></h3>
+                        <button class="btn-read" data-id="145aa752a569cc9e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A security breach was reported at BrowserStack, a cloud-based platform for testing and debugging websites. The issue involved users' email addresses being leaked from the company's database. It is believed that an individual employee within the organization accidentally or intentionally exposed sensitive information. An investigation by BrowserStack has revealed the error, which has been addressed to prevent further unauthorized disclosure of user data.</p><p class="summary">The incident highlights the importance of robust security measures and proper employee vetting in preventing such breaches. BrowserStack has taken steps to rectify the issue and protect users' personal information.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">browserstack</span>
+                        
+                        <span class="label-tag">security breach</span>
+                        
+                        <span class="label-tag">cloud-native applications</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://shkspr.mobi/blog/2026/04/someone-at-browserstack-is-leaking-users-email-address/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="17f24c52926eeae1">
+                    <div class="article-header">
+                        <h3><a href="https://www.tandfonline.com/doi/full/10.1080/23328940.2026.2645467#abstract" target="_blank" rel="noopener">Finnish sauna heat exposure induces stronger immune cell than cytokine responses</a></h3>
+                        <button class="btn-read" data-id="17f24c52926eeae1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Researchers studied the effects of Finnish sauna heat exposure on immune cells and found that it induced a stronger immune response compared to cytokine responses. Cytokines are proteins released by immune cells, and they play a crucial role in the body's defense against infections and diseases. The study suggests that heat exposure from saunas can stimulate the production of certain immune cells, which may provide protection against certain types of infections.</p><p class="summary">The findings have implications for our understanding of the relationship between exercise, heat stress, and immune function. It is possible that regular sauna use could have benefits for overall health and immunity.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">sauna</span>
+                        
+                        <span class="label-tag">heat exposure</span>
+                        
+                        <span class="label-tag">immune system</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.tandfonline.com/doi/full/10.1080/23328940.2026.2645467#abstract" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding performance bottlenecks with Pyroscope and Alloy: An example using TON blockchain</a></h3>
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Continuous profiling with tools like Alloy and Pyroscope can help identify performance bottlenecks in code. A C++ developer challenge on the TON blockchain used these tools to optimize a reference implementation of a blockchain validation algorithm. The challenge involved squeezing every microsecond out of the algorithm, and participants were given the reference implementation and allowed to modify it. The tools used by the developers included Alloy, an open source OpenTelemetry collector, and Pyroscope, which provides eBPF-based CPU profiling. With Alloy's pyroscope.ebpf component, detailed profiling data was captured and sent to Grafana Cloud for analysis. This approach allowed the developers to identify hotspots in the code without modifying a single line of contestant code.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana security release: Critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana has released patches for several versions of its software, including Grafana 12.4.2, to address critical and high-severity security vulnerabilities. The most significant vulnerability is CVE-2026-27876, which allows remote code execution due to a flaw in the SQL expressions feature. Users with access to execute data source queries can exploit this vulnerability to achieve full remote code execution. A workaround is to disable the sqlExpressions feature toggle or perform specific steps to update and restrict Sqlyze installations. Another vulnerability, CVE-2026-27880, allows for unauthenticated denial-of-service via the OpenFeature endpoint. Users are advised to upgrade to a patched version as soon as possible and consider deploying Grafana in a highly available environment with automatic restarts.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89abd832d87514bc">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">From raw data to flame graphs: A deep dive into how the OpenTelemetry eBPF profiler symbolizes Go</a></h3>
+                        <button class="btn-read" data-id="89abd832d87514bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The post discusses how the OpenTelemetry eBPF profiler works with Go programs to provide actionable function names from raw memory addresses. Unlike traditional profilers that inject agents into a process or call runtime APIs, eBPF profilers operate at the kernel level and capture only the instruction currently executing and the stack of return addresses. This requires symbolization to map these addresses back to meaningful function names.</p><p class="summary">In Go programs, this is made easier due to their unique .gopclntab section that remains in the binary even when debug symbols are removed. The OpenTelemetry eBPF profiler can extract function names on-target from this data, allowing developers to quickly identify performance bottlenecks and optimize code.</p><p class="summary">The post will explore the steps involved in symbolization, including what symbols are, how they hide in binaries, and the pipeline steps from raw address to function name. It will also cover binary search and frame caching, which enable fast symbolization for production environments.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">go</span>
+                        
+                        <span class="label-tag">ebfp</span>
+                        
+                        <span class="label-tag">profiling</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ea64acc22fc04932">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">How OpenRouter and Grafana Cloud bring observability to LLM-powered applications</a></h3>
+                        <button class="btn-read" data-id="ea64acc22fc04932" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Chris Watts, Head of Enterprise Engineering at OpenRouter, discusses the importance of observability for large language models (LLMs) in production applications. As LLMs become core infrastructure, teams face challenges in monitoring and optimizing their performance, cost, and reliability. OpenRouter's unified API provides access to hundreds of models from various providers, while Broadcast feature automatically sends traces from OpenRouter requests to observability platforms like Grafana Cloud. This approach addresses the unique needs of LLM-powered systems, including token usage and costs, model behavior variability, latency profiles, and non-deterministic failures.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">openrouter</span>
+                        
+                        <span class="label-tag">grafana cloud</span>
+                        
+                        <span class="label-tag">observability</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">lll</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0be525b2c2892f25">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Instrument zero‑code observability for LLMs and agents on Kubernetes</a></h3>
+                        <button class="btn-read" data-id="0be525b2c2892f25" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">In the fast-moving world of generative AI, traditional observability can become a burden due to multiple model providers, agent frameworks, vector databases, and custom tools. The OpenLIT Operator brings zero-code AI observability to Kubernetes by automatically injecting and configuring OpenTelemetry instrumentation into pods, producing distributed traces and metrics without any code changes. This approach provides seamless observability for LLMs, vector databases, and agentic frameworks running in Kubernetes, allowing users to track token usage, monitor agent workflows, measure response times, and debug AI framework interactions without touching their code.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">23:28:58</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">23:49:41</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">20m 43s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.4</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">14 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">0</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Skipped</div>
+                    <div class="value dim">1</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <footer>
+            Generated 2026-04-05 23:49 ·
+            <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+            <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+        </footer>
+    </div>
+
+    <script>
+    (function () {
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
