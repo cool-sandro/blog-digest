@@ -36,6 +36,11 @@ feeds:
     url: "https://opentelemetry.io/blog/index.xml"
   - name: "Jeff Geerling's Blog"
     url: "https://www.jeffgeerling.com/blog.xml"
+  - name: "Golem"
+    url: "https://rss.golem.de/rss.php?feed=ATOM1.0"
+  - name: "Heise IT"
+    url: "https://www.heise.de/rss/heise-Rubrik-IT-atom.xml"
+  
 
 # AI Settings
 ai:

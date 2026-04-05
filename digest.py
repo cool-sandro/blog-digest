@@ -346,6 +346,29 @@ def generate_html(articles: list[dict], config: dict, run_stats: dict | None = N
         by_feed.setdefault(a["feed"], []).append(a)
 
     today = datetime.now().strftime("%A, %B %d, %Y")
+    
+    out_dir = Path(config["output"]["directory"])
+    if not out_dir.is_absolute():
+        out_dir = BASE_DIR / out_dir
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Build digest archive list for sidebar navigation
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    reports = []
+    for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
+        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
+            label = dt.strftime("%A, %B %d, %Y – %H:%M")
+        except ValueError:
+            label = date_str
+        reports.append({
+            "filename": f.name,
+            "label": label,
+            "date_short": date_str[:10],
+            "is_today": date_str[:10] == today_str,
+        })
 
     html = template.render(
         articles_by_feed=by_feed,
@@ -353,13 +376,8 @@ def generate_html(articles: list[dict], config: dict, run_stats: dict | None = N
         date=today,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
         run_stats=run_stats or {},
+        reports=reports,
     )
-
-    out_dir = Path(config["output"]["directory"])
-    if not out_dir.is_absolute():
-        out_dir = BASE_DIR / out_dir
-
-    out_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"digest-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.html"
     (out_dir / filename).write_text(html)
