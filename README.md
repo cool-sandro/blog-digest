@@ -54,8 +54,7 @@ feeds:
 ai:
   ollama:
     base_url: "http://localhost:11434"
-    model: "qwen2.5:1.5b"  # RPi 5 (4 GB RAM)
-    # model: "llama3.2:3b" # RPi 5 (8 GB) or Mac
+    model: "llama3.2:3b"  # RPi 5 (4 GB RAM)
     thinking: false          # disable extended thinking for reasoning models
 
 summary:
