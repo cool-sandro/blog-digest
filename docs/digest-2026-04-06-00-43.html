@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Monday, April 06, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" class="active">
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        <span class="date-badge">Today</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Monday, April 06, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>24</strong> articles</span>
+                <span class="stat"><strong>5</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="5ad2b052570b27e8">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd9saf/oracle_db_on_k8s/" target="_blank" rel="noopener">oracle db on k8s</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="5ad2b052570b27e8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The blog post discusses the viability of running an Oracle Database on Kubernetes. Despite the common claim that "No DBs in K8s," some individuals have successfully containerized and deployed Oracle DB. The performance impact is a concern, but modern operators and bare metal clusters have made it possible to mitigate this issue. Licensing costs are also a consideration, but not necessarily a barrier. The post aims to provide insight into the practicality of running an Oracle Database on Kubernetes.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">oracle db</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd9saf/oracle_db_on_k8s/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="1a903a555e8fe442">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd7zyr/keda_gpu_scaler_autoscale_vllmtriton_inference/" target="_blank" rel="noopener">KEDA GPU Scaler – autoscale vLLM/Triton inference pods using real GPU utilization</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="1a903a555e8fe442" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The author created KEDA GPU Scaler as a solution for automating GPU scaling in Kubernetes. The existing method involved deploying dcgm-exporter, Prometheus, and writing custom PromQL queries, which was cumbersome and led to delays in scaling. KEDA GPU Scaler replaces this stack with a single DaemonSet that reads GPU metrics directly from NVML and serves them to KEDA over gRPC. This allows for sub-second metrics, 3-line ScaledObject config, and scale-to-zero functionality out of the box. The scaler currently supports NVIDIA GPUs only, but AMD ROCm support is planned.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">gpu scaling</span>
+                        
+                        <span class="label-tag">nvidia</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd7zyr/keda_gpu_scaler_autoscale_vllmtriton_inference/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="cb4c1b6547ecb873">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd1dyd/freemium_saas_on_k8s_automating/" target="_blank" rel="noopener">Freemium SaaS on K8s: Automating namespace-per-customer provisioning with GitLab CI, who's doing this?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="cb4c1b6547ecb873" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A company is pivoting to a freemium SaaS model and wants to ensure its architecture is suitable for the new business model. The goal is to automatically provision a complete isolated replica of their stack for each customer in their own namespace upon sign-up. The current approach involves using GitLab CI, Helm templating, Cert-manager, and CronJob to manage this process. However, there are concerns about scaling and cost efficiency. The company is wondering if the isolation worth the overhead and how to handle the "noisy neighbor" problem without breaking the bank.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">saas</span>
+                        
+                        <span class="label-tag">freemium</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd1dyd/freemium_saas_on_k8s_automating/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="cb88b0542185d5b3">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Multi-node cluster on Ubuntu desktop for practice</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="cb88b0542185d5b3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The blog post discusses creating a multi-node cluster on an Ubuntu 24.04 LTS desktop for practice purposes. The author is looking for the fastest and easiest way to set up such a cluster, with one control-plane node and three worker nodes.</p><p class="summary">The solution involves using Kubernetes as the container orchestration platform. The author has chosen this option due to its ease of use and flexibility in managing multiple nodes. To get started, the author will need to install Kubernetes on each node, then configure it to work together seamlessly.</p><p class="summary">The key to a successful multi-node cluster is ensuring that all nodes are properly configured and communicating with each other. This requires attention to detail and some technical expertise. However, with Kubernetes, the process becomes much more manageable.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">ubuntu</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">multi-node cluster</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="cf197285b2216356">
+                    <div class="article-header">
+                        <h3><a href="https://apps.apple.com/nl/app/google-ai-edge-gallery/id6749645337" target="_blank" rel="noopener">Gemma 4 on iPhone</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="cf197285b2216356" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The blog post discusses a popular iPhone app, Gemma 4 on iPhone, which showcases Google's AI Edge Gallery. The gallery features various artificial intelligence (AI) and machine learning (ML) models that can be used in real-time to analyze data from different sensors and devices.</p><p class="summary">One of the key takeaways is that these AI models are designed for edge computing, allowing them to process data closer to where it's generated, reducing latency and improving performance. The app demonstrates how these models can be used for tasks such as object detection, facial recognition, and audio analysis.</p><p class="summary">The post highlights the importance of edge AI in various industries, including healthcare, retail, and security, where real-time processing and analysis are crucial.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://apps.apple.com/nl/app/google-ai-edge-gallery/id6749645337" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="03af063eb381fee7">
+                    <div class="article-header">
+                        <h3><a href="https://help.openai.com/en/articles/20001106-codex-rate-card" target="_blank" rel="noopener">Codex pricing to align with API token usage, instead of per-message</a></h3>
+                        
+                        <button class="btn-read" data-id="03af063eb381fee7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">OpenAI has made changes to its Codex pricing model, moving away from a per-message rate card. Instead, the new pricing will be based on API token usage. This means that users will no longer need to worry about being charged for each message or request they make through the API. The change is aimed at making it easier and more cost-effective for developers to use Codex without worrying about unexpected charges.</p><p class="summary">The new pricing model will take into account the actual number of API tokens used, allowing users to better manage their costs and budget. This change is a positive move for developers who rely on Codex for its capabilities in natural language processing and machine learning.</p><p class="summary">The updated pricing information can be found on the OpenAI website.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://help.openai.com/en/articles/20001106-codex-rate-card" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6803337147321ddc">
+                    <div class="article-header">
+                        <h3><a href="https://www.bbc.com/news/videos/ce3d5gkd2geo" target="_blank" rel="noopener">Artemis II crew see first glimpse of far side of Moon [video]</a></h3>
+                        
+                        <button class="btn-read" data-id="6803337147321ddc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The article discusses the Artemis II mission, which sent astronauts on a lunar flyby. The crew caught their first glimpse of the far side of the Moon from space, marking a significant milestone in the mission. The observation was made using cameras and other equipment on board the spacecraft.</p><p class="summary">During the flyby, the crew also saw the Earth from a distance, providing a unique perspective on our planet. The experience is seen as an important step towards future human exploration of the Moon and beyond.</p><p class="summary">The Artemis II mission aims to test key technologies and systems that will be used in future lunar missions, including the Orion spacecraft and the Space Launch System rocket.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">space exploration</span>
+                        
+                        <span class="label-tag">moon</span>
+                        
+                        <span class="label-tag">artemis ii</span>
+                        
+                        <span class="label-tag">nasa</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.bbc.com/news/videos/ce3d5gkd2geo" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="145aa752a569cc9e">
+                    <div class="article-header">
+                        <h3><a href="https://shkspr.mobi/blog/2026/04/someone-at-browserstack-is-leaking-users-email-address/" target="_blank" rel="noopener">Someone at BrowserStack is leaking users' email addresses</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="145aa752a569cc9e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A recent blog post on a popular technology website reveals that a user of BrowserStack, a cloud-based platform for testing web applications, has been leaking users' email addresses. This is a serious security breach, as email addresses are sensitive information that can be used for phishing and other malicious activities. The incident was discovered when the publication noticed that some email addresses were being leaked in the comments section of an article. An investigation by BrowserStack found that the leak occurred due to a software bug, which has since been fixed. However, the incident highlights the importance of robust security measures and regular testing to prevent such breaches.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">browserstack</span>
+                        
+                        <span class="label-tag">security breach</span>
+                        
+                        <span class="label-tag">data leak</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://shkspr.mobi/blog/2026/04/someone-at-browserstack-is-leaking-users-email-address/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="17f24c52926eeae1">
+                    <div class="article-header">
+                        <h3><a href="https://www.tandfonline.com/doi/full/10.1080/23328940.2026.2645467#abstract" target="_blank" rel="noopener">Finnish sauna heat exposure induces stronger immune cell than cytokine responses</a></h3>
+                        
+                        <button class="btn-read" data-id="17f24c52926eeae1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A recent study found that exposure to the heat of a Finnish sauna induces a stronger immune response than cytokine responses in humans. Cytokines are proteins that help fight off infections, but they can also cause inflammation and tissue damage. The study suggests that the heat from saunas may trigger an immune response that is more effective at fighting off pathogens without causing excessive inflammation.</p><p class="summary">The researchers believe that the heat shock proteins produced during sauna use stimulate the immune system to produce more antimicrobial peptides, which are powerful defenders against infection. This finding could have implications for the development of new treatments for infections and autoimmune diseases.</p><p class="summary">This study highlights the importance of environmental factors in shaping our immune response.</p>
+                    
+                    <a class="read-more" href="https://www.tandfonline.com/doi/full/10.1080/23328940.2026.2645467#abstract" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding performance bottlenecks with Pyroscope and Alloy: An example using TON blockchain</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The blog post explores how continuous profiling with Alloy and Pyroscope can help optimize performance bottlenecks in code. A real-world example from the TON blockchain optimization contest demonstrates how modern profiling tools can accelerate the optimization process. The authors used Alloy's eBPF-based CPU profiler to capture detailed profiling data, which was then sent to Grafana Cloud for analysis. This approach allowed them to identify hotspots and track optimization progress without modifying a single line of code. By leveraging Alloy's pyroscope.ebpf component, they were able to gain immediate visibility into performance bottlenecks.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana security release: Critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana Labs has released Grafana 12.4.2 along with patches for versions 12.3, 12.2, 12.1, and 11.6 to address critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880. The security vulnerabilities allow attackers to execute arbitrary files and crash the server by sending requests with unbounded user input. Grafana Labs customers have received patched versions two weeks in advance, and cloud providers licensed to offer Grafana Cloud have also been patched. It is recommended that users upgrade to one of the patched versions as soon as possible.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security patches</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">bug fixes</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89abd832d87514bc">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">From raw data to flame graphs: A deep dive into how the OpenTelemetry eBPF profiler symbolizes Go</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="89abd832d87514bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The OpenTelemetry eBPF profiler uses a process called symbolization to turn raw memory addresses into function names. This is necessary because eBPF profilers operate at the kernel level and capture raw program counters without being able to inject agents, call runtime APIs, or recompile code. Symbolization involves mapping each address back to the binary's source code, but this can be a challenge due to the complexity of eBPF profilers and the unique characteristics of Go programs, which embed a .gopclntab section that remains in the binary even when debug symbols are removed.</p><p class="summary">This makes it easier for Go programs to produce better profiling data out of the box. The OpenTelemetry eBPF profiler's symbolization pipeline involves several steps, including binary search and frame caching, which enable fast performance. By understanding how this process works, developers can troubleshoot symbol issues, optimize their code, and take advantage of Go's unique advantages in eBPF profiling.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">go</span>
+                        
+                        <span class="label-tag">ebpf profiler</span>
+                        
+                        <span class="label-tag">opentelemetry</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ea64acc22fc04932">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">How OpenRouter and Grafana Cloud bring observability to LLM-powered applications</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ea64acc22fc04932" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The integration of OpenRouter and Grafana Cloud enables observability for large language models (LLMs) powered applications. This allows teams to track performance, costs, and failures in a more comprehensive way than traditional monitoring tools can. LLMs introduce new dimensions that need to be tracked, such as token usage and costs, model behavior variability, latency profiles, and non-deterministic failures. OpenRouter's Broadcast feature automatically sends traces from API requests to Grafana Cloud, providing rich attributes that include model information, token usage, timing data, cost data, status and errors, and custom metadata.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">observability</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0be525b2c2892f25">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Instrument zero‑code observability for LLMs and agents on Kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="0be525b2c2892f25" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The blog post discusses the importance of observability in AI applications running on Kubernetes. Traditional observability methods require developers to add instrumentation libraries to their code, which can be time-consuming and outdated. The OpenLIT Operator solves this problem by automatically injecting OpenTelemetry instrumentation into AI workloads without requiring any code changes or image rebuilds. This allows for zero-code observability, enabling users to track token usage, monitor agent workflows, measure response times, and debug AI framework interactions. Combining the OpenLIT Operator with Grafana Cloud provides comprehensive coverage of major LLM providers, vector databases, and agent frameworks, as well as cost and performance insights.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">open-telemetry</span>
+                        
+                        <span class="label-tag">ai-observability</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="7a39ec08fe88faf7">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/sei-dabei-wir-oeffnen-unsere-neue-community-fuer-weitere-early-birds-2604-207216.html" target="_blank" rel="noopener">Sei dabei: Wir öffnen unsere neue Community für weitere Early Birds</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7a39ec08fe88faf7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The article from Golem.de announces the launch of a new community for early adopters to shape its development. The community aims to bring together individuals who share interests in Kubernetes, containerization, and related technologies. By participating in this community, members will have the opportunity to provide feedback on various topics, including security and monitoring, helping shape the direction of the project.</p><p class="summary">The community is looking for enthusiastic users to help decide which features to prioritize. The goal is to create a collaborative environment where experts and non-experts can come together to discuss and implement new ideas. By doing so, the community hopes to accelerate innovation in the field of Kubernetes and related technologies.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/sei-dabei-wir-oeffnen-unsere-neue-community-fuer-weitere-early-birds-2604-207216.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="f5682a67b8fe45d0">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/abdu-mudesir-telekom-enttaeuscht-ueber-weggang-von-technikchef-2604-207257.html" target="_blank" rel="noopener">Abdu Mudesir: Telekom enttäuscht über Weggang von Technikchef</a></h3>
+                        
+                        <button class="btn-read" data-id="f5682a67b8fe45d0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Abdu Mudesir, the former head of technology at Deutsche Telekom, has left the company after a public criticism by the board of directors. The criticism was directed towards Mudesir's departure, with the board stating that they had not been able to reach an agreement on his departure package. Mudesir had expressed disappointment and frustration with the way he was let go, citing his million-dollar exit payment as a major point of contention.</p><p class="summary">The incident has sparked controversy within the company, with some employees reportedly unhappy about the situation. The board's decision to criticize Mudesir publicly has been seen as unprofessional and may have damaged the company's reputation.</p><p class="summary">Mudesir's departure marks a significant change for Telekom, which had previously prided itself on its strong technology leadership.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">telekom</span>
+                        
+                        <span class="label-tag">abdu mudesir</span>
+                        
+                        <span class="label-tag">deutsche telekom</span>
+                        
+                        <span class="label-tag">million dollar exit</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/abdu-mudesir-telekom-enttaeuscht-ueber-weggang-von-technikchef-2604-207257.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="dd7e837ad4a4bbf8">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/irankrieg-usa-schraenken-private-satellitenbilder-ein-2604-207255.html" target="_blank" rel="noopener">Irankrieg: USA schränken private Satellitenbilder ein</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="dd7e837ad4a4bbf8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The US government has pressured companies such as Planet Labs to limit access to satellite images of the Middle East, including pictures from the Gulf region. This move is part of a growing trend where governments are exerting control over sensitive information and imagery that could be used for surveillance or other purposes. The restrictions on access to these images raise concerns about freedom of information and the ability of researchers, journalists, and the public to gather accurate data.</p><p class="summary">The decision by companies like Planet Labs to comply with government demands suggests that there is a need for greater transparency and regulation in the use of satellite imagery. However, it also highlights the challenges of balancing national security interests with the public's right to information.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">us government</span>
+                        
+                        <span class="label-tag">satellitenbilder</span>
+                        
+                        <span class="label-tag">middle east</span>
+                        
+                        <span class="label-tag">freedom of information</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/irankrieg-usa-schraenken-private-satellitenbilder-ein-2604-207255.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6a0c4ba3c30e70c3">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/social-engineering-hacker-nehmen-open-source-maintainer-ins-visier-2604-207252.html" target="_blank" rel="noopener">Social Engineering: Hacker nehmen Open-Source-Maintainer ins Visier</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="6a0c4ba3c30e70c3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A hacker launched a social engineering attack on an open-source maintainer, exploiting vulnerabilities to compromise their system and steal sensitive information. This is part of a larger campaign targeting multiple maintainers, indicating the potential scope of the threat. The attack highlights the importance of maintaining robust security measures, including proper verification procedures for external communication.</p><p class="summary">The incident demonstrates the evolving tactics used by hackers to exploit human vulnerability rather than solely relying on technical weaknesses. Maintainers and developers must remain vigilant in their daily operations to avoid falling prey to such attacks.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">open source</span>
+                        
+                        <span class="label-tag">social engineering</span>
+                        
+                        <span class="label-tag">hacking</span>
+                        
+                        <span class="label-tag">security threats</span>
+                        
+                        <span class="label-tag">malware</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/social-engineering-hacker-nehmen-open-source-maintainer-ins-visier-2604-207252.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c7ae8c2b40af0386">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/iran-krieg-microsoft-fordert-globalen-schutz-von-rechenzentren-2604-207256.html" target="_blank" rel="noopener">Iran-Krieg: Microsoft fordert globalen Schutz von Rechenzentren</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="c7ae8c2b40af0386" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">A high-ranking Microsoft manager has expressed concern over the attacks on US cloud providers by the Iranian government. The attack is seen as a threat to global data centers and computing infrastructure. Despite this, Microsoft plans to proceed with its expansion plans for its cloud services. This move is met with criticism from some quarters, who are concerned about the vulnerability of sensitive information being stored in the cloud. However, Microsoft believes that it can mitigate these risks through robust security measures.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">microsoft</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">data-protection</span>
+                        
+                        <span class="label-tag">us-cloud</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/iran-krieg-microsoft-fordert-globalen-schutz-von-rechenzentren-2604-207256.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="0006791de8a0acbb">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-die-beste-kabellose-ueberwachungskamera-im-test-akku-wlan-lte-und-solar/0spn5e4?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Top 10: Die beste kabellose Überwachungskamera im Test – Akku, WLAN, LTE & Solar</a></h3>
+                        
+                        <button class="btn-read" data-id="0006791de8a0acbb" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">This blog post reviews the top 10 wireless surveillance cameras on the market, focusing on models with features such as high-definition video, solar power, and Wi-Fi connectivity. The cameras are designed to be compact, easy to install, and energy-efficient. They also offer various functionalities like motion detection, night vision, and weather resistance. The review highlights the benefits of wireless surveillance cameras, including their ability to provide real-time monitoring without the need for cables or wires.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">surveillance</span>
+                        
+                        <span class="label-tag">camera</span>
+                        
+                        <span class="label-tag">solar power</span>
+                        
+                        <span class="label-tag">wireless</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-10-die-beste-kabellose-ueberwachungskamera-im-test-akku-wlan-lte-und-solar/0spn5e4?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d332afb337d71ef0">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Anthropic-wirft-OpenClaw-aus-seinen-Claude-Abos-11246063.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Anthropic wirft OpenClaw aus seinen Claude-Abos</a></h3>
+                        
+                        <button class="btn-read" data-id="d332afb337d71ef0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Anthropic is terminating its OpenClaw AI service by phasing out its proprietary CloudAbos. Existing users of the Claude subscription will no longer be able to access OpenClaw without incurring additional costs. Anthropic has made this decision, citing the shift towards more open and transparent services.</p><p class="summary">This move may impact users who relied on OpenClaw's functionality. As a result, Anthropic is promoting its other cloud-based services as alternatives.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">openclaw</span>
+                        
+                        <span class="label-tag">anthropic</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Anthropic-wirft-OpenClaw-aus-seinen-Claude-Abos-11246063.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="713873a5ba5a6a95">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Sichere-Softwareentwicklung-Jetzt-noch-Vortrag-fuer-die-heise-devSec-einreichen-11243005.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">heise-Angebot: Sichere Softwareentwicklung: Vortrag für die heise devSec in Marburg einreichen</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="713873a5ba5a6a95" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The blog post announces a call for proposals for the heise devSec conference in Marburg, which focuses on secure software development. The conference will take place in May and will include an additional online event called "KI und Security". The deadline to submit proposals is April 14th. The conference aims to bring together experts in the field of security and software development to share knowledge and best practices.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">devsec</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Sichere-Softwareentwicklung-Jetzt-noch-Vortrag-fuer-die-heise-devSec-einreichen-11243005.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d51a379c679406aa">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Fieses-Osterei-D-Trust-verlangt-Zertifikatstausch-bis-Ostermontag-11245930.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Admins müssen D-Trust-Zertifikate tauschen – bis Ostermontag</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="d51a379c679406aa" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Administrators in Germany are facing a deadline to exchange their D-Trust certificates, which are used for secure communication. The Bundesdruckerei, a subsidiary of D-Trust, is requiring administrators to update their TLS certificates by Easter Monday at 5 PM. This change is necessary to maintain the security and trustworthiness of online transactions.</p><p class="summary">The exchange of certificates is not optional and must be completed before the deadline to avoid disruptions to sensitive services. Administrators are expected to take immediate action to ensure a smooth transition.</p><p class="summary">D-trust certificates need to be updated in order to keep secure communication.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">d-trust</span>
+                        
+                        <span class="label-tag">certificate-exchange</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Fieses-Osterei-D-Trust-verlangt-Zertifikatstausch-bis-Ostermontag-11245930.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="dcf3fe915a97d58a">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/FortiClient-EMS-Kritische-Codeschmuggel-Luecke-wird-angegriffen-11246000.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Jetzt updaten! Kritische FortiClient-EMS-Lücke wird attackiert</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="dcf3fe915a97d58a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">FortiClient, a popular security solution, has been compromised by hackers who are exploiting a critical vulnerability in the EMS (Endpoint Management System). Fortinet has released hotfixes to address this issue and advises administrators to apply them immediately. The attackers are using this exploit to smuggle malicious code into FortiClient installations. This highlights the importance of keeping software up-to-date with the latest security patches.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">fortinet</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">vulnerability</span>
+                        
+                        <span class="label-tag">exploit</span>
+                        
+                        <span class="label-tag">update</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/FortiClient-EMS-Kritische-Codeschmuggel-Luecke-wird-angegriffen-11246000.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">00:37:22</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">00:43:01</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">5m 39s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">5.3</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">10 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">14</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Skipped</div>
+                    <div class="value dim">1</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-06 00:43 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
