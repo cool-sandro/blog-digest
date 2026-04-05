@@ -368,7 +368,7 @@
             <h1>📡 Blog Digest</h1>
             <p class="meta">Sunday, April 05, 2026</p>
             <div class="stats">
-                <span class="stat"><strong>13</strong> articles</span>
+                <span class="stat"><strong>12</strong> articles</span>
                 <span class="stat"><strong>3</strong> feeds</span>
                 <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
             </div>
@@ -382,11 +382,23 @@
             <summary>
                 <span class="feed-dot"></span>
                 Kubernetes subreddit
-                <span class="feed-count">(3)</span>
+                <span class="feed-count">(2)</span>
                 <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
                 <span class="feed-chevron">▼</span>
             </summary>
             <div class="articles-wrapper">
+                
+                <div class="article" data-id="cb88b0542185d5b3">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Multi-node cluster on Ubuntu desktop for practice</a></h3>
+                        <button class="btn-read" data-id="cb88b0542185d5b3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">Creating a multi-node Kubernetes cluster on an Ubuntu desktop is a straightforward process with just one controller node and three worker nodes for practice. This setup can be achieved using the `kubeadm` command-line tool, which simplifies deployment significantly. By following these steps: Install Docker (if not already done) Set up your workstation as the master controller Create 3 worker nodes by configuring each with a static IP address and mounting necessary directories Initialize the cluster using `kubeadm` Join the three newly created nodes to the initial node (master) for network connectivity</p><p class="summary">This approach allows you to start practicing Kubernetes orchestration quickly without the complexity of managing multiple physical servers, making it perfect for beginners or those looking to hone their skills on a familiar environment.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
                 
                 <div class="article" data-id="9b56c24b4d5b6531">
                     <div class="article-header">
@@ -398,30 +410,6 @@
                     
                     <p class="summary">The user successfully deployed the Headlamp dashboard to their personal virtual machine cluster to test the platform. However, due to the isolated nature of the environment, the security risks are negligible. The core discussion focuses on a potential future feature to automatically grant service account tokens upon initial UI login, eliminating the need for manual token creation or repeated inputs in kubectl commands for that specific account. Currently, the manual approach described remains the standard workflow, which the author views as an unnecessary security fiction given the limited risk profile of a home-based VM.</p>
                     <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1scedvt/headlamp_tokenless_incluster_deployment/" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="7371faf62b97ed9d">
-                    <div class="article-header">
-                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sc28ga/how_we_cut_node_provisioning_time_in_half_by/" target="_blank" rel="noopener">How we cut node provisioning time in half by tuning kubelet resource reservations</a></h3>
-                        <button class="btn-read" data-id="7371faf62b97ed9d" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="date">2026-04-04</p>
-                    
-                    <p class="summary">EKS node provisioning times were consistently taking four minutes to reach the Ready status, a delay caused by aggressive eviction thresholds inherited from an old cluster configuration combined with missing explicit resource reservations. When the kubelet encountered these high thresholds during startup, it repeatedly evaluated resource limits and attempted to reclaim memory that was never actually under pressure, creating a loop that stalled the node's readiness transition. To resolve this, administrators adjusted the kubelet config to define explicit kube-reserved and system-reserved values matching actual system process usage observed over a two-week period. They also relaxed the memory available eviction threshold from a hard 100 MiB to a soft 300 MiB with a nine-second grace period to reduce over-reactivity. Additionally, the control plane was updated to receive node status updates more frequently, from the standard ten-second interval to forty seconds, ensuring the system could catch node status changes during the critical transition window. Implementing these changes lowered the provisioning time to around two minutes. This incident highlights that eviction settings significantly impact startup performance and that documentation often fails to treat these configuration parameters as critical startup tuning items.</p>
-                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sc28ga/how_we_cut_node_provisioning_time_in_half_by/" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="8ad865e1d818642f">
-                    <div class="article-header">
-                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sc3ffk/new_to_k8s_how_do_pods_actually_share_memory_on_a/" target="_blank" rel="noopener">new to K8s — how do pods actually share memory on a node?</a></h3>
-                        <button class="btn-read" data-id="8ad865e1d818642f" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="date">2026-04-04</p>
-                    
-                    <p class="summary">The author recently migrated to a Kubernetes cluster and faced performance issues because their hourly data pipeline jobs were consuming too much memory despite running on different schedules. This confusion stems from a lack of understanding regarding how memory is dynamically allocated and reclaimed when multiple pods share a single node. The core takeaway is that memory allocation occurs at runtime based on resource requests and available node capacity, rather than being statically divided at launch. Furthermore, the user struggled to verify real-time resource usage or check for lingering resource hogs from previous jobs in a managed cloud orchestration environment, which often lacks direct kubectl access or simple dashboards. This post highlights the importance of grasping the underlying allocation mechanics and leveraging monitoring tools to troubleshoot resource contention before job failures occur.</p>
-                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sc3ffk/new_to_k8s_how_do_pods_actually_share_memory_on_a/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
             </div>
@@ -437,6 +425,30 @@
             </summary>
             <div class="articles-wrapper">
                 
+                <div class="article" data-id="420a48de75db6f5f">
+                    <div class="article-header">
+                        <h3><a href="https://www.phoronix.com/news/Linux-7.0-AWS-PostgreSQL-Drop" target="_blank" rel="noopener">AWS engineer reports PostgreSQL perf halved by Linux 7.0, fix may not be easy</a></h3>
+                        <button class="btn-read" data-id="420a48de75db6f5f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The AWS engineer reporting a sharp decline in PostgreSQL performance after upgrading from Linux kernel 6 to 7.0 mentions that the fix may not be easy, especially given the complexity of the underlying drivers. The issue appears related to how the new version handles large memory operations, but is unlikely to be fixed by simply returning to an older version due to dependencies on specific libraries in newer versions of PostgreSQL. The engineer advises caution and a deep dive into Linux kernel documentation for potential solutions.</p>
+                    <a class="read-more" href="https://www.phoronix.com/news/Linux-7.0-AWS-PostgreSQL-Drop" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="be17167c7878b9e6">
+                    <div class="article-header">
+                        <h3><a href="https://bmi.usercontent.opencode.de/eudi-wallet/wallet-development-documentation-public/latest/architecture-concept/06-mobile-devices/02-mdvm/" target="_blank" rel="noopener">German implementation of eIDAS will require an Apple/Google account to function</a></h3>
+                        <button class="btn-read" data-id="be17167c7878b9e6" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The German implementation of eIDAS will require users to sign up for an Apple or Google account in order for the electronic ID system to function properly. This is because the new system, which allows citizens to digitally sign documents and verify their identity online, requires a third-party authentication method in addition to the usual user credentials. The article points out that this change is necessary due to security concerns over how users will be able to share sensitive information across multiple devices without the need for manual authentication every time they want to sign something. This could lead to issues if users' accounts are compromised or not properly secured, so it's important that users take steps to protect their accounts and identities before using the system.</p>
+                    <a class="read-more" href="https://bmi.usercontent.opencode.de/eudi-wallet/wallet-development-documentation-public/latest/architecture-concept/06-mobile-devices/02-mdvm/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
                 <div class="article" data-id="ae79274a9fed0dd5">
                     <div class="article-header">
                         <h3><a href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">How many products does Microsoft have named 'Copilot'?</a></h3>
@@ -449,6 +461,18 @@
                     <a class="read-more" href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
+                <div class="article" data-id="91fc906a99431e8a">
+                    <div class="article-header">
+                        <h3><a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">LLM Wiki – example of an "idea file"</a></h3>
+                        <button class="btn-read" data-id="91fc906a99431e8a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">"LLM Wiki" is an idea file inspired by Open AI's "I am GPT-3" post. It highlights the concept of large language models (LLMs) as a tool for innovation and discussion, rather than just generating text. The post suggests using LLMs to generate ideas that could lead to groundbreaking advancements in various fields like medicine or climate change. This approach encourages creativity and collaboration through open-source sharing of these "idea files." It emphasizes the value of community engagement and the potential for collective problem-solving through shared resources and knowledge exchange.</p>
+                    <a class="read-more" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
                 <div class="article" data-id="8d794ebe71446e3b">
                     <div class="article-header">
                         <h3><a href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Show HN: A game where you build a GPU</a></h3>
@@ -459,42 +483,6 @@
                     
                     <p class="summary">Many people seek to build their own graphics processing units, but existing guides often lack depth or fail to address modern needs. This project aims to create a comprehensive game that teaches users how to assemble a high-performance GPU from scratch. The tutorial focuses on selecting the right components, including choosing a high-end motherboard, acquiring top-tier processors, and finding compatible graphics cards that offer the best performance and value. The project emphasizes practical engineering and optimization, ensuring that builders can achieve reliable results without unnecessary complexity. By providing clear steps and real-world examples, the goal is to bridge the gap between theory and practical building, empowering enthusiasts to create powerful systems that meet their specific requirements while keeping costs under control.</p>
                     <a class="read-more" href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="6535f65e31705652">
-                    <div class="article-header">
-                        <h3><a href="https://www.theverge.com/tech/907003/apple-approves-driver-that-lets-nvidia-egpus-work-with-arm-macs" target="_blank" rel="noopener">Apple approves driver that lets Nvidia eGPUs work with Arm Macs</a></h3>
-                        <button class="btn-read" data-id="6535f65e31705652" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="date">2026-04-04</p>
-                    
-                    <p class="summary">Apple recently granted permission to Nvidia to develop a new driver enabling its Enterprise Graphics Processors to function on Arm-based Mac hardware. This move effectively allows Apple Macs to leverage Nvidia's eGPU solutions without requiring a complete switch to Intel silicon. Prior to this approval, Nvidia faced significant roadblocks trying to integrate its proprietary graphics technology with the diverse architecture of Mac systems. While earlier attempts have failed, this latest approval suggests Apple is finally recognizing Nvidia's value proposition. The collaboration will allow Apple to offer users powerful gaming and creative computing capabilities through their existing Arm Macs, effectively bridging the gap between Apple silicon and Nvidia's market leadership. This strategic partnership represents a significant milestone in the industry's push for hardware interoperability and open architecture, potentially setting a precedent for future developments in the ecosystem. The implementation timeline remains to be seen, but the door is clearly open for a more flexible computing experience for consumers and developers alike.</p>
-                    <a class="read-more" href="https://www.theverge.com/tech/907003/apple-approves-driver-that-lets-nvidia-egpus-work-with-arm-macs" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="20872d5c2882351b">
-                    <div class="article-header">
-                        <h3><a href="https://www.dw.com/en/german-men-need-military-permit-for-extended-stays-abroad/a-76662677" target="_blank" rel="noopener">German men 18-45 need military permit for extended stays abroad</a></h3>
-                        <button class="btn-read" data-id="20872d5c2882351b" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="date">2026-04-04</p>
-                    
-                    <p class="summary">German legislation now requires men aged 18 to 45 obtaining extended stays abroad to obtain specific military clearance from the Federal Army. This rule, which was recently expanded, ensures national security before allowing foreign visitors to leave the country. The system relies on a digital application submitted through the Federal Ministry of Defence. If the application is approved, the person receives a permit enabling travel for up to six months without a visa. Those with pre-authorized permits must renew them annually. The law aims to filter out potential security risks efficiently while balancing the need for international mobility. This policy reflects a broader effort by the German government to strengthen security protocols for citizens and residents abroad without unnecessarily restricting legal travel.</p>
-                    <a class="read-more" href="https://www.dw.com/en/german-men-need-military-permit-for-extended-stays-abroad/a-76662677" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="0b88aa99d00ac60f">
-                    <div class="article-header">
-                        <h3><a href="https://www.thetimes.com/uk/technology-uk/article/sarah-wynn-williams-careless-people-meta-nrffdfpmf" target="_blank" rel="noopener">Author of "Careless People" banned from saying anything negative about Meta</a></h3>
-                        <button class="btn-read" data-id="0b88aa99d00ac60f" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="date">2026-04-04</p>
-                    
-                    <p class="summary">Sarah Wynn Williams, the author of the bestselling book Careless People, was barred from discussing Facebook from Tuesday until Monday. This restriction applies to all her public appearances and media engagements, not just formal speaking roles. The ban was imposed by Meta following a viral post by one of her former students regarding Meta's new AI tool, "Dread." The incident sparked an internal controversy where a former student accused Meta of suppressing a legitimate critique. Meta subsequently banned Williams and her former student, the University of Oxford's professor, from any form of media or public speech until they were removed from Facebook. Williams' absence from her own book launch event and subsequent interviews has caused significant media coverage. While Meta has claimed this is to prevent negative public opinion, supporters argue the measure protects the author's reputation and violates her freedom of speech. The incident highlights the intense pressure social media companies face regarding how much criticism they can afford to absorb before they decide to cull their most vocal critics.</p>
-                    <a class="read-more" href="https://www.thetimes.com/uk/technology-uk/article/sarah-wynn-williams-careless-people-meta-nrffdfpmf" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
             </div>
@@ -572,34 +560,34 @@
             <div class="run-stats-grid">
                 <div class="run-stat-item">
                     <div class="label">Started</div>
-                    <div class="value">07:00:01</div>
+                    <div class="value">12:51:25</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Finished</div>
-                    <div class="value">07:17:44</div>
+                    <div class="value">12:53:02</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Duration</div>
-                    <div class="value">17m 42s</div>
+                    <div class="value">1m 36s</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Avg tokens/s</div>
-                    <div class="value">3.6</div>
+                    <div class="value">11.3</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Ollama</div>
-                    <div class="value">13 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen3.5:2b</span></div>
+                    <div class="value">4 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">From cache</div>
-                    <div class="value dim">0</div>
+                    <div class="value dim">8</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Skipped</div>
-                    <div class="value dim">2</div>
+                    <div class="value dim">3</div>
                 </div>
                 
             </div>
@@ -607,7 +595,7 @@
         
 
         <footer>
-            Generated 2026-04-05 07:17 ·
+            Generated 2026-04-05 12:53 ·
             <a href="index.html" style="color: var(--accent);">← Archive</a> ·
             <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
         </footer>
