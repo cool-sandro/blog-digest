@@ -54,7 +54,7 @@ def article_id(url: str) -> str:
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
 
-def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20) -> requests.Response:
+def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20, verify_ssl: bool = True) -> requests.Response:
     """HTTP GET with exponential backoff on transient failures."""
     delay = 2
     for attempt in range(max_retries):
@@ -63,6 +63,7 @@ def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20) -> req
                 url,
                 timeout=timeout,
                 headers={"User-Agent": "BlogDigest/1.0 (RSS Aggregator)"},
+                verify=verify_ssl,
             )
             resp.raise_for_status()
             return resp
@@ -85,10 +86,11 @@ def fetch_feeds(config: dict) -> list[dict]:
     for feed_cfg in config["feeds"]:
         name = feed_cfg["name"]
         url = feed_cfg["url"]
+        verify_ssl = feed_cfg.get("ssl_verify", True)
         log.info(f"Fetching feed: {name}")
 
         try:
-            resp = fetch_with_backoff(url)
+            resp = fetch_with_backoff(url, verify_ssl=verify_ssl)
             feed = feedparser.parse(resp.content)
             count = 0
             for entry in feed.entries:
@@ -155,16 +157,21 @@ def fetch_full_article(url: str, max_chars: int = 5000) -> str:
         return ""
 
 
-def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, float | None] | None:
-    """Summarize using local Ollama. Returns (summary, tokens_per_sec) or None."""
+def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], float | None] | None:
+    """Summarize and extract labels using local Ollama in a single call.
+    Returns (summary, labels, tokens_per_sec) or None."""
     ollama_cfg = config["ai"]["ollama"]
     base_url = ollama_cfg["base_url"]
     model = ollama_cfg["model"]
     max_words = config["summary"]["max_summary_length"]
+    max_labels = config["summary"].get("max_labels", 5)
 
     prompt = f"""Summarize this blog post in {max_words} words or less.
 Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text.
 Be concise and focus on the key takeaways. Write in English.
+
+After the summary, on a new line, write LABELS: followed by up to {max_labels} short comma-separated keyword/topic labels in lowercase.
+Example labels line: LABELS: kubernetes, security, cloud-native
 
 Title: {title}
 
@@ -186,17 +193,30 @@ Summary:"""
         )
         resp.raise_for_status()
         data = resp.json()
-        summary = data.get("response", "").strip()
+        raw = data.get("response", "").strip()
+
+        # Split summary from labels
+        summary = raw
+        labels = []
+        for marker in ("LABELS:", "Labels:", "labels:"):
+            if marker in raw:
+                parts = raw.split(marker, 1)
+                summary = parts[0].strip()
+                label_str = parts[1].strip()
+                labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
+                labels = [l for l in labels if l and len(l) < 40]
+                labels = labels[:max_labels]
+                break
+
         tps = None
         eval_count = data.get("eval_count")
         eval_duration = data.get("eval_duration")  # nanoseconds
         if eval_count and eval_duration and eval_duration > 0:
             tps = round(eval_count / (eval_duration / 1e9), 1)
-        return summary, tps
+        return summary, labels, tps
     except Exception as e:
         log.warning(f"Ollama failed: {e}")
         return None
-
 
 
 def clean_summary(text: str) -> str:
@@ -220,15 +240,15 @@ def clean_summary(text: str) -> str:
     return paragraphs[0] if paragraphs else text
 
 
-def summarize(text: str, title: str, config: dict) -> tuple[str, float | None]:
-    """Summarize with Ollama. Returns (summary, tps)."""
+def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], float | None]:
+    """Summarize with Ollama. Returns (summary, labels, tps)."""
     result = summarize_ollama(text, title, config)
     if result:
-        summary, tps = result
+        summary, labels, tps = result
         log.info(f"  Summarized with Ollama: {title[:50]}")
-        return summary, tps
+        return summary, labels, tps
 
-    return "Summary unavailable – Ollama failed.", None
+    return "Summary unavailable – Ollama failed.", [], None
 
 
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
@@ -257,8 +277,8 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             stats["failed"] += 1
             continue
 
-        # Summarize
-        summary, tps = summarize(text, article["title"], config)
+        # Summarize + extract labels (single LLM call)
+        summary, labels, tps = summarize(text, article["title"], config)
         summary = clean_summary(summary)
 
         if tps is not None:
@@ -274,6 +294,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             "url": article["url"],
             "published": article["published"],
             "summary": summary,
+            "labels": labels,
         }
 
         cache[aid] = result

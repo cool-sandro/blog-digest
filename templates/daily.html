@@ -262,6 +262,26 @@
             line-height: 1.7;
         }
 
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
         .article .read-more {
             display: inline-block;
             margin-top: 0.6rem;
@@ -397,6 +417,13 @@
                     <p class="date">{{ article.published[:10] }}</p>
                     {% endif %}
                     <p class="summary">{{ article.summary }}</p>
+                    {% if article.labels %}
+                    <div class="labels">
+                        {% for label in article.labels %}
+                        <span class="label-tag">{{ label }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <a class="read-more" href="{{ article.url }}" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 {% endfor %}
@@ -571,7 +598,8 @@
                 section.querySelectorAll('.article').forEach(card => {
                     const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
                     const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
-                    const matches = !query || title.includes(query) || summary.includes(query);
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
                     card.style.display = matches ? '' : 'none';
                     if (matches) visibleInFeed++;
                 });
