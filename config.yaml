@@ -52,6 +52,16 @@ summary:
   max_summary_length: 200  # words per article
   max_labels: 5             # max keyword/topic labels per article
 
+# User profile – teach the AI about your interests
+# Articles that match these will be tagged "For you"
+user_profile:
+  interests:
+    - kubernetes
+    - containerization
+    - open source
+    - monitoring
+    - otlp
+
 # Output
 output:
   directory: "./docs"

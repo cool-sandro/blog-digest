@@ -157,21 +157,28 @@ def fetch_full_article(url: str, max_chars: int = 5000) -> str:
         return ""
 
 
-def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], float | None] | None:
+def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None] | None:
     """Summarize and extract labels using local Ollama in a single call.
-    Returns (summary, labels, tokens_per_sec) or None."""
+    Returns (summary, labels, for_you, tokens_per_sec) or None."""
     ollama_cfg = config["ai"]["ollama"]
     base_url = ollama_cfg["base_url"]
     model = ollama_cfg["model"]
     max_words = config["summary"]["max_summary_length"]
     max_labels = config["summary"].get("max_labels", 5)
 
+    # Get user interests if available
+    user_interests = config.get("user_profile", {}).get("interests", [])
+    interests_text = ""
+    if user_interests:
+        interests_text = f"\nUser interests: {', '.join(user_interests)}"
+        interests_text += "\nAfter LABELS, add FOR_YOU: on a new line with YES or NO."
+
     prompt = f"""Summarize this blog post in {max_words} words or less.
 Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text.
 Be concise and focus on the key takeaways. Write in English.
 
 After the summary, on a new line, write LABELS: followed by up to {max_labels} short comma-separated keyword/topic labels in lowercase.
-Example labels line: LABELS: kubernetes, security, cloud-native
+Example labels line: LABELS: kubernetes, security, cloud-native{interests_text}
 
 Title: {title}
 
@@ -195,14 +202,32 @@ Summary:"""
         data = resp.json()
         raw = data.get("response", "").strip()
 
-        # Split summary from labels
+        # Split summary from labels and for_you flag
         summary = raw
         labels = []
+        for_you = False
+
         for marker in ("LABELS:", "Labels:", "labels:"):
             if marker in raw:
                 parts = raw.split(marker, 1)
                 summary = parts[0].strip()
-                label_str = parts[1].strip()
+                rest = parts[1].strip()
+                
+                # Extract labels first
+                for_you_marker = None
+                for fy_marker in ("FOR_YOU:", "For_you:", "for_you:"):
+                    if fy_marker in rest:
+                        for_you_marker = fy_marker
+                        break
+                
+                if for_you_marker:
+                    label_part, for_you_part = rest.split(for_you_marker, 1)
+                    label_str = label_part.strip()
+                    for_you_str = for_you_part.strip().split()[0].upper()  # Get first word (YES/NO)
+                    for_you = for_you_str.startswith("Y")
+                else:
+                    label_str = rest
+                
                 labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
                 labels = [l for l in labels if l and len(l) < 40]
                 labels = labels[:max_labels]
@@ -213,7 +238,7 @@ Summary:"""
         eval_duration = data.get("eval_duration")  # nanoseconds
         if eval_count and eval_duration and eval_duration > 0:
             tps = round(eval_count / (eval_duration / 1e9), 1)
-        return summary, labels, tps
+        return summary, labels, for_you, tps
     except Exception as e:
         log.warning(f"Ollama failed: {e}")
         return None
@@ -240,15 +265,15 @@ def clean_summary(text: str) -> str:
     return paragraphs[0] if paragraphs else text
 
 
-def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], float | None]:
-    """Summarize with Ollama. Returns (summary, labels, tps)."""
+def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None]:
+    """Summarize with Ollama. Returns (summary, labels, for_you, tps)."""
     result = summarize_ollama(text, title, config)
     if result:
-        summary, labels, tps = result
+        summary, labels, for_you, tps = result
         log.info(f"  Summarized with Ollama: {title[:50]}")
-        return summary, labels, tps
+        return summary, labels, for_you, tps
 
-    return "Summary unavailable – Ollama failed.", [], None
+    return "Summary unavailable – Ollama failed.", [], False, None
 
 
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
@@ -278,7 +303,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             continue
 
         # Summarize + extract labels (single LLM call)
-        summary, labels, tps = summarize(text, article["title"], config)
+        summary, labels, for_you, tps = summarize(text, article["title"], config)
         summary = clean_summary(summary)
 
         if tps is not None:
@@ -295,6 +320,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             "published": article["published"],
             "summary": summary,
             "labels": labels,
+            "for_you": for_you,
         }
 
         cache[aid] = result

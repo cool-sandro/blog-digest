@@ -250,6 +250,19 @@
             background: var(--surface);
         }
 
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .article .date {
             font-size: 0.78rem;
             color: var(--text-muted);
@@ -411,6 +424,9 @@
                 <div class="article" data-id="{{ article.id }}">
                     <div class="article-header">
                         <h3><a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a></h3>
+                        {% if article.for_you %}
+                        <span class="badge-for-you">For you</span>
+                        {% endif %}
                         <button class="btn-read" data-id="{{ article.id }}" aria-label="Mark as read">Read</button>
                     </div>
                     {% if article.published %}
