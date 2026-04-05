@@ -412,6 +412,17 @@ def main():
     processed, proc_stats = process_articles(articles, config)
     log.info(f"Processed {len(processed)} articles")
 
+    # Abort if too many summaries failed (don't publish broken digests)
+    newly_summarized = proc_stats["ollama"] + proc_stats["failed"]
+    if newly_summarized > 0:
+        failure_ratio = proc_stats["failed"] / newly_summarized
+        if failure_ratio > 0.5:
+            log.error(
+                f"Aborting: {proc_stats['failed']}/{newly_summarized} new summaries failed "
+                f"({failure_ratio:.0%}). Not publishing a broken digest."
+            )
+            sys.exit(1)
+
     end_time = datetime.now()
     duration = end_time - start_time
     duration_str = f"{int(duration.total_seconds() // 60)}m {int(duration.total_seconds() % 60)}s"
