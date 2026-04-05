@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Sunday, April 05, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+
+        @media (max-width: 640px) {
+            body { padding: 0.75rem 0.6rem; }
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (min-width: 900px) {
+            .articles-wrapper {
+                padding-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Sunday, April 05, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>13</strong> articles</span>
+                <span class="stat"><strong>3</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(3)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="9b56c24b4d5b6531">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1scedvt/headlamp_tokenless_incluster_deployment/" target="_blank" rel="noopener">Headlamp: token-less in-cluster deployment?</a></h3>
+                        <button class="btn-read" data-id="9b56c24b4d5b6531" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The user successfully deployed the Headlamp dashboard to their personal virtual machine cluster to test the platform. However, due to the isolated nature of the environment, the security risks are negligible. The core discussion focuses on a potential future feature to automatically grant service account tokens upon initial UI login, eliminating the need for manual token creation or repeated inputs in kubectl commands for that specific account. Currently, the manual approach described remains the standard workflow, which the author views as an unnecessary security fiction given the limited risk profile of a home-based VM.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1scedvt/headlamp_tokenless_incluster_deployment/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7371faf62b97ed9d">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sc28ga/how_we_cut_node_provisioning_time_in_half_by/" target="_blank" rel="noopener">How we cut node provisioning time in half by tuning kubelet resource reservations</a></h3>
+                        <button class="btn-read" data-id="7371faf62b97ed9d" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">EKS node provisioning times were consistently taking four minutes to reach the Ready status, a delay caused by aggressive eviction thresholds inherited from an old cluster configuration combined with missing explicit resource reservations. When the kubelet encountered these high thresholds during startup, it repeatedly evaluated resource limits and attempted to reclaim memory that was never actually under pressure, creating a loop that stalled the node's readiness transition. To resolve this, administrators adjusted the kubelet config to define explicit kube-reserved and system-reserved values matching actual system process usage observed over a two-week period. They also relaxed the memory available eviction threshold from a hard 100 MiB to a soft 300 MiB with a nine-second grace period to reduce over-reactivity. Additionally, the control plane was updated to receive node status updates more frequently, from the standard ten-second interval to forty seconds, ensuring the system could catch node status changes during the critical transition window. Implementing these changes lowered the provisioning time to around two minutes. This incident highlights that eviction settings significantly impact startup performance and that documentation often fails to treat these configuration parameters as critical startup tuning items.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sc28ga/how_we_cut_node_provisioning_time_in_half_by/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8ad865e1d818642f">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sc3ffk/new_to_k8s_how_do_pods_actually_share_memory_on_a/" target="_blank" rel="noopener">new to K8s — how do pods actually share memory on a node?</a></h3>
+                        <button class="btn-read" data-id="8ad865e1d818642f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The author recently migrated to a Kubernetes cluster and faced performance issues because their hourly data pipeline jobs were consuming too much memory despite running on different schedules. This confusion stems from a lack of understanding regarding how memory is dynamically allocated and reclaimed when multiple pods share a single node. The core takeaway is that memory allocation occurs at runtime based on resource requests and available node capacity, rather than being statically divided at launch. Furthermore, the user struggled to verify real-time resource usage or check for lingering resource hogs from previous jobs in a managed cloud orchestration environment, which often lacks direct kubectl access or simple dashboards. This post highlights the importance of grasping the underlying allocation mechanics and leveraging monitoring tools to troubleshoot resource contention before job failures occur.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sc3ffk/new_to_k8s_how_do_pods_actually_share_memory_on_a/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="ae79274a9fed0dd5">
+                    <div class="article-header">
+                        <h3><a href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">How many products does Microsoft have named 'Copilot'?</a></h3>
+                        <button class="btn-read" data-id="ae79274a9fed0dd5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">Microsoft has officially named five distinct products as part of its Copilot suite. These products include Copilot for Bing, which is the conversational AI version of the search engine; Copilot for Teams, an AI assistant built specifically into Microsoft workplace applications; and Copilot Studio, a platform for developers to create custom AI models. A separate feature, the Copilot chat within Bing Chat, counts as another entry point for users to interact with the technology, while Copilot Pro represents the paid enterprise version that offers deeper integration with corporate workflows. This lineup reflects Microsoft's strategy to move beyond simple chatbots by embedding intelligence directly into the daily tools employees use, from office suites to web search and development environments. The expansion indicates a broader initiative to standardize AI adoption across the enterprise ecosystem, ensuring consistency in how users interact with intelligent assistants regardless of the specific device or application they encounter.</p>
+                    <a class="read-more" href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8d794ebe71446e3b">
+                    <div class="article-header">
+                        <h3><a href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Show HN: A game where you build a GPU</a></h3>
+                        <button class="btn-read" data-id="8d794ebe71446e3b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">Many people seek to build their own graphics processing units, but existing guides often lack depth or fail to address modern needs. This project aims to create a comprehensive game that teaches users how to assemble a high-performance GPU from scratch. The tutorial focuses on selecting the right components, including choosing a high-end motherboard, acquiring top-tier processors, and finding compatible graphics cards that offer the best performance and value. The project emphasizes practical engineering and optimization, ensuring that builders can achieve reliable results without unnecessary complexity. By providing clear steps and real-world examples, the goal is to bridge the gap between theory and practical building, empowering enthusiasts to create powerful systems that meet their specific requirements while keeping costs under control.</p>
+                    <a class="read-more" href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6535f65e31705652">
+                    <div class="article-header">
+                        <h3><a href="https://www.theverge.com/tech/907003/apple-approves-driver-that-lets-nvidia-egpus-work-with-arm-macs" target="_blank" rel="noopener">Apple approves driver that lets Nvidia eGPUs work with Arm Macs</a></h3>
+                        <button class="btn-read" data-id="6535f65e31705652" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">Apple recently granted permission to Nvidia to develop a new driver enabling its Enterprise Graphics Processors to function on Arm-based Mac hardware. This move effectively allows Apple Macs to leverage Nvidia's eGPU solutions without requiring a complete switch to Intel silicon. Prior to this approval, Nvidia faced significant roadblocks trying to integrate its proprietary graphics technology with the diverse architecture of Mac systems. While earlier attempts have failed, this latest approval suggests Apple is finally recognizing Nvidia's value proposition. The collaboration will allow Apple to offer users powerful gaming and creative computing capabilities through their existing Arm Macs, effectively bridging the gap between Apple silicon and Nvidia's market leadership. This strategic partnership represents a significant milestone in the industry's push for hardware interoperability and open architecture, potentially setting a precedent for future developments in the ecosystem. The implementation timeline remains to be seen, but the door is clearly open for a more flexible computing experience for consumers and developers alike.</p>
+                    <a class="read-more" href="https://www.theverge.com/tech/907003/apple-approves-driver-that-lets-nvidia-egpus-work-with-arm-macs" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="20872d5c2882351b">
+                    <div class="article-header">
+                        <h3><a href="https://www.dw.com/en/german-men-need-military-permit-for-extended-stays-abroad/a-76662677" target="_blank" rel="noopener">German men 18-45 need military permit for extended stays abroad</a></h3>
+                        <button class="btn-read" data-id="20872d5c2882351b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">German legislation now requires men aged 18 to 45 obtaining extended stays abroad to obtain specific military clearance from the Federal Army. This rule, which was recently expanded, ensures national security before allowing foreign visitors to leave the country. The system relies on a digital application submitted through the Federal Ministry of Defence. If the application is approved, the person receives a permit enabling travel for up to six months without a visa. Those with pre-authorized permits must renew them annually. The law aims to filter out potential security risks efficiently while balancing the need for international mobility. This policy reflects a broader effort by the German government to strengthen security protocols for citizens and residents abroad without unnecessarily restricting legal travel.</p>
+                    <a class="read-more" href="https://www.dw.com/en/german-men-need-military-permit-for-extended-stays-abroad/a-76662677" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0b88aa99d00ac60f">
+                    <div class="article-header">
+                        <h3><a href="https://www.thetimes.com/uk/technology-uk/article/sarah-wynn-williams-careless-people-meta-nrffdfpmf" target="_blank" rel="noopener">Author of "Careless People" banned from saying anything negative about Meta</a></h3>
+                        <button class="btn-read" data-id="0b88aa99d00ac60f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">Sarah Wynn Williams, the author of the bestselling book Careless People, was barred from discussing Facebook from Tuesday until Monday. This restriction applies to all her public appearances and media engagements, not just formal speaking roles. The ban was imposed by Meta following a viral post by one of her former students regarding Meta's new AI tool, "Dread." The incident sparked an internal controversy where a former student accused Meta of suppressing a legitimate critique. Meta subsequently banned Williams and her former student, the University of Oxford's professor, from any form of media or public speech until they were removed from Facebook. Williams' absence from her own book launch event and subsequent interviews has caused significant media coverage. While Meta has claimed this is to prevent negative public opinion, supporters argue the measure protects the author's reputation and violates her freedom of speech. The incident highlights the intense pressure social media companies face regarding how much criticism they can afford to absorb before they decide to cull their most vocal critics.</p>
+                    <a class="read-more" href="https://www.thetimes.com/uk/technology-uk/article/sarah-wynn-williams-careless-people-meta-nrffdfpmf" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding performance bottlenecks with Pyroscope and Alloy: An example using TON blockchain</a></h3>
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Performance optimization often feels like searching for a needle in a haystack, but continuous profiling can pinpoint bottlenecks without altering the source code. The Open Network (TON) blockchain optimization contest presented a perfect testbed, requiring participants to squeeze every microsecond from a complex validation algorithm. While the author did not run the final contest submissions, several engineers used Alloy to profile their local runs and analyze the results. Alloy leveraged its eBPF-based pyroscope component to capture detailed CPU profiling data and send it to Grafana Cloud for visualization. This approach offered immediate visibility into hotspots and allowed the team to track how specific code changes affected performance. The setup required minimal configuration, running the eBPF profiler with root privileges to send data to a specified endpoint. For the contest, code was compiled using RelWithDebInfo to preserve symbols for accurate flame graph analysis. Examining a reference implementation showed that DataCell creation and SHA256 hash computations were primary consumption points. Another significant hotspot involved Ed25519 signature verification, which is frequently called during smart contract execution. By combining these tools, developers gained the ability to identify exactly where the code spends its time, enabling faster and more targeted optimization strategies.</p>
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana security release: Critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana is releasing security patches for versions 12.4.2 and earlier, which address critical and high severity vulnerabilities identified as CVE-2026-27876 and CVE-2026-27880. The first issue enables remote code execution through malicious SQL queries, allowing attackers with elevated privileges to execute arbitrary file writes or establish SSH connections. This flaw affects all Grafana versions from 11.6.0 onwards. Mitigations include disabling the SQL expressions feature or updating and disabling specific AWS data sources. The second vulnerability stems from unauthenticated access to the OpenFeature endpoint, which can crash servers through memory exhaustion, impacting versions from 12.1.0.</p><p class="summary">A comprehensive incident timeline confirms these issues originated in mid-2025, leading to a public release in early March. While full remediation requires immediate upgrades, specific workarounds like proxy filtering and feature toggles are available to reduce exposure during a transition period. Cloud providers have been notified under security policy to ensure their platforms remain secure alongside the customer releases.</p>
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89abd832d87514bc">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">From raw data to flame graphs: A deep dive into how the OpenTelemetry eBPF profiler symbolizes Go</a></h3>
+                        <button class="btn-read" data-id="89abd832d87514bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Troubleshooting slow production issues often starts with raw memory addresses that lack immediate context. eBPF profilers capture this data at the kernel level, requiring manual mapping of hexadecimal addresses back to functions, a tedious process that fails in complex environments. The solution lies in symbolization, transforming raw memory into actionable function names. This process is especially critical for Go programs, which can embed .gopclntab sections in stripped binaries to map addresses directly to source locations. The open source OpenTelemetry eBPF profiler simplifies this workflow through efficient binary search and frame caching, enabling accurate profiling without runtime modification. By following the pipeline from raw program counters to final function names, developers gain deep insight into bottlenecks. This approach offers a unique advantage over other languages that rely on server-side symbolization, making stripped Go binaries highly effective for continuous profiling. Understanding these mechanics allows for effective debugging of symbol issues, as specialized tools like nm or readelf can help inspect binary structures and resolve discrepancies between expected and actual profile data.</p>
+                    <a class="read-more" href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ea64acc22fc04932">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">How OpenRouter and Grafana Cloud bring observability to LLM-powered applications</a></h3>
+                        <button class="btn-read" data-id="ea64acc22fc04932" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">OpenRouter and Grafana Cloud address a critical gap in AI infrastructure by providing robust observability. While managing multiple models requires complex routing and billing oversight, these platforms consolidate these needs into a unified API. OpenRouter simplifies this by handling load balancing and provider fallbacks automatically. Crucially, the integration with Grafana Cloud enables teams to monitor token usage, costs, latency profiles, and non-deterministic failures without deploying new code or instrumentation. This infrastructure-level visibility is essential because traditional application monitoring struggles with the unique dimensions of LLM workloads. Users configure tracing once via the OpenRouter dashboard, and every request automatically generates OpenTelemetry traces that are relayed to Grafana Cloud's Tempo OSS backend. These traces include essential attributes like model identity, usage metrics, timing details, and cost data. This seamless workflow empowers engineering teams to diagnose performance issues and optimize spending effectively while they focus on building their applications rather than managing backend infrastructure.</p>
+                    <a class="read-more" href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0be525b2c2892f25">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Instrument zero‑code observability for LLMs and agents on Kubernetes</a></h3>
+                        <button class="btn-read" data-id="0be525b2c2892f25" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">AI infrastructure requires robust observability to manage complex agent workloads and LLM operations within Kubernetes, yet instrumenting every pod can be overwhelming. The OpenLIT Operator offers a transformative solution by automating the injection of OpenTelemetry instrumentation into AI workloads, eliminating the need for manual code changes or image rebuilds. This zero-code approach seamlessly tracks critical metrics like token usage, latency, and agent workflows without disrupting production services. By leveraging Grafana Cloud, users can achieve comprehensive visibility across distributed systems while maintaining vendor neutrality and optimizing resource allocation. The setup process is streamlined for rapid onboarding, allowing teams to deploy operators that support various LLM providers and custom tools. This integration empowers observability practitioners to gain deep insights into system performance and costs efficiently. For further assistance, users can utilize Grafana Cloud's built-in LLM assistant to help manage dashboards and troubleshoot issues during their implementation.</p>
+                    <a class="read-more" href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">07:00:01</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">07:17:44</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">17m 42s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">3.6</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">13 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen3.5:2b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">0</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Skipped</div>
+                    <div class="value dim">2</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <footer>
+            Generated 2026-04-05 07:17 ·
+            <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+            <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+        </footer>
+    </div>
+
+    <script>
+    (function () {
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
