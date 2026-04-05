@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Sunday, April 05, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+
+        @media (max-width: 640px) {
+            body { padding: 0.75rem 0.6rem; }
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (min-width: 900px) {
+            .articles-wrapper {
+                padding-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Sunday, April 05, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>12</strong> articles</span>
+                <span class="stat"><strong>3</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(2)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="cb88b0542185d5b3">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Multi-node cluster on Ubuntu desktop for practice</a></h3>
+                        <button class="btn-read" data-id="cb88b0542185d5b3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The post discusses how to set up a multi-node Kubernetes cluster on an Ubuntu desktop for practice. The fastest and easiest method involves using the official kubeadm guide, which can be found at the link provided. By following these steps, users can easily create a 1 control-plane node alongside 3 worker nodes, making it perfect for practicing with Docker containers. The key takeaway is that while Kubernetes is primarily intended to run on larger clusters of machines, anyone can use kubeadm to set up their own multi-node cluster from a desktop, as long as they have a stable internet connection and an adequate amount of resources.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sd08ny/multinode_cluster_on_ubuntu_desktop_for_practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="9b56c24b4d5b6531">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1scedvt/headlamp_tokenless_incluster_deployment/" target="_blank" rel="noopener">Headlamp: token-less in-cluster deployment?</a></h3>
+                        <button class="btn-read" data-id="9b56c24b4d5b6531" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">In this blog post, author explains how to deploy headlamp without requiring authentication through service account tokens. The key takeaways are: Headlamp can authenticate using your own token if it's already loaded into the UI. This eliminates the need for additional token requests, making the deployment more secure and practical for personal use cases like home clusters or virtual machines in a private network. The author suggests this method as an alternative to manually providing tokens through `kubectl create token`, simplifying authentication while maintaining security. This technique uses your service account credentials directly within headlamp, rather than relying on external authentication methods, making it ideal for environments with strict security policies or limited trust between users and systems.</p>
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1scedvt/headlamp_tokenless_incluster_deployment/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="420a48de75db6f5f">
+                    <div class="article-header">
+                        <h3><a href="https://www.phoronix.com/news/Linux-7.0-AWS-PostgreSQL-Drop" target="_blank" rel="noopener">AWS engineer reports PostgreSQL perf halved by Linux 7.0, fix may not be easy</a></h3>
+                        <button class="btn-read" data-id="420a48de75db6f5f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">AWS engineer reports that PostgreSQL performance has dropped to half its previous speed on Linux kernel version 7.0, prompting a fix not expected to be easy for the community. The issue lies in how PostgreSQL interacts with shared memory segments, and while there is an existing patch available, it doesn't work across all versions of Linux. This necessitates a more comprehensive solution that addresses both the patch's limitations and potential conflicts on other kernels. The engineer emphasizes the importance of a stable and performant environment for database operations, which has significant implications for users relying on PostgreSQL on various distributions of Ubuntu or CentOS.</p>
+                    <a class="read-more" href="https://www.phoronix.com/news/Linux-7.0-AWS-PostgreSQL-Drop" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="be17167c7878b9e6">
+                    <div class="article-header">
+                        <h3><a href="https://bmi.usercontent.opencode.de/eudi-wallet/wallet-development-documentation-public/latest/architecture-concept/06-mobile-devices/02-mdvm/" target="_blank" rel="noopener">German implementation of eIDAS will require an Apple/Google account to function</a></h3>
+                        <button class="btn-read" data-id="be17167c7878b9e6" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">German implementation of eIDAS (Electronic Identification, Authentication and Trust Services) will require users to have an Apple or Google account to function. This new feature is designed to enhance user experience by providing a seamless integration with existing mobile devices. The German version of the eIDAS system aims to streamline digital identity verification processes within the country's electronic identification ecosystem. By requiring these accounts, authorities in Germany are looking to improve accessibility and convenience for citizens while maintaining security standards. This change aligns with broader trends towards more user-friendly digital ID systems worldwide.</p>
+                    <a class="read-more" href="https://bmi.usercontent.opencode.de/eudi-wallet/wallet-development-documentation-public/latest/architecture-concept/06-mobile-devices/02-mdvm/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ae79274a9fed0dd5">
+                    <div class="article-header">
+                        <h3><a href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">How many products does Microsoft have named 'Copilot'?</a></h3>
+                        <button class="btn-read" data-id="ae79274a9fed0dd5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The article discusses the naming convention in Microsoft's "Copilot" product line, which is used to refer to a series of AI-powered applications designed for improving productivity and efficiency. The author explains that while there are multiple products with the name "Copilot," they are actually distinct solutions offering different features tailored to various use cases.</p><p class="summary">The article goes on to provide examples of how these Copilots interact with users, highlighting their unique capabilities in areas like coding, research assistance, project management, and more. The author provides links to additional resources that can be found when referring to each product individually, such as GitHub repositories for specific projects or detailed documentation explaining the application's functionality.</p><p class="summary">The main takeaway is understanding that Microsoft refers to several products under the "Copilot" banner but are entirely different solutions with varying features and functionalities. This information helps readers discern which product would best suit their needs when searching for a Copilot solution.</p>
+                    <a class="read-more" href="https://teybannerman.com/strategy/2026/03/31/how-many-microsoft-copilot-are-there.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="91fc906a99431e8a">
+                    <div class="article-header">
+                        <h3><a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">LLM Wiki – example of an "idea file"</a></h3>
+                        <button class="btn-read" data-id="91fc906a99431e8a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">The blog post discusses a "idea file" system developed by OpenAI, specifically for language models. This system is designed to provide context and structure to the ideas generated by large language models (LLMs). It is described as an example of how LLMs can be used in more than just natural language processing tasks.</p><p class="summary">The idea file system allows users or developers to input an idea or concept into a database, which then provides structured answers based on that input. This structure helps users understand the relationship between their inputs and the resulting outputs, making it easier for them to find relevant information quickly. The blog post emphasizes how this approach could be useful in various applications of LLMs beyond just generating text.</p><p class="summary">The author discusses why they chose this system over others, highlighting its potential benefits for structuring ideas efficiently and providing structured answers. They also mention that other companies are working on similar systems or have implemented them internally to improve the usability of their models. The summary concludes by encouraging readers to explore more about this idea file concept since it is likely to be a valuable addition to how LLMs can be used in many fields.</p><p class="summary">The overall takeaways from the blog post revolve around understanding that there are multiple ways to integrate and use large language models, beyond just text generation. The "idea file" system presented here serves as an illustration of this versatility and could potentially streamline information retrieval for users.</p>
+                    <a class="read-more" href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8d794ebe71446e3b">
+                    <div class="article-header">
+                        <h3><a href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Show HN: A game where you build a GPU</a></h3>
+                        <button class="btn-read" data-id="8d794ebe71446e3b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-04</p>
+                    
+                    <p class="summary">I created a game where you build and manage your own GPU. The idea behind this is that the resources for GPUs are often lacking, so I decided to share my experiences and insights with others who may be interested in building their own hardware or upgrading their existing systems. The game allows players to choose from various components such as CPU cores, memory, storage, and cooling options, and then they can build a GPU that best suits their needs. The game also includes tutorials on how to install the software drivers for different operating systems, making it easier for users who are new to building GPUs. Overall, this project was a learning experience for me and I believe it could be useful for others who want to improve their gaming performance or simply build a better computer system.</p>
+                    <a class="read-more" href="https://jaso1024.com/mvidia/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding performance bottlenecks with Pyroscope and Alloy: An example using TON blockchain</a></h3>
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Finding Performance Bottlenecks with Pyroscope and Alloy: An Example Using TON Blockchain</p><p class="summary">Performance optimization can feel like searching for a needle in a haystack. But continuous profiling tools can transform the process. In this post, we'll explore how modern profiling tools accelerate performance optimization by leveraging Alloy and Pyroscope.</p><p class="summary">The Open Network (TON) blockchain optimization contest was straightforward: participants had to optimize an algorithm without modifying code. We used Alloy's eBPF-based CPU profiler and sent data to Grafana Cloud for analysis. This allowed us to identify performance bottlenecks quickly, enabling optimizations.</p><p class="summary">We profiled the TON blockchain validation algorithm, focusing on memory allocations (27%), function calls (14%), hash computations (10%), and crypto operations (9%). These operations represent natural optimization targets in modern software.</p><p class="summary">By observing execution times and tracking changes with Alloy's eBPF-based profiling, we could optimize smart contract performance. For instance, vm::DataCell::create consumed 14% of the total time, and vm::exec<em>ed25519</em>check_signature accounted for 9%. These optimizations saved a significant amount of CPU time.</p><p class="summary">The contest helped us identify where bottlenecks are located within the codebase, guiding future optimization efforts. This method can be applied to any performance-critical system, not just blockchain algorithms.</p>
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana security release: Critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana has issued security patches for four versions of its dashboarding platform, including updates to version 12.4.2 that include critical and high severity fixes for two specific vulnerabilities in the SQL expressions feature and an unauthenticated denial-of-service vulnerability related to OpenFeature endpoints. These upgrades are available on Grafana Cloud as well as standalone installations from now until March 9th, 2026. The company emphasizes the importance of upgrading immediately to mitigate risk, with a recommended timeline of two weeks for patches to be delivered in advance and detailed workarounds outlined for scenarios where an upgrade cannot be implemented immediately.</p>
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89abd832d87514bc">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">From raw data to flame graphs: A deep dive into how the OpenTelemetry eBPF profiler symbolizes Go</a></h3>
+                        <button class="btn-read" data-id="89abd832d87514bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This post delves into how Go programs profile better than other native languages while being stripped and debugged. Traditional profilers ask the running program for function names, but eBPF profilers require kernel-level symbolization. The process starts with raw memory addresses in binary code, which are often long strings of hex digits without meaning. For Go programs, these can be directly mapped to functions within the .gopclntab section embedded in binaries even when debug symbols have been removed (stripped). This makes it easier for eBPF profilers to accurately symbolize function names and identify bottlenecks.</p><p class="summary">Key challenges include: <strong>Symbolization Pipeline</strong>: Starting with raw addresses. Mapping these directly using .gopclntab for Go programs, bypassing the usual stripping process. Analyzing the pipeline's steps from raw memory addresses to function names: readingelf (for ELF binaries), nm and file commands inspecting binary headers, and symbolizing through Pyroscope.</p><p class="summary"><strong>Performance Tricks</strong>: <strong>Binary Search</strong>: Used for efficiently finding specific functions within large address ranges. <strong>Frame Caching</strong>: A technique that optimizes performance by keeping frequently accessed addresses in memory close to the CPU.</p><p class="summary"><strong>Real Code Example from OpenTelemetry eBPF Profiler</strong>: ```c <strong>attribute</strong>((section(".gopclntab"))) void __thiscall function1(void) {     // function body } ``` This reveals how Go programs encode their symbol information directly into binary code, making them easier to profile in an eBPF environment.</p><p class="summary"><strong>Conclusion</strong>: Understands why Go programs are more profilable and accurate even when stripped. Knows how to debug symbol issues that may arise due to different profiling techniques.   Realizes the importance of understanding function names and addresses for efficient debugging and optimization, particularly useful in complex containerized environments.</p>
+                    <a class="read-more" href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ea64acc22fc04932">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">How OpenRouter and Grafana Cloud bring observability to LLM-powered applications</a></h3>
+                        <button class="btn-read" data-id="ea64acc22fc04932" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">In this blog post, Chris Watts, head of enterprise engineering at OpenRouter, discusses how LLM-powered applications face a new challenge in observability. The key takeaways are: In traditional monitoring, HTTP status codes and response times are familiar signals but not sufficient for understanding the performance of AI models. LLMs introduce novel dimensions such as token usage, model variability, latency profiles, and non-deterministic failures that can be tracked by tracing APIs like OpenTelemetry and sending traces to observability platforms. Observability built into infrastructure layers is crucial for teams working with multiple models from different providers. While logging and metrics are necessary, they become difficult to maintain across numerous models and providers. OpenRouter Broadcast automatically generates OpenTelemetry traces for every API request without requiring additional instrumentation or changing the codebase. This allows developers to focus on building applications rather than managing multiple keys and billing accounts. For Grafana Cloud, traces sent via OTLP HTTP/JSON endpoint directly to the cloud-based tracing backend powered by Tempo OSS. Each trace includes rich attributes in OpenTelemetry semantic conventions for generative AI: Model information, Token usage, Timing data, Cost data, Status and errors, and Custom metadata.</p><p class="summary">Key points highlighted are: The need for observability that's built into infrastructure layers rather than relying on application-specific monitoring. How OpenRouter Broadcast handles tracing of requests without requiring additional instrumentation or changing the codebase. The benefits of using observability platforms like Grafana Cloud to monitor LLM-powered applications effectively.</p>
+                    <a class="read-more" href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0be525b2c2892f25">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Instrument zero‑code observability for LLMs and agents on Kubernetes</a></h3>
+                        <button class="btn-read" data-id="0be525b2c2892f25" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">### Summary of the Blog Post on Zero-Code Observability for Large Language Models (LLMs) and Agents on Kubernetes</p><p class="summary"><strong>Introduction:</strong> In today's world, AI is rapidly changing everything from how we work to how we communicate. Developers are not just limited to coding; they can create LLM-powered applications using large language models (LLMs). These apps interact with other LLMs via even more LLMs, creating a complex ecosystem of microservices running on Kubernetes.</p><p class="summary"><strong>Key Takeaways:</strong> <strong>Complexity and Maintenance:</strong> Monitoring these systems becomes challenging due to the distributed nature of microservices. <strong>Tooling Needed:</strong> Observability practitioners need tools that can monitor workloads in production, AI agents, MCP servers, and zero-code LLMs (this post). <strong>Grafana Cloud Integration:</strong> This series shows how to use Grafana Cloud for monitoring LLMs on Kubernetes with the help of OpenLIT Operator.    <strong>Overview:</strong> Traditional observability relies heavily on developers adding libraries to their application code, which becomes a burden when using multiple providers and frameworks. <strong>OpenLIT Operator:</strong> This operator automatically injects OpenTelemetry instrumentation into your pods without requiring any changes or image rebuilds, making it perfect for AI applications running in Kubernetes.</p><p class="summary"><strong>Benefits of Zero-Code Observability:</strong> <strong>Ease of Use:</strong> Rapid onboarding - deploy the OpenLIT Operator once and instrument all workloads. <strong>Comprehensive Coverage:</strong> Supports major providers, vector databases, and agent frameworks, extending via plugin architecture. <strong>Vendor Neutrality:</strong> Integrates with existing observability infrastructure, allowing data to be sent to Grafana Cloud or any OTLP-compatible backend.</p><p class="summary"><strong>Zero-Code Observability in Grafana Cloud:</strong> Trace capturing for token usage, cost, latency, and performance optimization. Enables debugging interactions between AI frameworks through distributed traces, metrics, and agent workflows.</p><p class="summary"><strong>How to Set Up Zero-Code Observability:</strong> <strong>High-Level Explanation:</strong> Start with a brief overview of the architecture where LLMs run within pods in Kubernetes clusters monitored by OpenLIT Operator. <strong>Step-by-Step Instructions:</strong> Detailed step-by-step guide for setting up zero-code observability on Grafana Cloud, including: Deploying the OpenLIT Operator Configuring traces and metrics using AI Observability in Grafana Cloud</p><p class="summary"><strong>Conclusion:</strong> With the ability to quickly set up zero-code observability through the OpenLIT Operator with Grafana Cloud, it's easier than ever to track token usage, agent workflows, response times, and debug interactions between LLMs without touching your code. This approach not only simplifies monitoring but also helps in optimizing model selection and resource allocation effectively.</p>
+                    <a class="read-more" href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">13:34:01</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">13:44:05</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">10m 3s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">9.2</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">12 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">qwen2.5:1.5b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">0</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Skipped</div>
+                    <div class="value dim">3</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <footer>
+            Generated 2026-04-05 13:44 ·
+            <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+            <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+        </footer>
+    </div>
+
+    <script>
+    (function () {
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
