@@ -157,9 +157,36 @@ def fetch_full_article(url: str, max_chars: int = 5000) -> str:
         return ""
 
 
-def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None] | None:
+def deduplicate_labels(labels: list[str]) -> list[str]:
+    """Remove similar/redundant labels using string similarity (Levenshtein-ish heuristic).
+    Keeps the first occurrence of each label family."""
+    if len(labels) <= 1:
+        return labels
+    
+    def similarity(s1: str, s2: str) -> float:
+        """Simple similarity metric: 1 - (edit distance / max length)."""
+        s1_lower, s2_lower = s1.lower(), s2.lower()
+        if s1_lower == s2_lower:
+            return 1.0
+        # Check if one is a substring of the other
+        if s1_lower in s2_lower or s2_lower in s1_lower:
+            return 0.8
+        # Levenshtein-style: count matching characters
+        matches = sum(1 for a, b in zip(s1_lower, s2_lower) if a == b)
+        return matches / max(len(s1_lower), len(s2_lower))
+    
+    result = []
+    threshold = 0.70  # labels more similar than this are considered duplicates
+    for label in labels:
+        is_similar = any(similarity(label, existing) > threshold for existing in result)
+        if not is_similar:
+            result.append(label)
+    return result
+
+
+def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None, str] | None:
     """Summarize and extract labels using local Ollama in a single call.
-    Returns (summary, labels, for_you, tokens_per_sec) or None."""
+    Returns (summary, labels, for_you, tokens_per_sec, title_translated) or None."""
     ollama_cfg = config["ai"]["ollama"]
     base_url = ollama_cfg["base_url"]
     model = ollama_cfg["model"]
@@ -173,19 +200,27 @@ def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str
         interests_text = f"\nUser interests: {', '.join(user_interests)}"
         interests_text += "\nAfter LABELS, add FOR_YOU: on a new line with YES or NO."
 
-    prompt = f"""Summarize this blog post in {max_words} words or less.
+    prompt = f"""Translate the title to English if needed, then summarize this blog post in {max_words} words or less.
 Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text.
 Be concise and focus on the key takeaways. Write in English.
 
+Start your response with: TITLE: [translated title]
+Then the summary.
 After the summary, on a new line, write LABELS: followed by up to {max_labels} short comma-separated keyword/topic labels in lowercase.
-Example labels line: LABELS: kubernetes, security, cloud-native{interests_text}
+Labels should be DIVERSE and SPECIFIC (not variations or synonyms of each other).
+Avoid redundant labels like both "kubernetes" and "k8s", or "containers" and "containerization".
+Pick the most important, distinct topics the article covers.
+Example format:
+TITLE: Kubernetes Best Practices
+Your summary here...
+LABELS: kubernetes, security, performance-optimization{interests_text}
 
-Title: {title}
+Original Title: {title}
 
 Content:
 {text[:4000]}
 
-Summary:"""
+Response:"""
 
     try:
         timeout = ollama_cfg.get("timeout", 300)
@@ -202,16 +237,39 @@ Summary:"""
         data = resp.json()
         raw = data.get("response", "").strip()
 
-        # Split summary from labels and for_you flag
+        # Extract TITLE, summary, LABELS, and FOR_YOU
+        title_en = title  # fallback to original
         summary = raw
         labels = []
         for_you = False
 
+        # Extract title first
+        for title_marker in ("TITLE:", "Title:", "title:"):
+            if title_marker in raw:
+                title_part = raw.split(title_marker, 1)[1]
+                # Find where title ends (before the next line that looks like content)
+                title_lines = title_part.split("\n")
+                title_en = title_lines[0].strip().strip('"') if title_lines else title
+                break
+
+        # Extract summary and labels
         for marker in ("LABELS:", "Labels:", "labels:"):
             if marker in raw:
                 parts = raw.split(marker, 1)
                 summary = parts[0].strip()
                 rest = parts[1].strip()
+                # Remove TITLE line from summary if present
+                for title_marker in ("TITLE:", "Title:", "title:"):
+                    if title_marker in summary:
+                        title_split = summary.split(title_marker, 1)
+                        after_marker = title_split[1]
+                        # Remove everything up to and including the first newline
+                        if '\n' in after_marker:
+                            summary = after_marker.split('\n', 1)[1]
+                        else:
+                            summary = ""
+                        break
+                summary = summary.strip()
                 
                 # Extract labels first
                 for_you_marker = None
@@ -229,16 +287,34 @@ Summary:"""
                     label_str = rest
                 
                 labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
-                labels = [l for l in labels if l and len(l) < 40]
+                labels = [l for l in labels if l and len(l) < 40 and len(l.split()) <= 4]
+                # Deduplicate similar labels before truncating
+                labels = deduplicate_labels(labels)
                 labels = labels[:max_labels]
                 break
+        else:
+            # No LABELS marker found — strip TITLE and FOR_YOU lines from raw summary
+            for title_marker in ("TITLE:", "Title:", "title:"):
+                if title_marker in summary:
+                    title_split = summary.split(title_marker, 1)
+                    after_marker = title_split[1]
+                    summary = after_marker.split('\n', 1)[1] if '\n' in after_marker else ""
+                    break
+            for fy_marker in ("FOR_YOU:", "For_you:", "for_you:"):
+                if fy_marker in summary:
+                    fy_split = summary.split(fy_marker, 1)
+                    summary = fy_split[0].strip()
+                    for_you_str = fy_split[1].strip().split()[0].upper() if fy_split[1].strip() else ""
+                    for_you = for_you_str.startswith("Y")
+                    break
+            summary = summary.strip()
 
         tps = None
         eval_count = data.get("eval_count")
         eval_duration = data.get("eval_duration")  # nanoseconds
         if eval_count and eval_duration and eval_duration > 0:
             tps = round(eval_count / (eval_duration / 1e9), 1)
-        return summary, labels, for_you, tps
+        return summary, labels, for_you, tps, title_en
     except Exception as e:
         log.warning(f"Ollama failed: {e}")
         return None
@@ -265,15 +341,15 @@ def clean_summary(text: str) -> str:
     return paragraphs[0] if paragraphs else text
 
 
-def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None]:
-    """Summarize with Ollama. Returns (summary, labels, for_you, tps)."""
+def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None, str]:
+    """Summarize with Ollama. Returns (summary, labels, for_you, tps, title_en)."""
     result = summarize_ollama(text, title, config)
     if result:
-        summary, labels, for_you, tps = result
+        summary, labels, for_you, tps, title_en = result
         log.info(f"  Summarized with Ollama: {title[:50]}")
-        return summary, labels, for_you, tps
+        return summary, labels, for_you, tps, title_en
 
-    return "Summary unavailable – Ollama failed.", [], False, None
+    return "Summary unavailable – Ollama failed.", [], False, None, title
 
 
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
@@ -303,7 +379,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             continue
 
         # Summarize + extract labels (single LLM call)
-        summary, labels, for_you, tps = summarize(text, article["title"], config)
+        summary, labels, for_you, tps, title_en = summarize(text, article["title"], config)
         summary = clean_summary(summary)
 
         if tps is not None:
@@ -315,7 +391,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
         result = {
             "id": aid,
             "feed": article["feed"],
-            "title": article["title"],
+            "title": title_en,
             "url": article["url"],
             "published": article["published"],
             "summary": summary,
