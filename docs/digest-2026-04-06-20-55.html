@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Monday, April 06, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" class="active">
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        <span class="date-badge">Today</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" class="active">
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        <span class="date-badge">Today</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" class="active">
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        <span class="date-badge">Today</span>
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Monday, April 06, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>31</strong> articles</span>
+                <span class="stat"><strong>8</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="CNCF Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                CNCF Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="CNCF Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="3c8eeb97ddb76346">
+                    <div class="article-header">
+                        <h3><a href="https://www.cncf.io/blog/2026/04/06/peer-to-peer-acceleration-for-ai-model-distribution-with-dragonfly/" target="_blank" rel="noopener">Peer-to-Peer acceleration for AI model distribution with Dragonfly</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="3c8eeb97ddb76346" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Peer-to-Peer acceleration for AI model distribution with Dragonfly</p><p class="summary">Dragonfly, a CNCF Graduated project, has introduced peer-to-peer-based file distribution system to address the challenges of large-scale AI model distribution. The current approach of downloading models across many nodes leads to performance issues due to high network costs and bandwidth limits. To overcome this, Dragonfly uses a piece-based streaming download approach that reduces origin traffic by 99.5% for a 200-node cluster.</p><p class="summary">The system works by splitting files into small pieces and distributing them across the P2P mesh. The seed peer fetches a model from the origin hub once, computes the P2P topology, and then shares pieces with other peers in parallel, reducing total transfer time. Dragonfly has also added native support for Hugging Face and ModelScope models, eliminating the need for proxies, URL rewriting, or wrapper scripts.</p><p class="summary">The introduction of these changes allows infrastructure to enable model distribution to scale efficiently, making it possible to download models to any node without affecting performance.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">p2p</span>
+                        
+                        <span class="label-tag">ai-model-distribution</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                        <span class="label-tag">dragonfly</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.cncf.io/blog/2026/04/06/peer-to-peer-acceleration-for-ai-model-distribution-with-dragonfly/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="59ae159b0f5ebb0d">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sdrnk4/has_anyone_elses_k8s_role_quietly_become_a/" target="_blank" rel="noopener">Has anyone else's Kubernetes role quietly become a security role without anyone making it official?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="59ae159b0f5ebb0d" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Has anyone else's Kubernetes role quietly become a security role without anyone making it official?</p><p class="summary">This blog post highlights the growing importance of security in Kubernetes, a popular container orchestration platform. Many professionals have taken on security-related responsibilities without formal recognition or training, leading to inconsistent and piecemeal knowledge of best practices. A recent survey by Red Hat found that 90% of DevOps and engineering professionals experienced at least one Kubernetes security incident in the past year, with many incidents traced back to misconfigurations. The post also notes that 82% of container users are now running Kubernetes in production, but only a quarter of clusters receive regular security updates.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">devops</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">certification</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sdrnk4/has_anyone_elses_k8s_role_quietly_become_a/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="f4f732bac6876521">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sdkofd/ciliums_ipcache_doesnt_scale_past_1m_pods_how/" target="_blank" rel="noopener">How Many Unique Identities Does Your Kubernetes Cluster Actually Have?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="f4f732bac6876521" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">How Many Unique Identities Does Your Kubernetes Cluster Actually Have?</p><p class="summary">The blog post discusses how identity-based network policy scales in Kubernetes clusters. The author is looking for real-world data on the number of unique identities within a cluster and how pods distribute across them. To achieve this, they've created a script that reads the pod information from the cluster using kubectl commands, processes it, and prints out the number of unique identities found.</p><p class="summary">The script uses jq and awk to extract the namespace and labels of each pod, removes certain key-value pairs, sorts the results, and then counts the occurrences of each label. The output shows that a significant proportion of pods share common labels, with only one pod having a unique identity.</p><p class="summary">In general, the cluster can be divided into two categories: those where most pods belong to a few large groups (indicating some level of clustering), and those where pods are more evenly distributed across many small identities.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">network-policy</span>
+                        
+                        <span class="label-tag">scalability</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sdkofd/ciliums_ipcache_doesnt_scale_past_1m_pods_how/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="4b5fea8cafbefdbe">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sdwx3p/servicemesh_at_scale_with_linkerd_creator_william/" target="_blank" rel="noopener">Scaling Service Mesh with Linkerd</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="4b5fea8cafbefdbe" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Scaling Service Mesh with Linkerd</p><p class="summary">This blog post discusses the challenges of scaling a service mesh like Linkerd and provides guidance on how to overcome them. The author, William Morgan, shares his experience as the creator of Linkerd and offers practical advice for deploying and managing service meshes at scale.</p><p class="summary">Scaling a service mesh requires careful consideration of factors such as traffic management, security, and performance optimization. The author highlights the importance of designing the mesh in a way that allows it to adapt to changing workloads and traffic patterns. He also emphasizes the need for continuous monitoring and feedback mechanisms to ensure that the mesh is operating effectively.</p><p class="summary">The post also touches on the role of observability tools, such as OpenTelemetry, in helping to understand and improve service mesh performance. By following best practices and using the right tools, organizations can successfully scale their service meshes and achieve greater efficiency and reliability in their applications.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">linkerd</span>
+                        
+                        <span class="label-tag">scalability</span>
+                        
+                        <span class="label-tag">observability</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sdwx3p/servicemesh_at_scale_with_linkerd_creator_william/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="e75f1e9084435ab5">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1se1dm7/finops_question_what_do_you_do_when_a_few_pods/" target="_blank" rel="noopener">how to deal with idle nodes in kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="e75f1e9084435ab5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">how to deal with idle nodes in kubernetes</p><p class="summary">The blog post discusses a common challenge in Kubernetes clusters where some nodes are not being fully utilized due to unevictable pods. The author, coming from the FinOps side, is frustrated with this scenario as it ties up committed capacity and makes consolidation more difficult. The DevOps team explains that they cannot simply drain the affected nodes because of various reasons such as pod disruption budgets, local storage, strict affinities, or lack of suitable replacement nodes.</p><p class="summary">The post asks for strategies to clean these pods so that nodes can be consolidated later without disrupting the critical applications running on them. It seeks suggestions from readers who may have encountered similar issues and can offer advice on how to approach this problem in a way that doesn't sound like a simple "move the pods" solution.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">node-utilization</span>
+                        
+                        <span class="label-tag">eviction-strategies</span>
+                        
+                        <span class="label-tag">capacity-planning</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1se1dm7/finops_question_what_do_you_do_when_a_few_pods/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="71537ea21b0a0145">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sdrsn4/ui_and_inside_job_count_mismatch/" target="_blank" rel="noopener">UI Mismatch Between Cron Job History and Workloads UI</a></h3>
+                        
+                        <button class="btn-read" data-id="71537ea21b0a0145" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">UI Mismatch Between Cron Job History and Workloads UI</p><p class="summary">The discrepancy between the cron job history and the Workloads UI is a puzzling issue that arises when using the `successful<em>jobs</em>history<em>limit` and `failed</em>jobs<em>history</em>limit` settings in Kubernetes. The user has set these limits to 10 for successful jobs and 5 for failed jobs, but when checking the pods column in the Workloads UI, they see a mismatch between the actual number of pods running or completed and what is displayed in the UI.</p><p class="summary">The issue seems to be caused by the fact that the cron job history is not being accurately reflected in the Workloads UI. The user has tried using `kubectl get pods -n <namespace_name>` to count the actual number of pods for a particular job, which resulted in 11 pods (one running and ten completed), but the Workloads UI still shows 1/14 pods.</p><p class="summary">The discrepancy may be due to the way Kubernetes stores its internal state versus what is displayed in the UI. The user has not provided any specific solutions or workarounds to resolve this issue, leaving it unclear how to accurately reflect the cron job history in the Workloads UI.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">ui</span>
+                        
+                        <span class="label-tag">cron-jobs</span>
+                        
+                        <span class="label-tag">workload-management</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sdrsn4/ui_and_inside_job_count_mismatch/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Red Hat Cloud Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Red Hat Cloud Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Red Hat Cloud Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="714b65b268ead38a">
+                    <div class="article-header">
+                        <h3><a href="https://www.redhat.com/en/blog/ai-scientific-research-power-small-language-models" target="_blank" rel="noopener">The Power of Small Language Models in Scientific Research</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="714b65b268ead38a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-05</p>
+                    
+                    <p class="summary">The Power of Small Language Models in Scientific Research</p><p class="summary">The scientific community is facing a compute problem, where the infrastructure to support research is not keeping pace with the increasing number of ideas. Generative AI capabilities are also being sought, but delivering them through a suitable architecture and operating model poses challenges, such as ensuring access without excessive costs or security risks. Small language models (SLMs) are a solution to this problem, designed with fewer parameters than larger models, typically in the range of 1 billion.</p><p class="summary">SMALL LANGUAGE MODELS ARE DEVELOPED WITH SIGNIFICANTLY FEWER PARAMETERS THAN THEIR MASSIVE COUNTERPARTS, TYPICALLY RANGING FROM 1 BILLION TO A FEW MILLIONS. THESE SMALLER MODELS CAN STILL PROVIDE GENERATIVE AI CAPABILITIES WHILE REDUCING THE NEED FOR EXPENSIVE INFRASTRUCTURE AND RUNAWAY SPEND. THEY ALSO ALLOW FOR DOMAIN-SPECIFIC DEVELOPMENT, ENABLING RESEARCH INSTITUTIONS TO ACCESS GENAI CAPABILITIES WITHOUT RESTRICTED ACCESS.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">research</span>
+                        
+                        <span class="label-tag">language-models</span>
+                        
+                        <span class="label-tag">computational-infrastructure</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.redhat.com/en/blog/ai-scientific-research-power-small-language-models" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="ee772184d801d2d3">
+                    <div class="article-header">
+                        <h3><a href="https://www.0xsid.com/blog/wont-download-your-app" target="_blank" rel="noopener">Don't download my app, the web version is fine</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ee772184d801d2d3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Don't download my app, the web version is fine</p><p class="summary">This article discusses a common problem faced by developers who create mobile apps and want to share their web-based versions. The author of the post states that they won't download an app unless there's something compelling about it, as they are accustomed to using web applications on their computers. They highlight the importance of having a solid online presence, showcasing a website or blog that reflects one's personality or skills.</p><p class="summary">The post emphasizes the value of having a well-designed website, which can be more engaging than a mobile app in many cases. It also suggests that relying solely on an app for a professional or personal brand may not be enough, and that a web-based presence is often preferred.</p><p class="summary">In addition, the author mentions that they wouldn't download an app if it didn't have a clear online identity or a compelling reason to do so. This highlights the importance of having a strong digital footprint in today's digital age.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">mobile-apps</span>
+                        
+                        <span class="label-tag">web-development</span>
+                        
+                        <span class="label-tag">digital-identity</span>
+                        
+                        <span class="label-tag">entrepreneurship</span>
+                        
+                        <span class="label-tag">personal-branding</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.0xsid.com/blog/wont-download-your-app" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="14651fb6ef2070d1">
+                    <div class="article-header">
+                        <h3><a href="https://github.com/anthropics/claude-code/issues/42796" target="_blank" rel="noopener">Claude Code Is Unusable for Complex Engineering Tasks with the Feb Updates</a></h3>
+                        
+                        <button class="btn-read" data-id="14651fb6ef2070d1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Claude Code Is Unusable for Complex Engineering Tasks with the Feb Updates</p><p class="summary">Claude Code, an open-source code analysis and review tool, recently released updates in February. Unfortunately, these updates have made the tool unusable for complex engineering tasks, causing frustration among its users. The issues stem from a combination of factors, including changes to the user interface, reduced flexibility, and increased complexity. These changes have led to difficulties in managing large codebases, making it harder for engineers to navigate and analyze complex systems.</p><p class="summary">The developers have acknowledged the problems and are working on addressing them. However, the impact of these updates has already been felt by many users. It highlights the importance of testing and iteration in open-source software development. The situation serves as a reminder that even well-intentioned changes can have unintended consequences, emphasizing the need for careful consideration and user feedback during the development process.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">code-review</span>
+                        
+                        <span class="label-tag">developer-experience</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://github.com/anthropics/claude-code/issues/42796" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="22ef0b6a9f492a61">
+                    <div class="article-header">
+                        <h3><a href="https://www.dw.com/en/is-germanys-gold-safe-in-new-york/video-75766873" target="_blank" rel="noopener">Is Germany's Gold Safe in New York?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="22ef0b6a9f492a61" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Is Germany's Gold Safe in New York?</p><p class="summary">The article from DW.com explores the safety of German gold stored at the Federal Reserve Bank of New York. According to Deutsche Bundesbank, about $130 billion worth of gold is held by the Fed, mostly for safekeeping purposes.</p><p class="summary">Germany has expressed concerns over the location of its gold reserves due to geopolitical tensions with the US. A survey conducted in 2019 found that many Germans believed their gold was not secure or even in danger of being stolen or damaged.</p><p class="summary">However, experts argue that the Federal Reserve's vaults at the New York Fed are among the most secure in the world, thanks to advanced security measures and monitoring systems. They also point out that the gold is insured against damage or loss.</p><p class="summary">In conclusion, while some Germans may have concerns about the safety of their gold stored in New York, experts believe it is relatively secure due to strict security protocols.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">gold</span>
+                        
+                        <span class="label-tag">new-york</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">banking</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.dw.com/en/is-germanys-gold-safe-in-new-york/video-75766873" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="de654c5b92b1bda5">
+                    <div class="article-header">
+                        <h3><a href="https://tboteproject.com/surveillancefindings/" target="_blank" rel="noopener">Mass Surveillance Infrastructure via Age Verification Systems</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="de654c5b92b1bda5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Mass Surveillance Infrastructure via Age Verification Systems</p><p class="summary">This blog post discusses the potential for age verification systems to function as mass surveillance infrastructure. The author raises concerns that these systems, designed to verify users' ages online, can also be used by governments and corporations to track individuals' online activities. The article highlights how such systems can collect and store vast amounts of personal data, which can then be used for monitoring and controlling citizens. The author argues that this raises significant privacy and security concerns, as these systems can be easily exploited for nefarious purposes.</p><p class="summary">In conclusion, the post emphasizes the need for greater transparency and accountability in the use of age verification systems to prevent potential misuse as mass surveillance tools. It encourages readers to think critically about the role of technology in shaping their online experiences and to advocate for stronger privacy protections.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">surveillance</span>
+                        
+                        <span class="label-tag">digital-identity-theft</span>
+                        
+                        <span class="label-tag">data-protection</span>
+                        
+                        <span class="label-tag">government-overreach</span>
+                        
+                        <span class="label-tag">privacy-innovation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://tboteproject.com/surveillancefindings/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="9af381922081adf3">
+                    <div class="article-header">
+                        <h3><a href="https://www.mining.com/france-pulls-last-gold-held-in-us-for-15b-gain/" target="_blank" rel="noopener">France Pulls Last Gold Held in US for $15 Billion Gain</a></h3>
+                        
+                        <button class="btn-read" data-id="9af381922081adf3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">France Pulls Last Gold Held in US for $15 Billion Gain</p><p class="summary">France has sold its last gold reserve held in the United States, a move that is expected to generate a significant profit of around $15 billion. The sale was made through a private deal and will be used to pay off debts incurred by the French state-owned bank, BNP Paribas. This marks the end of France's 20-year gold storage agreement with the US Federal Reserve.</p><p class="summary">The move is seen as a strategic shift in France's economic strategy, as the country seeks to reduce its reliance on foreign assets and diversify its investments. The sale will also provide a significant boost to France's economy, allowing it to invest in other sectors such as renewable energy and digital technology.</p><p class="summary">France's decision to sell its gold reserves is part of a broader trend among central banks to offload their gold holdings, which have been largely unchanged for centuries. This move is expected to pave the way for new investment opportunities and potentially alter the global financial landscape.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">economics</span>
+                        
+                        <span class="label-tag">finance</span>
+                        
+                        <span class="label-tag">government-deal-making</span>
+                        
+                        <span class="label-tag">debt-management</span>
+                        
+                        <span class="label-tag">fiscal-strategy</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.mining.com/france-pulls-last-gold-held-in-us-for-15b-gain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="GCP Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                GCP Blog
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="GCP Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="829ca4765d125e4a">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/topics/retail/how-a-leading-consumer-insight-brand-uses-dataproc-to-hyper-personalise-faster/" target="_blank" rel="noopener">How a Leading Consumer Insight Brand Uses Dataproc to Hyper-Personalize Faster</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="829ca4765d125e4a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">How a Leading Consumer Insight Brand Uses Dataproc to Hyper-Personalize Faster</p><p class="summary">This consumer insight brand uses Google Cloud's Dataproc and Serverless for Apache Spark to power hundreds of automated personalization campaigns across multiple brands. They recognized the need for a data foundation capable of processing complex datasets for sophisticated ML models, which led them to leverage Dataproc as their high-speed engine for feature engineering. By using Dataproc, they've significantly improved their innovation velocity, reduced time-to-market, and enabled faster delivery of personalized experiences to customers.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cloud computing</span>
+                        
+                        <span class="label-tag">data engineering</span>
+                        
+                        <span class="label-tag">machine learning</span>
+                        
+                        <span class="label-tag">personalization</span>
+                        
+                        <span class="label-tag">apache spark</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/topics/retail/how-a-leading-consumer-insight-brand-uses-dataproc-to-hyper-personalise-faster/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ec6b5b42c471bcce">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/business-intelligence/looker-self-service-explores/" target="_blank" rel="noopener">Looker self-service Explores for Faster Ad-Hoc Analysis</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ec6b5b42c471bcce" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Looker self-service Explores for Faster Ad-Hoc Analysis</p><p class="summary">Looker is introducing self-service Explores, which allows users to bring their own data into the platform, providing instant access to insights while maintaining the integrity of existing governed data ecosystems. This new feature complements Looker's enterprise semantic platform and enables users to accelerate high-velocity, ad-hoc analysis. With self-service Explores, users can import files directly from Google Drive or Google Sheets, transform data into conversational analytics, and gain instant insights without needing code or waiting.</p><p class="summary">Self-service Explores bring the value of modern, governed BI to the experimentation capabilities of spreadsheets, allowing anyone with the right permissions to turn a flat file into a fully functional Explore in seconds. The feature includes key capabilities such as instant file uploads, merge queries, re-upload and refresh, and conversational analytics.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">self-service-explores</span>
+                        
+                        <span class="label-tag">looker</span>
+                        
+                        <span class="label-tag">bigquery</span>
+                        
+                        <span class="label-tag">data-integration</span>
+                        
+                        <span class="label-tag">business-intelligence</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/business-intelligence/looker-self-service-explores/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7cecb76af1fab5f5">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/business-intelligence/looker-embedded-adds-conversational-analytics/" target="_blank" rel="noopener">Conversational Analytics now available for Looker Embedded environments</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7cecb76af1fab5f5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Conversational Analytics now available for Looker Embedded environments</p><p class="summary">Conversational analytics are now available in Looker Embedded environments, enabling businesses to build highly interactive and conversational apps that engage users in a dialogue. This is made possible by the Conversational Analytics API, which extends the natural language experience users have grown to expect from Looker. With this feature, organizations can differentiate their products with unique conversational experiences, accelerate data monetization and developer extensibility, and build with agentic IDEs with confidence.</p><p class="summary">The Conversational Analytics API provides a low-code iframe implementation or extensible SDKs, making it easier to ship production-ready conversational AI within any application. It also offers native support for querying multiple Looker Explores, a built-in code interpreter, and customizable theming. This allows businesses to provide private-labeled, high-reasoning agent experiences alongside their core features.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">looker</span>
+                        
+                        <span class="label-tag">ai-powered-recommendations</span>
+                        
+                        <span class="label-tag">data-embedding</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/business-intelligence/looker-embedded-adds-conversational-analytics/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ebe13cb6c2681f6c">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/topics/systems/ironwood-tpus-deliver-37x-carbon-efficiency-gains/" target="_blank" rel="noopener">Google's TPU ironwood delivers 3.7x carbon efficiency gains compared to the previous generation.</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ebe13cb6c2681f6c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Google's TPU ironwood delivers 3.7x carbon efficiency gains compared to the previous generation.</p><p class="summary">Google has made significant strides in improving the environmental impact of its AI infrastructure by updating its metrics for its seventh-generation TPUs, Ironwood. The new metric, Compute Carbon Intensity (CCI), measures the estimated amount of CO2 equivalent emitted for every utilized floating-point operation. According to Google, Ironwood demonstrates a remarkable 3.7x improvement in CCI compared to the previous generation of performance-optimized TPUs. This means that despite the growing demand for compute resources driven by AI, Google's ongoing work has helped reduce energy consumption and emissions of AI workloads.</p><p class="summary">The improvements are attributed to the combination of high-performance capabilities and low footprint of Ironwood hardware, which accelerates efficiency gains in computing operations while minimizing the impact on the environment.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai-infrastructure</span>
+                        
+                        <span class="label-tag">sustainability</span>
+                        
+                        <span class="label-tag">tpu</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/topics/systems/ironwood-tpus-deliver-37x-carbon-efficiency-gains/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Using Pyroscope and Alloy to Find Performance Bottlenecks in TON Blockchain</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Using Pyroscope and Alloy to Find Performance Bottlenecks in TON Blockchain</p><p class="summary">This blog post explores how continuous profiling with Pyroscope and Alloy can help transform the performance optimization process for blockchain validation algorithms. The authors used real-world examples from last year's TON blockchain optimization contest, a C++ developer challenge, to demonstrate the effectiveness of modern profiling tools. They leveraged Alloy, an open-source OpenTelemetry collector, to capture detailed profiling data and identify hotspots in the code.</p><p class="summary">The authors set up eBPF-based profiling with Alloy, which allowed them to gain immediate visibility into performance bottlenecks without modifying a single line of contestant code. By analyzing the reference implementation flame graph, they were able to pinpoint specific functions that consumed a significant amount of execution time, such as vm::DataCell::create and vm::exec<em>ed25519</em>check_signature.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">blockchain</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana Security Release</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana Security Release</p><p class="summary">Grafana has released version 12.4.2, along with patches for previous versions, to address critical and high severity security vulnerabilities. The updates fix issues related to SQL expressions allowing arbitrary file write enabling remote code execution (CVE-2026-27876) and unauthenticated denial-of-service via OpenFeature endpoint (CVE-2026-27880). Users are advised to upgrade to the patched versions as soon as possible.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">vulnerability-management</span>
+                        
+                        <span class="label-tag">open-source-software</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89abd832d87514bc">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">How eBPF Profilers Symbolize Go Program Addresses for Better Profiling</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="89abd832d87514bc" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">How eBPF Profilers Symbolize Go Program Addresses for Better Profiling</p><p class="summary">This blog post delves into the process of symbolization in eBPF profilers, specifically focusing on Go programs. The author explains how raw program counters, captured by eBPF profilers, are transformed into actionable function names through a complex pipeline. The key to this transformation lies in the .gopclntab section of Go binaries, which enables profilers to extract function names on-target. The post explores the steps involved in symbolization, including binary search and frame caching, as well as practical commands to inspect your own binaries.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">go</span>
+                        
+                        <span class="label-tag">ebpf</span>
+                        
+                        <span class="label-tag">profiling</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/deep-dive-into-how-the-opentelemetry-ebpf-profiler-symbolizes-go/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ea64acc22fc04932">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Observability for Large Language Model (LLM) Powered Applications</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ea64acc22fc04932" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Observability for Large Language Model (LLM) Powered Applications</p><p class="summary">OpenRouter and Grafana Cloud have developed a solution to provide observability for applications that rely on large language models. As LLMs become more widespread, teams face the challenge of monitoring their performance, costs, and failures in real-time. OpenRouter's unified API provides access to hundreds of models from various providers, while Broadcast automatically sends traces to observability platforms like Grafana Cloud without requiring additional instrumentation. This approach allows for built-in observability, enabling teams to track new dimensions such as token usage, model behavior variability, latency profiles, and non-deterministic failures.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">observability</span>
+                        
+                        <span class="label-tag">lll</span>
+                        
+                        <span class="label-tag">infrastructure-as-code</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/how-openrouter-and-grafana-cloud-bring-observability-to-llm-powered-applications/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0be525b2c2892f25">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Zero-code observability for large language models (LLMs) and agents on Kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="0be525b2c2892f25" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Zero-code observability for large language models (LLMs) and agents on Kubernetes</p><p class="summary">This blog post discusses the importance of observability in large language models (LLMs) and agents running on Kubernetes, and how to use OpenLIT Operator with Grafana Cloud to enable zero-code observability without modifying a single line of code. The author highlights the benefits of zero-code observability, including rapid onboarding, comprehensive coverage, vendor neutrality, and cost and performance insights. They provide a step-by-step guide for setting up zero-code observability for AI applications in Grafana Cloud.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">open-telemetry</span>
+                        
+                        <span class="label-tag">grafana-cloud</span>
+                        
+                        <span class="label-tag">artificial-intelligence</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/ai-observability-zero-code/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="942a2ce0c826062f">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/digitalfunk-debakel-bundeswehr-zahlt-zwei-milliarden-fuer-untaugliche-technik-2604-207266.html" target="_blank" rel="noopener">German Defence Ministry Pays Billions for Ineffective Technology</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="942a2ce0c826062f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">German Defence Ministry Pays Billions for Ineffective Technology</p><p class="summary">The German defence ministry has announced a massive payment of two billion euros to a digital system that has proven ineffective. This is the final bill for one of the country's most ambitious digitalisation projects, which aimed to modernise its military technology.</p><p class="summary">The project was plagued by technical issues from the start and has been widely questioned in parliament. An investigation found that the problems were caused by a combination of factors, including inadequate testing and insufficient resources. The ministry's decision to pay out such a large sum is seen as a costly mistake that could have been avoided with better planning and management.</p><p class="summary">The failure of this project highlights the need for greater oversight and accountability in defence procurement. It also underscores the importance of ensuring that new technologies are thoroughly tested before being implemented on a large scale.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">german defence</span>
+                        
+                        <span class="label-tag">digitalisation</span>
+                        
+                        <span class="label-tag">procurement</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/digitalfunk-debakel-bundeswehr-zahlt-zwei-milliarden-fuer-untaugliche-technik-2604-207266.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="e0cd1674af5daeef">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/stargate-iran-will-openais-ki-rechenzentrum-in-abu-dhabi-angreifen-2604-207265.html" target="_blank" rel="noopener">Iran to Attack OpenAIs Stargate AI Computing Center in Abu Dhabi</a></h3>
+                        
+                        <button class="btn-read" data-id="e0cd1674af5daeef" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Iran to Attack OpenAIs Stargate AI Computing Center in Abu Dhabi</p><p class="summary">Iran plans to launch a cyber attack on the Stargate AI computing center in Abu Dhabi, which is operated by US-based artificial intelligence firm OpenAI. The attack is seen as part of an effort by Iranian hackers to disrupt the country's rival technology companies and gain an advantage over them.</p><p class="summary">The Stargate center uses a proprietary operating system that is not publicly available, but it is believed to be connected to OpenAIs highly advanced AI systems. Iranian authorities claim that they have discovered vulnerabilities in the system and are planning to exploit them to launch the attack.</p><p class="summary">Iran's plans have raised concerns about the potential risks of cyber attacks on critical infrastructure and the vulnerability of AI systems to exploitation by malicious actors.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">artificial intelligence</span>
+                        
+                        <span class="label-tag">geopolitics</span>
+                        
+                        <span class="label-tag">openai</span>
+                        
+                        <span class="label-tag">stargate</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/stargate-iran-will-openais-ki-rechenzentrum-in-abu-dhabi-angreifen-2604-207265.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="530d9771d1a2ebde">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/raumfahrt-starship-koennte-die-globale-kriegsfuehrung-veraendern-2604-207264.html" target="_blank" rel="noopener">Space Travel: Starship Could Change Global Warfare</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="530d9771d1a2ebde" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Space Travel: Starship Could Change Global Warfare</p><p class="summary">The blog post discusses the potential impact of SpaceX's Starship on global warfare and raises questions about its implications for international law. Physicist Fred Hochberg believes that Starship could serve as a basis for orbital arsenals, leading to significant concerns about the use of space-based weapons.</p><p class="summary">The development of Starship has sparked debate about the rules governing the use of space-based weapons and their potential impact on global conflict. As countries consider using Starship-like technology in warfare, they must also address the legal framework that would govern its use.</p><p class="summary">The post highlights the need for a clear understanding of the laws and regulations surrounding space-based warfare, as well as the development of strategies to prevent the misuse of such technologies.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">space-exploration</span>
+                        
+                        <span class="label-tag">disarmament-treaties</span>
+                        
+                        <span class="label-tag">orbital-weaponry</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/raumfahrt-starship-koennte-die-globale-kriegsfuehrung-veraendern-2604-207264.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7d1f0880f8fbba89">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/raumfahrt-warum-die-nasa-auf-veraltete-windows-tablets-setzt-2604-207262.html" target="_blank" rel="noopener">Why NASA Uses Outdated Windows Tablets in Spacecraft</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7d1f0880f8fbba89" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Why NASA Uses Outdated Windows Tablets in Spacecraft</p><p class="summary">NASA uses outdated Windows tablets in its spacecraft, including the Orion capsule. An expert from NASA explains that this is not an error. According to him, these old devices are reliable and do not pose a risk to the astronauts.</p><p class="summary">The use of legacy hardware is often overlooked when it comes to space technology, but experts argue that it is a deliberate choice. The tablets are chosen for their simplicity, ease of use, and ability to withstand extreme conditions found in space. Additionally, the lack of internet connectivity means that data can be transmitted more efficiently without relying on cloud services.</p><p class="summary">This approach allows NASA to maintain control over its systems, ensuring that critical information remains secure. Furthermore, the simplicity of these devices reduces the risk of software failures or malware infections. As a result, the use of outdated Windows tablets in space technology has become a matter of practicality rather than technical inferiority.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">nasa</span>
+                        
+                        <span class="label-tag">space-technology</span>
+                        
+                        <span class="label-tag">legacy-hardware</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/raumfahrt-warum-die-nasa-auf-veraltete-windows-tablets-setzt-2604-207262.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0f3fe8a1d70d524b">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/politik-parteien-nutzen-vermehrt-ki-generierte-videos-2604-207261.html" target="_blank" rel="noopener">Parties use more AI-generated videos</a></h3>
+                        
+                        <button class="btn-read" data-id="0f3fe8a1d70d524b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Parties use more AI-generated videos</p><p class="summary">This blog post discusses how political parties in Germany are increasingly using AI-generated videos, often without labeling them as such, in their election campaigns. The rise of deepfakes and AI-generated content has made it easier for politicians to create convincing but fake videos. This trend is particularly concerning as it can be difficult for voters to distinguish between real and manipulated media.</p><p class="summary">The use of AI-generated videos in politics raises questions about the integrity of information and the potential for misinformation. As AI technology continues to evolve, it will be essential to develop strategies for detecting and mitigating the spread of fake content.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">politics</span>
+                        
+                        <span class="label-tag">deepfakes</span>
+                        
+                        <span class="label-tag">ai-generative-media</span>
+                        
+                        <span class="label-tag">election-campaigns</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/politik-parteien-nutzen-vermehrt-ki-generierte-videos-2604-207261.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="abe9727575d65223">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-die-beste-handykamera-im-test-traumfotos-mit-vivo-xiaomi-und-huawei/tfe9b9d?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">The Best Smartphone Camera</a></h3>
+                        
+                        <button class="btn-read" data-id="abe9727575d65223" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">The Best Smartphone Camera</p><p class="summary">The article reviews the top smartphone cameras, comparing their performance and features to determine the best one. It discusses the advancements in camera technology, particularly in low-light conditions and portrait mode. The test results highlight the strengths of each camera, including image quality, autofocus, and flash performance.</p><p class="summary">The article concludes that even the highest-end smartphones can produce excellent photos, making a dedicated digital camera less necessary for most users. However, those looking for more advanced features or better image quality may still prefer a separate camera.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">smartphone-camera</span>
+                        
+                        <span class="label-tag">camera-testing</span>
+                        
+                        <span class="label-tag">tech-review</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-10-die-beste-handykamera-im-test-traumfotos-mit-vivo-xiaomi-und-huawei/tfe9b9d?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ee94f4a93322c3ec">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Angreifer-koennen-Weboberflaeche-von-WatchGuard-Firebox-attackieren-11246291.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Vulnerabilities in WatchGuard Firebox Web Interface Can Be Exploited by Attackers</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="ee94f4a93322c3ec" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Vulnerabilities in WatchGuard Firebox Web Interface Can Be Exploited by Attackers</p><p class="summary">The recent security alert regarding the WatchGuard Firebox series highlights a critical vulnerability that can be exploited by attackers to gain unauthorized access to the web interface of these firewalls. This means that the Dimension and WebBlockerServer products from this line are susceptible to attacks, but security patches are available to address this issue.</p><p class="summary">Attackers have discovered that they can bypass the authentication process to access the web-based management console, potentially allowing them to alter settings, install malware, or even take control of the entire system. This vulnerability is particularly concerning as it highlights a significant weakness in the otherwise robust security measures provided by WatchGuard.</p><p class="summary">To ensure the integrity and security of these firewalls, it is essential for users to apply the available security patches as soon as possible. This will help prevent any potential attacks that may exploit this vulnerability.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">watchguard</span>
+                        
+                        <span class="label-tag">security-patches</span>
+                        
+                        <span class="label-tag">firewall-securing</span>
+                        
+                        <span class="label-tag">threat-risk</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Angreifer-koennen-Weboberflaeche-von-WatchGuard-Firebox-attackieren-11246291.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8423cda001266d8c">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/HCL-BigFix-Kryptografische-Schluessel-offensichtlich-nicht-sicher-gespeichert-11246307.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Cryptographic Keys Not Securely Stored in HCL BigFix</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="8423cda001266d8c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Cryptographic Keys Not Securely Stored in HCL BigFix</p><p class="summary">HCL BigFix has released security patches that address two vulnerabilities in its endpoint management platform. These patches aim to improve the overall security of the software by fixing weaknesses in how cryptographic keys are stored and managed. The company acknowledges that these issues were not identified during internal testing, highlighting a need for more robust testing procedures moving forward.</p><p class="summary">The recent security patches are part of HCL's ongoing commitment to enhancing the platform's security features. By addressing these vulnerabilities, BigFix aims to prevent potential threats from exploiting weak points in its system. This move underscores the importance of prioritizing security and taking proactive steps to address emerging risks.</p><p class="summary">The patches also demonstrate HCL's dedication to maintaining a secure environment for users by identifying and fixing weaknesses before they can be exploited.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">bigfix</span>
+                        
+                        <span class="label-tag">hcl</span>
+                        
+                        <span class="label-tag">software-security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/HCL-BigFix-Kryptografische-Schluessel-offensichtlich-nicht-sicher-gespeichert-11246307.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="fc21d491b00e6bdf">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Fake-Teams-Update-So-haben-Angreifer-den-axios-Maintainer-ausgetrickst-11246273.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Axel's Manager Was Tricked by Attackers</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="fc21d491b00e6bdf" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Axel's Manager Was Tricked by Attackers</p><p class="summary">The article discusses how attackers tricked the maintainer of axios, a popular HTTP client library, into applying malicious code to his system. The maintainer explains that cybercriminals were able to infect the HTTP client with malware, which then spread to other systems, including possibly other maintainers' systems.</p><p class="summary">This incident highlights the vulnerability of open-source projects to attacks from malicious actors and emphasizes the importance of maintaining a secure development workflow. It also serves as a warning to maintainers and developers about the potential risks associated with using untrusted third-party libraries or code.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">python</span>
+                        
+                        <span class="label-tag">axios</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Fake-Teams-Update-So-haben-Angreifer-den-axios-Maintainer-ausgetrickst-11246273.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="dfc496bf7e86762f">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Schadcode-Sicherheitsluecken-in-Werbeblocker-Pi-hole-geschlossen-11246221.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Pi-hole security vulnerabilities patched</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="dfc496bf7e86762f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-06</p>
+                    
+                    <p class="summary">Pi-hole security vulnerabilities patched</p><p class="summary">Pi-hole, an open-source ad blocker, has released important updates to address recent security vulnerabilities. These updates aim to close potential entry points for malicious code on systems running the software. The latest patches improve the overall security posture of Pi-hole, ensuring that users' networks are better protected against potential threats.</p><p class="summary">The latest update includes a fix for a vulnerability that allowed attackers to inject malware into the system. This update highlights the importance of keeping software up-to-date and using robust security measures when managing network traffic.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                        <span class="label-tag">ad-blocking</span>
+                        
+                        <span class="label-tag">vulnerability-patching</span>
+                        
+                        <span class="label-tag">internet-privacy</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Schadcode-Sicherheitsluecken-in-Werbeblocker-Pi-hole-geschlossen-11246221.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">20:11:13</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">20:55:45</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">44m 32s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.6</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">31 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">0</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-06 20:55 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
