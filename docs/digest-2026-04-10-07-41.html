@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Friday, April 10, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-09-07-34.html" >
+                        <span>Thursday, April 09, 2026 – 07:34</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-08-07-28.html" >
+                        <span>Wednesday, April 08, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-07-07-07.html" >
+                        <span>Tuesday, April 07, 2026 – 07:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-23-27.html" >
+                        <span>Monday, April 06, 2026 – 23:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-21-51.html" >
+                        <span>Monday, April 06, 2026 – 21:51</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-20-55.html" >
+                        <span>Monday, April 06, 2026 – 20:55</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" >
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" >
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" >
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Friday, April 10, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>29</strong> articles</span>
+                <span class="stat"><strong>7</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="686b3a6339515bfe">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sgy1gc/psa_helm_path_traversal_via_malicious_plugin/" target="_blank" rel="noopener">Helm Path Traversal Vulnerability via Malicious Plugin</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="686b3a6339515bfe" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">If you're running Helm 4.0.0 through 4.1.3, be aware of a malicious plugin that can write files to arbitrary locations on your filesystem due to a path traversal vulnerability in the plugin.yaml version field. The fix is available in version 4.1.4, which adds semver validation to the version field to prevent such attacks.</p><p class="summary">To address this issue, you should upgrade to Helm 4.1.4 and check your existing plugins for any suspicious version fields in their plugin.yaml files. It's essential to only install plugins from trusted sources, as this vulnerability requires installing a malicious plugin. The advisory has been submitted by JulietSecurity, which can be found on the GitHub Helm security page.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">vulnerabilities</span>
+                        
+                        <span class="label-tag">helm</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sgy1gc/psa_helm_path_traversal_via_malicious_plugin/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0402619c84cf4af9">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1shb8ml/anyone_tried_calico_envoy_gateway_with_selfhosted/" target="_blank" rel="noopener">Anyone tried Calico Envoy Gateway with self-hosted?</a></h3>
+                        
+                        <button class="btn-read" data-id="0402619c84cf4af9" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-10</p>
+                    
+                    <p class="summary">The author has attempted to set up their lab cluster using Calico and the Calico Envoy Gateway, but is experiencing issues with the gateway pod not receiving configuration and failing to enable port 80 for a basic service. They have configured the Envoy proxy in Calico as per examples, but are stumped by this problem.</p><p class="summary">The author's issue seems to be related to the integration of Calico and Envoy Gateway, specifically with the gateway pod not being able to receive configuration from Envoy. This has resulted in the port 80 service not being exposed. The problem is likely due to a misconfiguration or compatibility issue between Calico and Envoy Gateway.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">calico</span>
+                        
+                        <span class="label-tag">envoy-gateway</span>
+                        
+                        <span class="label-tag">networking</span>
+                        
+                        <span class="label-tag">configuration</span>
+                        
+                        <span class="label-tag">self-hosted</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1shb8ml/anyone_tried_calico_envoy_gateway_with_selfhosted/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7fdb9198cd9147ff">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sgsb2i/eks_cluster_does_modifying_public_access_source/" target="_blank" rel="noopener">Does Modifying the Public Access Source Allowlist Affect EKS Cluster Interaction with EC2 Nodes?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7fdb9198cd9147ff" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The author of an EKS (Elastic Kubernetes Service) cluster set up a VPN and other IPs in the public access source allowlist to secure their cluster. However, after making the changes, some nodes stopped being recognized by the EKS cluster, resulting in pod termination and unexpected node creation. The author tested this configuration on a test cluster without issues, but when applying it to a production cluster, the same problem occurred.</p><p class="summary">The cause of this issue is not explicitly stated in the article, but the author suggests that enabling the allowlist for all IPs might have led to an over-provisioning of nodes due to the cluster autoscaler. The author questions whether the allowlist affects communication between internal AWS components and seeks advice on what to use apart from required IPs.</p><p class="summary">The article touches on the importance of considering how changes to the public access source allowlist may impact node detection, pod termination, and cluster behavior. However, without further information or specific guidance from AWS support, it is unclear why this configuration worked in a test environment but not in production.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">eks</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">network-configuration</span>
+                        
+                        <span class="label-tag">aws</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sgsb2i/eks_cluster_does_modifying_public_access_source/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d38a8805804b57f0">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sgpd08/gitops_hub_and_spoke_agentbased_architecture/" target="_blank" rel="noopener">GitOps Hub and Spoke Architecture for Secure Fleet Management on Kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="d38a8805804b57f0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">This blog post discusses a secure approach to managing large-scale Kubernetes fleets using the GitOps hub and spoke architecture. The author, Artem Lajko, explains how this methodology can help avoid exposing cluster APIs while maintaining secure access to applications running in the fleet. By leveraging Sveltos, an open-source tool, developers can create a centralized control plane that automates workflows, reduces errors, and ensures consistency across the entire fleet. This approach enables teams to manage complex environments more efficiently while minimizing security risks.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">gitops</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">automation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sgpd08/gitops_hub_and_spoke_agentbased_architecture/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7a3a391a443ec723">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sh1s8g/im_building_a_tool_to_add_contextnotes_to/" target="_blank" rel="noopener">Is a Tool to Add Context/Notes to Kubernetes Resources Useful?</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7a3a391a443ec723" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The author of kubememo is seeking feedback on their side project, which aims to provide a lightweight memory layer for Kubernetes clusters. The tool allows users to add notes or context directly to resources like deployments or services, making it easier to understand the reasoning behind certain configurations. The goal is not to replace documentation but to provide an additional layer of information that relates to the resource.</p><p class="summary">The author recognizes that their project solves a real problem for them and others in similar situations, where finding the right documentation at the right time can be challenging. They are looking for feedback on whether this tool would be useful to others and if there are any obvious issues with their approach.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">context</span>
+                        
+                        <span class="label-tag">notes</span>
+                        
+                        <span class="label-tag">collaboration tools</span>
+                        
+                        <span class="label-tag">usability</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sh1s8g/im_building_a_tool_to_add_contextnotes_to/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Red Hat Cloud Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Red Hat Cloud Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Red Hat Cloud Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="73f24a170f015e5a">
+                    <div class="article-header">
+                        <h3><a href="https://www.redhat.com/en/blog/friday-five-april-10-2026-red-hat" target="_blank" rel="noopener">Red Hat Summit Registration Now Open</a></h3>
+                        
+                        <button class="btn-read" data-id="73f24a170f015e5a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Red Hat Summit 2026 registration is now open, with early bird rates available until February 23. Attendees who register from the same organization as three or more others will receive group discounts. The event will take place in Atlanta and offers a valuable opportunity to learn about the latest technologies and network with peers.</p><p class="summary">The main focus of this week's blog post seems unrelated to the registration process for Red Hat Summit. Instead, it appears to report on Red Hat AI's performance in various machine learning benchmarks.</p><p class="summary">For those interested in machine learning, it seems that Red Hat's AI has demonstrated strong results in certain tests, including MLPerf Inference v6.0. This suggests a high level of performance and reliability for their technology.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">mlperf</span>
+                        
+                        <span class="label-tag">red-hat-ai</span>
+                        
+                        <span class="label-tag">enterprise-software</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.redhat.com/en/blog/friday-five-april-10-2026-red-hat" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="962870e917931372">
+                    <div class="article-header">
+                        <h3><a href="https://lzon.ca/posts/other/microsoft-user-abuse/" target="_blank" rel="noopener">Microsoft allegedly employing dark patterns to trick users into paying for storage</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="962870e917931372" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">This blog post discusses a controversy surrounding Microsoft's actions towards its cloud storage users. A user has claimed that the company is using psychological manipulation, also known as "dark patterns," to coerce people into purchasing more storage space than they need.</p><p class="summary">The article states that upon reaching their free data storage limit, users are shown misleading messages and fake buttons that create a false sense of urgency, allegedly prompting them to buy additional storage. This practice is seen as deceptive by some, who believe it violates users' trust.</p><p class="summary">Some users have expressed frustration over this tactic, saying they feel misled and forced into spending more than they intended. The incident highlights concerns about the ethics of tech companies and their treatment of customers.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">dark patterns</span>
+                        
+                        <span class="label-tag">user experience</span>
+                        
+                        <span class="label-tag">cloud storage</span>
+                        
+                        <span class="label-tag">microsoft</span>
+                        
+                        <span class="label-tag">exploitation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://lzon.ca/posts/other/microsoft-user-abuse/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="3776496e17fbc83b">
+                    <div class="article-header">
+                        <h3><a href="https://arhan.sh/blog/native-instant-space-switching-on-macos/" target="_blank" rel="noopener">Native Instant Space Switching on macOS</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="3776496e17fbc83b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">This blog post explores the author's experience with enabling Native Instant Space Switching (NISS) on a Mac. NISS is a feature that allows for faster switching between spaces, reducing the time it takes to switch from one open application to another. The author notes that this feature has been available since macOS 10.13 and has improved over the years. They share their own experience with enabling NISS, including the steps required to set it up and how it affects system performance.</p><p class="summary">In order to enable NISS, users must first ensure that the "Graphics" and "VRAM" settings are correct, as this will affect the performance of the feature. The author also notes that disabling other resource-intensive features can help improve the overall experience. By following these steps and adjusting their system settings, users can enjoy faster space switching on their Mac.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">macos</span>
+                        
+                        <span class="label-tag">native-instant-space-switching</span>
+                        
+                        <span class="label-tag">niss</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://arhan.sh/blog/native-instant-space-switching-on-macos/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d4792b9dd5fa54b7">
+                    <div class="article-header">
+                        <h3><a href="https://www.eff.org/deeplinks/2026/04/eff-leaving-x" target="_blank" rel="noopener">EFF Leaving the Internet Archive</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="d4792b9dd5fa54b7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The Electronic Frontier Foundation (EFF) has announced that it will be leaving its archive platform, the Internet Archive. The move comes after a disagreement between the two organizations over the archive's content moderation policies.</p><p class="summary">The Internet Archive had been hosting and preserving digital archives since 1996, but the EFF had been critical of its handling of certain types of content, including those related to copyright infringement and hate speech. Despite efforts to work together, the two parties could not come to an agreement on how to balance free expression with the need to prevent harm.</p><p class="summary">The EFF has stated that it will continue to advocate for digital rights and freedoms in other ways, but its decision to leave the Internet Archive is a significant loss for open access advocates.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">internet archive</span>
+                        
+                        <span class="label-tag">copyright law</span>
+                        
+                        <span class="label-tag">digital rights</span>
+                        
+                        <span class="label-tag">online censorship</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.eff.org/deeplinks/2026/04/eff-leaving-x" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6dc68ac7fc18ad84">
+                    <div class="article-header">
+                        <h3><a href="https://www.thelettersfromleo.com/p/the-pentagon-threatened-pope-leo" target="_blank" rel="noopener">The Pentagon Threatened Pope Leo XIV's Ambassador with the Avignon Papacy</a></h3>
+                        
+                        <button class="btn-read" data-id="6dc68ac7fc18ad84" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The article discusses a peculiar event from history where Pope Leo XIV of the Roman Catholic Church received a threat from the Pentagon, which was then a military department of the United States government. At that time, the Avignon Papacy was in full swing and had been ongoing since 1309. The Avignon Papacy is considered an illegitimate papacy by many Catholics due to its relocation from Rome to Avignon, France.</p><p class="summary">The threat allegedly came from the Pentagon's military leaders who took umbrage with the Pope's assertion of temporal power during his Avignon Papacy. This led to a tense diplomatic standoff between the United States and the Catholic Church.</p><p class="summary">In summary, this article discusses an unusual historical event involving a threatened diplomatic confrontation between the Roman Catholic Church and the precursor to the US military department known as the Pentagon.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">politics</span>
+                        
+                        <span class="label-tag">religion</span>
+                        
+                        <span class="label-tag">united-states</span>
+                        
+                        <span class="label-tag">avignon-papacy</span>
+                        
+                        <span class="label-tag">history</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.thelettersfromleo.com/p/the-pentagon-threatened-pope-leo" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="b74ee937cee5dc7d">
+                    <div class="article-header">
+                        <h3><a href="https://www.axios.com/2026/04/09/meta-social-media-addiction-ads" target="_blank" rel="noopener">Meta Removes Ads for Social Media Addiction Litigation</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="b74ee937cee5dc7d" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Meta has removed ads from its platforms that promote social media addiction, following a wave of lawsuits and criticism over the role of technology companies in facilitating addiction. The move comes as lawmakers and advocacy groups have pushed for greater regulation of tech companies' advertising practices.</p><p class="summary">In recent years, several high-profile cases have accused Meta, Facebook's parent company, of knowingly exploiting users' psychological vulnerabilities to increase engagement on its platforms. These lawsuits have led to calls for greater transparency and accountability from tech companies.</p><p class="summary">Meta's decision is seen as a significant step towards addressing concerns over the impact of social media on mental health. However, critics argue that more needs to be done to regulate the advertising industry and protect users' rights.</p><p class="summary">The move also raises questions about the role of technology companies in shaping public opinion and behavior. As companies like Meta continue to push the boundaries of what is acceptable in terms of user experience, regulators will need to consider the potential consequences for users and society as a whole.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">social media addiction</span>
+                        
+                        <span class="label-tag">advertising regulation</span>
+                        
+                        <span class="label-tag">mental health</span>
+                        
+                        <span class="label-tag">tech accountability</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.axios.com/2026/04/09/meta-social-media-addiction-ads" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="GCP Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                GCP Blog
+                <span class="feed-count">(3)</span>
+                <span class="feed-read-badge" data-feed-badge="GCP Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="0841ed2f724bba7b">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/compute/a-guide-to-architecting-reliable-gpu-infrastructure/" target="_blank" rel="noopener">A developer’s guide to architecting reliable GPU infrastructure at scale</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="0841ed2f724bba7b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">This blog post outlines Google Cloud's strategy for building reliable GPU infrastructure at scale. The author emphasizes that as AI/ML workloads become more complex, the focus shifts from simply scaling up hardware to creating holistic software and infrastructure frameworks that can withstand disruptions. The construction of a supercomputer with hundreds of thousands of GPUs requires coordinated management to avoid failures and minimize downtime. The authors discuss the high cost of failure in terms of both economic consequences and delay in time-to-market, as well as operational complexities that come with managing large GPU clusters.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">gpu-infrastructure</span>
+                        
+                        <span class="label-tag">cloud-computing</span>
+                        
+                        <span class="label-tag">reliability-strategies</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/compute/a-guide-to-architecting-reliable-gpu-infrastructure/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="b458feaf9dbdd3b6">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/identity-security/securing-ai-inference-on-gke-with-model-armor/" target="_blank" rel="noopener">Securing AI Inference on GKE with Model Armor</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="b458feaf9dbdd3b6" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Model Armor is a guardrail service that integrates directly into the network data path with Google Kubernetes Engine (GKE) Service Extensions to implement a hardened, high-performance inference stack. Traditional firewalls aren't designed to catch unique AI-driven attack vectors like prompt injection and sensitive data leakage. To address these risks, developers should use Model Armor to fortify their services against adversarial inputs and strictly moderate model outputs. The service acts as an intelligent gatekeeper that inspects traffic before it reaches the model and after the model responds, providing protection without requiring changes to application code.</p><p class="summary">The solution is decoupled security with Model Armor, which addresses operational risks such as opacity, inflexibility, and monitoring difficulty by detecting and blocking prompt injection, filtering responses for hate speech and sensitive data, and scanning outputs for policy violations. A balanced security-performance stack can be constructed by combining GKE, Model Armor, and high-throughput storage.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">model-armor</span>
+                        
+                        <span class="label-tag">gke</span>
+                        
+                        <span class="label-tag">ai-security</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security-governance</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/identity-security/securing-ai-inference-on-gke-with-model-armor/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="a73be9984584efdb">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/serverless/cloud-run-worker-pools-at-estee-lauder-companies/" target="_blank" rel="noopener">Estee Lauder Companies uses Cloud Run worker pools for pull-based agentic workloads</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="a73be9984584efdb" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Estee Lauder Companies has successfully implemented Cloud Run worker pools to manage its pull-based and distributed workload, specifically for its generative AI application, Jo Malone London's AI Scent Advisor. The company used worker pools to decouple the user-facing web tier from LLM operations, achieving 100% message durability, strong UI latency SLAs, and minimal operations overhead. This modular architecture has enabled Estee Lauder Companies to rapidly launch specialized AI advisors across its diverse house of brands.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cloud-run</span>
+                        
+                        <span class="label-tag">agentic-workloads</span>
+                        
+                        <span class="label-tag">serverless</span>
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">distributed-systems</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/serverless/cloud-run-worker-pools-at-estee-lauder-companies/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="166ea0eabc1525b8">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/business-metrics-in-grafana-cloud-get-an-ai-assist-to-help-securely-analyze-your-data/" target="_blank" rel="noopener">Using Grafana Cloud's Private Data Source Connect and AI Assistant to Analyze Business Metrics Securely</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="166ea0eabc1525b8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This blog post discusses how businesses can use Grafana Cloud's private data source connect (PDC) and its AI assistant to securely analyze their business metrics. PDC allows users to connect their observability platform to rich, proprietary datasets that reside in private networks without compromising security or managing complex network infrastructure. The AI assistant, part of the PDC solution, can access and visualize this data using natural language queries.</p><p class="summary">Grafana Cloud's PDC is a key feature for enterprise-grade observability, establishing a secure, encrypted, private connection between the Grafana Cloud instance and data sources hosted in private networks. This allows users to avoid complexity in managing VPNs or network-level access controls while maintaining security and scalability.</p><p class="summary">The blog post also highlights the importance of PostgreSQL in analytics beyond metrics, as it can query relational data with complex queries, joins, and rich datasets. By connecting PostgreSQL via PDC, users can unlock deep analytics directly within their Grafana dashboards.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/business-metrics-in-grafana-cloud-get-an-ai-assist-to-help-securely-analyze-your-data/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d32203ec7305bdad">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Query fair usage in Grafana Cloud</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="d32203ec7305bdad" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana Cloud's query fair usage policy is designed to prevent abuse from extremely resource-intensive queries while allowing typical usage without extra charges. The policy keeps costs predictable, encourages efficient querying, and protects shared infrastructure. To understand your usage ratio and identify the source of query usage, you can view the cost of a query before running it or check the billing dashboard.</p><p class="summary">You can find the query fair usage by going to the Billing/Usage dashboard and scrolling down to the Logs Ingestion and Query Details section, or by using the newly redesigned Cost Management and billing experience. You can also utilize the Loki query fair usage dashboard for hosted Grafana customers.</p><p class="summary">To determine the source of query usage, you can use the Loki query fair usage dashboard, which shows a breakdown of your query usage, query type, dashboard, Grafana-alert, and Explore/other. The dashboard provides detailed information on highest volume queries, including the originating query, Grafana username, rule and dashboard names, query size in bytes, and query execution frequency.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">grafana-cloud</span>
+                        
+                        <span class="label-tag">billing</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c8c9d4affd3e7293">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Observability in Go Where to Start and What Matters Most</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="c8c9d4affd3e7293" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Observability in Go is a crucial aspect of debugging systems, as figuring out what's happening in the system can be more difficult than fixing the issue itself. In this podcast episode, experts discuss where to start with observability in Go, highlighting the importance of logs, context, metrics, traces, and profiling.</p><p class="summary">The conversation begins by emphasizing the need for simplicity and standardization when starting a new project. It's recommended to use established libraries and frameworks, such as the Go standard library or well-maintained third-party libraries. The experts also stress the value of turning logs into metrics, using context to understand system behavior, and tracing complex program flows.</p><p class="summary">The discussion touches on practical lessons for implementing observability in Go, including using pprof effectively and leveraging eBPF for visibility beyond application boundaries. The episode concludes by discussing when it's time to reach for advanced techniques like tracing, with the experts noting that this typically applies to more complicated or large-scale projects.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">go</span>
+                        
+                        <span class="label-tag">logs</span>
+                        
+                        <span class="label-tag">metrics</span>
+                        
+                        <span class="label-tag">profiling</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding performance bottlenecks with Pyroscope and Alloy on TON blockchain</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This blog post discusses how continuous profiling using Alloy and Pyroscope can help optimize performance in blockchain validation algorithms. The authors used real-world examples from last year's TON blockchain optimization contest, a C++ developer challenge where contestants had to squeeze every microsecond out of a blockchain validation algorithm. They employed Alloy, an open-source OpenTelemetry collector, with built-in Prometheus pipelines and support for metrics, logs, traces, and profiles. By leveraging Alloy's eBPF-based CPU profiler, they were able to identify hotspots and track optimization progress without modifying the contestant code.</p><p class="summary">The authors set up Alloy by configuring it to capture detailed profiling data from the TON blockchain validation algorithm. They used Pyroscope to forward the profiling data to Grafana Cloud for analysis. This approach allowed them to gain immediate visibility into performance bottlenecks in the algorithm.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ton</span>
+                        
+                        <span class="label-tag">blockchain</span>
+                        
+                        <span class="label-tag">cryptocurrency</span>
+                        
+                        <span class="label-tag">profiling</span>
+                        
+                        <span class="label-tag">optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2f2d7e8dd2d6261b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana Security Release</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Grafana has released a new version, 12.4.2, which includes critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880. The company recommends upgrading to the newly released version as soon as possible. Two vulnerabilities were patched: SQL expressions arbitrary file write enabling remote code execution (CVSS score 9.1 CRITICAL) and unauthenticated denial-of-service via OpenFeature endpoint (CVSS score 7.5 HIGH). Users can reduce risk by disabling the sqlExpressions feature toggle, updating Sqlyze to at least v1.5.0 or disabling it, disabling all AWS data sources, deploying in a highly available environment with automatic restarts, or implementing a reverse proxy. The company has coordinated closely with cloud providers and customers under embargo.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">vulnerabilities</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="9907b88688bae287">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/deutsch-kanadische-ki-allianz-aleph-alpha-und-cohere-verhandeln-ueber-zusammenschluss-2604-207400.html" target="_blank" rel="noopener">German-Canadian AI Alliance Discusses Potential Merger of Aleph Alpha and Cohere</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="9907b88688bae287" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The German-Canadian AI Alliance, a partnership between the Canadian government and the German Federal Ministry for Economic Affairs and Energy, is exploring the possibility of merging Aleph Alpha and Cohere. A financial investment from the federal government remains possible in the future. The alliance aims to create a collaborative environment that fosters innovation and knowledge sharing among its member organizations.</p><p class="summary">The potential merger would bring together two prominent AI companies, Aleph Alpha and Cohere, which are known for their expertise in natural language processing and artificial intelligence. A combined entity would likely benefit from increased resources, talent, and access to cutting-edge technology.</p><p class="summary">While no official decisions have been made, the alliance's exploration of a merger suggests a growing interest in collaborative efforts within the AI sector.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai-merger</span>
+                        
+                        <span class="label-tag">german-canadian-alliance</span>
+                        
+                        <span class="label-tag">canadian-government</span>
+                        
+                        <span class="label-tag">innovation</span>
+                        
+                        <span class="label-tag">research</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/deutsch-kanadische-ki-allianz-aleph-alpha-und-cohere-verhandeln-ueber-zusammenschluss-2604-207400.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0cc4124466d461c0">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-magnetische-bosch-pro-wasserwaage-bei-amazon-im-preisfall-2604-207398.html" target="_blank" rel="noopener">Magnetic Bosch Pro Water Scale on Sale at Amazon</a></h3>
+                        
+                        <button class="btn-read" data-id="0cc4124466d461c0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">A compact magnetic water scale from Bosch Professional is now available on Amazon at a lower price, offering three different models with varying features.</p><p class="summary">The article discusses the sale of this product and its updated pricing on Amazon. The author notes that the water scale has become more affordable, making it an attractive option for those looking for a reliable and compact scale. However, no specific details about the products' technical specifications or how they differ from one another are provided in the response.</p><p class="summary">The article appears to be unrelated to technology or programming topics, focusing instead on a sale at Amazon rather than offering advice or guidance on software development, cloud computing, or other related subjects.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">amazon</span>
+                        
+                        <span class="label-tag">pricing</span>
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">bosch</span>
+                        
+                        <span class="label-tag">sales</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-magnetische-bosch-pro-wasserwaage-bei-amazon-im-preisfall-2604-207398.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="13e91ebe06b4dd13">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/amazon-chef-ki-dienste-bringen-in-diesem-jahr-15-milliarden-umsatz-2604-207399.html" target="_blank" rel="noopener">Amazon's AI Services Will Reach $15 Billion in Revenue This Year</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="13e91ebe06b4dd13" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Amazon is investing heavily in its artificial intelligence services, known as AWS AI or Amazon-Chef, and the company expects these investments to pay off with significant revenue gains. The growth of AI services on AWS has been driven by increasing demand for cloud-based solutions, particularly among large enterprises.</p><p class="summary">As the CEO Andy Jassy noted, the demand for AWS's services is substantial, and the company aims to capitalize on this trend. However, Amazon must also address concerns about the sustainability of its massive investments in AI research and development.</p><p class="summary">Despite these challenges, Amazon remains confident that its AI strategy will yield significant returns. The company's focus on cloud-based AI solutions has proven popular with businesses looking for scalable and secure infrastructure.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">amazon-web-services</span>
+                        
+                        <span class="label-tag">cloud-computing</span>
+                        
+                        <span class="label-tag">artificial-intelligence</span>
+                        
+                        <span class="label-tag">business-strategy</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/amazon-chef-ki-dienste-bringen-in-diesem-jahr-15-milliarden-umsatz-2604-207399.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="bd0efaf4e62db8e2">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-hazet-schraubendreher-fuer-14-klappmesser-fuer-keine-11-euro-2604-207396.html" target="_blank" rel="noopener">Hazet Tool Sets for Sale at a Low Price on Amazon</a></h3>
+                        
+                        <button class="btn-read" data-id="bd0efaf4e62db8e2" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">This blog post discusses the author's experience finding affordable tool sets from the German brand Hazet on Amazon. The author mentions that they were able to purchase a set of tools, including a clapper hammer and other hand tools, at a very low price, just 14 Euros for the entire set, making it an attractive option for those looking to buy quality tools without breaking the bank.</p><p class="summary">The post seems to be more focused on highlighting the value of Hazet tool sets rather than providing in-depth technical information about the tools or their use cases. The author's main point is that these sets are worth considering due to their affordability and quality.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">amazon</span>
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">hazet</span>
+                        
+                        <span class="label-tag">deals</span>
+                        
+                        <span class="label-tag">budget</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-hazet-schraubendreher-fuer-14-klappmesser-fuer-keine-11-euro-2604-207396.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="9dfba4896d29fa6b">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/ios-zwischenspeicher-macht-geloeschte-signal-nachrichten-sichtbar-2604-207397.html" target="_blank" rel="noopener">iOS Notification Cache Reveals Deleted Messages</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="9dfba4896d29fa6b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">The article discusses a lesser-known feature in iOS that can reveal deleted messages from the notification cache, even after they have been purged. This occurs when a specific storage area for notifications is enabled, making deleted messages visible until this setting is disabled or cleared.</p><p class="summary">This phenomenon was discovered by users who were able to view their deleted messages through an iPhone's notification history. The article notes that this issue may be related to security concerns and raises questions about the reliability of Apple's built-in deletion mechanisms.</p><p class="summary">The feature has raised awareness among iOS users, highlighting a potential vulnerability in the operating system's notification management. While not a critical issue for most users, it highlights the importance of being aware of iPhone settings and their implications on data privacy.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ios</span>
+                        
+                        <span class="label-tag">notification-cache</span>
+                        
+                        <span class="label-tag">deleted-messages</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/ios-zwischenspeicher-macht-geloeschte-signal-nachrichten-sichtbar-2604-207397.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="7cdc5279d0211179">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Anthropic-KI-Mythos-Dringende-Warnung-an-US-Banken-BSI-erwartet-Umwaelzungen-11251450.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Warning to US Banks on Anthropic-KI Mythos</a></h3>
+                        
+                        <button class="btn-read" data-id="7cdc5279d0211179" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-10</p>
+                    
+                    <p class="summary">The article discusses the potential risks and consequences of Anthropics new KI (Artificial Intelligence) mythos for US banks. The CEO of the Bank for International Settlements (BSI), Agustín Carstens, has warned that the rapid development of AI could lead to significant changes in the financial sector. This includes a shift away from traditional banking practices and towards more tech-savvy institutions.</p><p class="summary">The article highlights the potential impact of AI on the banking industry, including increased efficiency, improved security, and new opportunities for innovation. However, it also notes that there are risks associated with AI adoption, such as job displacement and cybersecurity threats. The BSI is urging US banks to be cautious in their approach to AI and to prioritize responsible development and deployment.</p><p class="summary">In summary, the article emphasizes the importance of considering the potential consequences of AI on the financial sector and encourages caution when implementing new technologies. As AI continues to evolve, it is crucial for institutions like US banks to stay informed and adapt to changing landscape.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">artificial-intelligence</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Anthropic-KI-Mythos-Dringende-Warnung-an-US-Banken-BSI-erwartet-Umwaelzungen-11251450.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="5e25954de2ec22a4">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Bugfix-Update-fuer-Tahoe-bringt-macOS-auf-Stand-26-4-1-11251318.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">New macOS 26.4.1 Version Available to Fix Wi-Fi Issue</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="5e25954de2ec22a4" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-10</p>
+                    
+                    <p class="summary">The latest update for macOS is now available, addressing a specific Wi-Fi issue that had been causing problems for users. This new version builds on the previous release, which was introduced just two weeks prior. Apple has released an updated version of the operating system to resolve a WLAN problem that was causing issues for some Mac users.</p><p class="summary">The update aims to improve the stability and performance of macOS, addressing a specific issue with Wi-Fi connectivity. By fixing this particular problem, Apple hopes to enhance the overall user experience on their devices.</p><p class="summary">Apple has made available the latest version of macOS 26.4.1 as an update to help resolve issues related to Wi-Fi connectivity.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">macos</span>
+                        
+                        <span class="label-tag">wifi</span>
+                        
+                        <span class="label-tag">bugfix</span>
+                        
+                        <span class="label-tag">apple</span>
+                        
+                        <span class="label-tag">updates</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Bugfix-Update-fuer-Tahoe-bringt-macOS-auf-Stand-26-4-1-11251318.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c12cca2f4dd8c91a">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Vorsicht-Kunde-Wenn-der-Glasfaseranschluss-lahmt-11248416.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Be Careful, Customer! – What to Do When Fiber Optic Speeds Aren't Delivered</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="c12cca2f4dd8c91a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-10</p>
+                    
+                    <p class="summary">This blog post is about a consumer's experience with a fiber optic internet service provider. The customer had ordered a high-speed connection but was not getting the promised speeds. The company was unresponsive and unwilling to help resolve the issue. To address this problem, the author provides advice on how to check the speed of one's connection and what rights consumers have when dealing with such issues.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">fiber-optic-internet</span>
+                        
+                        <span class="label-tag">customer-service</span>
+                        
+                        <span class="label-tag">speed-testing</span>
+                        
+                        <span class="label-tag">online-protection</span>
+                        
+                        <span class="label-tag">consumer-rights</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Vorsicht-Kunde-Wenn-der-Glasfaseranschluss-lahmt-11248416.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="768c7c9bb13e17d6">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Hohe-Energiekosten-und-Regularien-OpenAI-pausiert-Stargate-UK-11251304.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">OpenAI Halts UK Project Amid Energy Costs and Regulations</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="768c7c9bb13e17d6" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">OpenAI has halted its UK project, Stargate, due to high energy costs and regulations. The company plans to continue discussing with the UK government in London. Despite the halt, OpenAI remains committed to exploring opportunities for international collaboration.</p><p class="summary">The decision was made following a review of the project's economic viability. High energy costs and regulatory challenges have led to increased expenses, making it difficult for the project to proceed. However, OpenAI is open to continuing negotiations with the UK government to address these concerns.</p><p class="summary">In order to strike a balance between innovation and sustainability, companies like OpenAI must carefully consider their business models and operating costs. This can involve exploring alternative energy sources or finding ways to reduce expenses without compromising on performance.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">uk-government</span>
+                        
+                        <span class="label-tag">energy-efficient-solutions</span>
+                        
+                        <span class="label-tag">openai</span>
+                        
+                        <span class="label-tag">stargate-uk</span>
+                        
+                        <span class="label-tag">ai-innovation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Hohe-Energiekosten-und-Regularien-OpenAI-pausiert-Stargate-UK-11251304.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7b78c1935dfa0fc1">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/KI-Wettlauf-Meta-und-CoreWeave-mit-21-Milliarden-Dollar-Deal-11251258.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Meta Buys CoreWeave's AI Cloud Capability for $21 Billion Over Six Years</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        <button class="btn-read" data-id="7b78c1935dfa0fc1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-09</p>
+                    
+                    <p class="summary">Meta has acquired CoreWeave, a company that provides cloud-based artificial intelligence (AI) capabilities, in a deal worth $21 billion over six years. The acquisition is part of Meta's ongoing efforts to develop its own AI models and technologies.</p><p class="summary">The deal marks a significant investment in the rapidly growing field of AI, with Meta seeking to expand its offerings beyond social media platforms. CoreWeave's technology will likely enhance Meta's ability to develop more sophisticated AI models, including its new Muse Spark model announced just one day prior to the acquisition.</p><p class="summary">While details about the acquisition are not yet publicly available, it is clear that Meta sees significant potential in CoreWeave's technology and is willing to invest heavily to secure it. As the AI landscape continues to evolve, this deal highlights the growing importance of cloud-based AI capabilities for major tech companies.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">metaverse</span>
+                        
+                        <span class="label-tag">coreweave</span>
+                        
+                        <span class="label-tag">cloud-computing</span>
+                        
+                        <span class="label-tag">business-acquisitions</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/KI-Wettlauf-Meta-und-CoreWeave-mit-21-Milliarden-Dollar-Deal-11251258.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">07:00:02</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">07:41:52</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">41m 49s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.7</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">29 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">0</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-10 07:41 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
