@@ -707,13 +707,6 @@
                 </li>
                 
                 <li class="sidebar-item">
-                    <a href="digest-2026-04-12-01-49.html" class="active">
-                        <span>Sunday, April 12, 2026 – 01:49</span>
-                        <span class="date-badge">Today</span>
-                    </a>
-                </li>
-                
-                <li class="sidebar-item">
                     <a href="digest-2026-04-12-01-35.html" class="active">
                         <span>Sunday, April 12, 2026 – 01:35</span>
                         <span class="date-badge">Today</span>
@@ -744,13 +737,6 @@
                 <li class="sidebar-item">
                     <a href="digest-2026-04-11-23-39.html" >
                         <span>Saturday, April 11, 2026 – 23:39</span>
-                        
-                    </a>
-                </li>
-                
-                <li class="sidebar-item">
-                    <a href="digest-2026-04-11-17-47.html" >
-                        <span>Saturday, April 11, 2026 – 17:47</span>
                         
                     </a>
                 </li>
@@ -918,7 +904,7 @@
                 
                 <div class="article" data-id="d8d5337eb03785de">
                     <div class="article-header">
-                        <h3><a href="https://www.cncf.io/blog/2026/04/11/what-i-learned-at-my-first-kubecon-cloudnativecon-as-a-high-school-speaker/" target="_blank" rel="noopener">My First KubeCon + CloudNativeCon Experience as a High School Speaker</a></h3>
+                        <h3><a href="https://www.cncf.io/blog/2026/04/11/what-i-learned-at-my-first-kubecon-cloudnativecon-as-a-high-school-speaker/" target="_blank" rel="noopener">What I Learned at My First KubeCon + CloudNativeCon as a High School Speaker</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -928,7 +914,19 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The author attended KubeCon + CloudNativeCon Europe 2026, a major open-source conference, and presented their poster on hurricane prediction using Kubernetes and other tools. They were overwhelmed by the event's size but enjoyed sharing their project with others, hearing about similar work, and learning from attendees.</p>
+                    <p class="summary">The author attended their first KubeCon + CloudNativeCon Europe 2026, one of the largest open-source conferences in the world. They were selected as a speaker and presented their project on hurricane prediction using Kubernetes, kgateway, vLLM, FourCastNet, and CFD models.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">cloudnativecon</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://www.cncf.io/blog/2026/04/11/what-i-learned-at-my-first-kubecon-cloudnativecon-as-a-high-school-speaker/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
@@ -958,14 +956,24 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">Kubernetes is a complex platform that can't be managed with just one tool. To make it more manageable, various tools were created to help users handle different tasks efficiently. These tools include K9s and Lens for a terminal UI, ArgoCD for automated deployment from Git, KEDA for scaling based on metrics, Karpenter for dynamic node allocation, and Network Policies for security.</p>
+                    <p class="summary">The article explains the need for various tools in the Kubernetes ecosystem due to its limitations. It introduces several tools that help streamline operations, such as K9s/Lens for monitoring and navigating clusters, ArgoCD for automated deployment, KEDA for dynamic pod scaling, Karpenter for self-healing nodes, and Network Policies for securing traffic.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">open-source-monitoring-otlp</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sivn22/every_kubernetes_tool_explained_in_one_post_and/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="e4cd17e7d49cb06a">
                     <div class="article-header">
-                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sijmf5/how_we_cut_pod_startup_time_by_60_using_preloaded/" target="_blank" rel="noopener">How we cut pod startup time by 60% using preloaded image caches on self-managed nodes</a></h3>
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sijmf5/how_we_cut_pod_startup_time_by_60_using_preloaded/" target="_blank" rel="noopener">Optimizing Pod Startup Time on Self-Managed Kubernetes Cluster</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -975,28 +983,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">Translates to: "How We Reduced Pod Startup Time by 60% Using Preloaded Image Caches on Self-Managed Nodes"</p><p class="summary">The article describes a solution for reducing pod startup time in a self-managed Kubernetes cluster. By using a preloader DaemonSet that pulls commonly used images as part of the node initialization sequence, the authors were able to reduce average pod startup time from around 4.8 minutes to 1.9 minutes. This resulted in an overall reduction of pod startup time across all workloads by about 60%. The solution relies on a predictable image set and requires disk space sizing accordingly.</p>
-                    
-                    <div class="labels">
-                        
-                        <span class="label-tag">kubernetes</span>
-                        
-                        <span class="label-tag">containerization</span>
-                        
-                        <span class="label-tag">open-source</span>
-                        
-                        <span class="label-tag">monitoring</span>
-                        
-                        <span class="label-tag">otlp</span>
-                        
-                    </div>
+                    <p class="summary">A self-managed Kubernetes cluster was optimized to reduce pod startup time from 4.8 minutes to 1.9 minutes using preloaded image caches on nodes. A DaemonSet was created to run a preloader that pulls commonly used images during node boot time, reducing startup time by 60%. This solution works well for predictable image sets but may require adjustments for dynamic workloads or sufficient disk space.</p>
                     
                     <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sijmf5/how_we_cut_pod_startup_time_by_60_using_preloaded/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="d98b9d3b480faa34">
                     <div class="article-header">
-                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sijon6/how_are_you_handling_pod_disruption_budgets_in/" target="_blank" rel="noopener">Handling pod disruption budgets with aggressive HPA scaling.</a></h3>
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sijon6/how_are_you_handling_pod_disruption_budgets_in/" target="_blank" rel="noopener">How are you handling pod disruption budgets in clusters with aggressive HPA scaling?</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1006,7 +1000,7 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">A cluster manager is experiencing issues with HPA's scale-down behavior and PDBs blocking node evictions during cluster autoscaling, causing stale states. They've tried adjusting PDB settings and HPA stabilization windows but none of these solutions feel clean. They're seeking advice on how to handle this issue in production.</p>
+                    <p class="summary">A user is experiencing a problem where Pod Disruption Budgets (PDBs) on critical workloads are blocking evictions during cluster autoscaler scale-down events, leading to stalled drains. They have tried various solutions, but none feel clean. They're seeking advice from others on how to handle this issue in production.</p>
                     
                     <div class="labels">
                         
@@ -1014,9 +1008,9 @@
                         
                         <span class="label-tag">hpa</span>
                         
-                        <span class="label-tag">cluster-autoscaler</span>
-                        
                         <span class="label-tag">pod-disruption-budget</span>
+                        
+                        <span class="label-tag">cluster-autoscaler</span>
                         
                         <span class="label-tag">scaling</span>
                         
@@ -1027,7 +1021,7 @@
                 
                 <div class="article" data-id="3add635b47b7eb0e">
                     <div class="article-header">
-                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1siedcf/replicaset_template_has_two_containers_instead_of/" target="_blank" rel="noopener">Kubernetes ReplicaSet Template Has Two Containers Instead of One.</a></h3>
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1siedcf/replicaset_template_has_two_containers_instead_of/" target="_blank" rel="noopener">Kubernetes ReplicaSet Template Error When Creating a New Container.</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1037,7 +1031,7 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">A user is experiencing an issue with their Kubernetes ReplicaSet template, where it contains two containers (one old and one new) despite only having a single container in the YAML configuration file. The error message indicates a duplicate port definition between the two containers.</p>
+                    <p class="summary">The error occurs when trying to apply a deployment configuration YAML file that contains two containers with the same port definition. The issue arises from the fact that you have rolled back and then reapplied the same configuration, resulting in two container definitions being created by the ReplicaSet template. To resolve this, ensure that your application's container definition is unique or use a unique container name for each instance.</p>
                     
                     <div class="labels">
                         
@@ -1047,9 +1041,9 @@
                         
                         <span class="label-tag">deployment</span>
                         
-                        <span class="label-tag">yaml</span>
+                        <span class="label-tag">replica set</span>
                         
-                        <span class="label-tag">errors</span>
+                        <span class="label-tag">containers</span>
                         
                     </div>
                     
@@ -1071,7 +1065,7 @@
                 
                 <div class="article" data-id="f12489a0fef86eaa">
                     <div class="article-header">
-                        <h3><a href="https://aisle.com/blog/ai-cybersecurity-after-mythos-the-jagged-frontier" target="_blank" rel="noopener">Small models also found the vulnerabilities that Mythos found</a></h3>
+                        <h3><a href="https://aisle.com/blog/ai-cybersecurity-after-mythos-the-jagged-frontier" target="_blank" rel="noopener">AI cybersecurity threats after Mythos, the jagged frontier of small models</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1081,14 +1075,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">A recent article discusses how smaller AI models have been discovering vulnerabilities in cybersecurity systems, similar to Mythos, a notable example of this. Researchers are exploring ways to improve vulnerability detection in AI-powered security systems.</p>
+                    <p class="summary">A recent article discusses how even small models in artificial intelligence can be vulnerable to cyber threats, similar to those faced by larger systems. This raises concerns about the growing importance of cybersecurity measures for all types of AI systems, regardless of size.</p>
                     
                     <a class="read-more" href="https://aisle.com/blog/ai-cybersecurity-after-mythos-the-jagged-frontier" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="a8daccb1dafd53ee">
                     <div class="article-header">
-                        <h3><a href="https://www.theregister.com/2026/04/10/south_korea_data_access_universal/" target="_blank" rel="noopener">South Korea to Introduce Universal Basic Mobile Data Access</a></h3>
+                        <h3><a href="https://www.theregister.com/2026/04/10/south_korea_data_access_universal/" target="_blank" rel="noopener">South Korea to Mandate Universal Basic Mobile Data Access for All Citizens</a></h3>
                         
                         
                         <button class="btn-read" data-id="a8daccb1dafd53ee" aria-label="Mark as read">Read</button>
@@ -1096,14 +1090,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">South Korea's government has announced plans to introduce a universal basic mobile data access program, providing low-income households with free or subsidized mobile phone services. The goal is to improve digital inclusion and bridge the gap between those who have access to the internet and those who do not.</p>
+                    <p class="summary">The South Korean government has announced plans to introduce a universal basic mobile data access policy, requiring all citizens and residents to have access to affordable internet connectivity. This move aims to bridge the digital divide and ensure that everyone in the country has access to essential online services.</p>
                     
                     <a class="read-more" href="https://www.theregister.com/2026/04/10/south_korea_data_access_universal/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="82bcea5b75cc3577">
                     <div class="article-header">
-                        <h3><a href="https://www.xda-developers.com/frances-government-ditching-windows-for-linux/" target="_blank" rel="noopener">France's government is ditching Windows for Linux, says US tech a strategic risk.</a></h3>
+                        <h3><a href="https://www.xda-developers.com/frances-government-ditching-windows-for-linux/" target="_blank" rel="noopener">France's government is abandoning Windows for Linux, a US tech move deemed strategic risk.</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1113,7 +1107,7 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The French government has announced plans to switch from using Microsoft Windows to open-source Linux as part of its efforts to reduce reliance on American technology. This decision comes amid concerns over the potential risks associated with relying on US-based companies and their software.</p>
+                    <p class="summary">The French government has announced plans to switch from using Windows operating systems to open-source Linux solutions. This decision comes after a US tech company expressed concerns that the use of Windows could pose strategic risks to national security and economic interests. The change aims to enhance France's independence from foreign technology suppliers and reduce reliance on proprietary software. Experts view this move as a significant shift in the country's approach to technology adoption, driven by growing concerns about data privacy and cybersecurity.</p>
                     
                     <div class="labels">
                         
@@ -1121,11 +1115,11 @@
                         
                         <span class="label-tag">windows</span>
                         
-                        <span class="label-tag">open source</span>
+                        <span class="label-tag">us-tech</span>
                         
-                        <span class="label-tag">french government</span>
+                        <span class="label-tag">france</span>
                         
-                        <span class="label-tag">us tech</span>
+                        <span class="label-tag">government</span>
                         
                     </div>
                     
@@ -1134,7 +1128,9 @@
                 
                 <div class="article" data-id="7a54f3ea5db78111">
                     <div class="article-header">
-                        <h3><a href="https://news.ycombinator.com/item?id=47727960" target="_blank" rel="noopener">Pardonned.com – A searchable database of US Pardons</a></h3>
+                        <h3><a href="https://news.ycombinator.com/item?id=47727960" target="_blank" rel="noopener">Show HN: Pardonned.com – A searchable database of US Pardons</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
                         
                         
                         <button class="btn-read" data-id="7a54f3ea5db78111" aria-label="Mark as read">Read</button>
@@ -1142,7 +1138,21 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">Pardonned.com is a static website that allows users to search for and verify information on US pardons. The site was built using Playwright to scrape data from the DOJ website, SQLite as a local database, and Astro 6 for generating the website. All code is open source and available on Github.</p>
+                    <p class="summary">Pardonned.com is an open-source, static website that allows users to search and verify claims made by Liz Oyer about pardons. The website uses Playwright for web scraping, SQLite as a local database, and Astro 6 to build the site from the database. It's built on top of Github and has over 349 comments and 182 points on Hacker News.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">github</span>
+                        
+                        <span class="label-tag">astro</span>
+                        
+                        <span class="label-tag">sqlite</span>
+                        
+                        <span class="label-tag">playwright</span>
+                        
+                        <span class="label-tag">opendata</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://news.ycombinator.com/item?id=47727960" target="_blank" rel="noopener">Read full article →</a>
                 </div>
@@ -1159,19 +1169,19 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The article is a personal reflection from the author who has been working at Amazon Web Services (AWS) for 20 years. The author shares their experiences, both positive and negative, about their time at the company. They discuss the impact of technological advancements on their job and how it has changed over the years.</p>
+                    <p class="summary">The author shares their personal experience of working at Amazon Web Services (AWS) for 20 years, reflecting on the company's growth and evolution during that time. They discuss the challenges they faced, the impact of AWS on the industry, and what they've learned about cloud computing.</p>
                     
                     <div class="labels">
                         
-                        <span class="label-tag">kubernetes</span>
+                        <span class="label-tag">aws</span>
+                        
+                        <span class="label-tag">amazon</span>
                         
                         <span class="label-tag">cloud computing</span>
                         
-                        <span class="label-tag">aws</span>
+                        <span class="label-tag">career development</span>
                         
-                        <span class="label-tag">software development</span>
-                        
-                        <span class="label-tag">career advice</span>
+                        <span class="label-tag">job satisfaction</span>
                         
                     </div>
                     
@@ -1193,20 +1203,36 @@
                 
                 <div class="article" data-id="166ea0eabc1525b8">
                     <div class="article-header">
-                        <h3><a href="https://grafana.com/blog/business-metrics-in-grafana-cloud-get-an-ai-assist-to-help-securely-analyze-your-data/" target="_blank" rel="noopener">Business metrics in Grafana Cloud: Get an AI assist to help securely analyze your data</a></h3>
+                        <h3><a href="https://grafana.com/blog/business-metrics-in-grafana-cloud-get-an-ai-assist-to-help-securely-analyze-your-data/" target="_blank" rel="noopener">Using AI Assistant in Grafana Cloud to Analyze Business Metrics Securely</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
                         
                         
                         <button class="btn-read" data-id="166ea0eabc1525b8" aria-label="Mark as read">Read</button>
                     </div>
                     
-                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    <p class="summary">Grafana Cloud's private data source connect (PDC) allows businesses to securely analyze their rich, proprietary datasets without compromising security or managing complex network infrastructure. With the help of PDC and Grafana Assistant, users can visualize and query their data using AI-powered tools. This blog post demonstrates how to access private data securely in Grafana Cloud and use AI assistant to translate complex database queries into human-readable language and visualizations.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://grafana.com/blog/business-metrics-in-grafana-cloud-get-an-ai-assist-to-help-securely-analyze-your-data/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="d32203ec7305bdad">
                     <div class="article-header">
-                        <h3><a href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Query fair usage in Grafana Cloud: What it is and how it affects your logs observability practice</a></h3>
+                        <h3><a href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Understanding fair usage in Grafana Cloud for better log observability</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1214,7 +1240,51 @@
                         <button class="btn-read" data-id="d32203ec7305bdad" aria-label="Mark as read">Read</button>
                     </div>
                     
-                    <p class="summary">Grafana Cloud's query fair usage policy allows customers to query up to 100 times their monthly ingested log volume at no additional charge. This policy aims to keep costs predictable, encourage efficient querying, and protect shared infrastructure while still allowing for generous exploration of logs. The policy helps prevent abuse from resource-intensive queries.</p>
+                    <p class="summary">Grafana Cloud offers a generous formula that allows users to query up to 100 times their monthly ingested log volume in gigabytes for free. However, if not managed carefully, this can lead to unexpected bills. This article will help readers understand the concept of fair usage, its importance, and how to find their usage ratio on Grafana Cloud. It also provides best practices for managing observability and applying good policies to prevent abuse.</p>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c8c9d4affd3e7293">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Observability in Go: Where to start and what matters most</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="c8c9d4affd3e7293" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">The article discusses the importance of observability in Go programming, focusing on where to start and how to integrate metrics, traces, and profiling into complex systems. Experts share practical lessons on turning logs into metrics, avoiding common pitfalls, and using pprof effectively.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">go</span>
+                        
+                        <span class="label-tag">observability</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">debugging</span>
+                        
+                        <span class="label-tag">opensource</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="656366b777394a7a">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding Performance Bottlenecks with Pyroscope and Alloy: An Example Using TON Blockchain</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This blog post explores how continuous profiling using Alloy and Pyroscope can improve performance optimization. The authors used real-world examples from the 2023 Open Network (TON) blockchain optimization contest to demonstrate how modern profiling tools accelerate the optimization process. They leveraged Alloy's eBPF-based CPU profiler, pyroscope.ebpf, to capture detailed profiling data and identify performance bottlenecks without modifying the contestant code.</p>
                     
                     <div class="labels">
                         
@@ -1230,62 +1300,34 @@
                         
                     </div>
                     
-                    <a class="read-more" href="https://grafana.com/blog/query-fair-usage-in-grafana-cloud-what-is-it-and-how-it-affects-your-logs-observability-practice/" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="c8c9d4affd3e7293">
-                    <div class="article-header">
-                        <h3><a href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Observability in Go - Where to Start and What Matters Most</a></h3>
-                        
-                        <span class="badge-for-you">For you</span>
-                        
-                        
-                        <button class="btn-read" data-id="c8c9d4affd3e7293" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="summary">The podcast discusses the importance of observability in Go programming, where hosts Mat Ryer, Donia Chaiehloudj, Charles Korn, and Bryan Boreham share practical lessons on implementing observability in Go projects. They cover topics such as logs, context, metrics, tracing, profiling, and eBPF to gain visibility beyond the application.</p>
-                    
-                    <div class="labels">
-                        
-                        <span class="label-tag">go</span>
-                        
-                        <span class="label-tag">kubernetes</span>
-                        
-                        <span class="label-tag">monitoring</span>
-                        
-                        <span class="label-tag">open source</span>
-                        
-                        <span class="label-tag">otlp</span>
-                        
-                    </div>
-                    
-                    <a class="read-more" href="https://grafana.com/blog/observability-in-go-where-to-start-and-what-matters-most/" target="_blank" rel="noopener">Read full article →</a>
-                </div>
-                
-                <div class="article" data-id="656366b777394a7a">
-                    <div class="article-header">
-                        <h3><a href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Finding Performance Bottlenecks with Pyroscope and Alloy: An example using TON blockchain</a></h3>
-                        
-                        <span class="badge-for-you">For you</span>
-                        
-                        
-                        <button class="btn-read" data-id="656366b777394a7a" aria-label="Mark as read">Read</button>
-                    </div>
-                    
-                    <p class="summary">This blog post explores how continuous profiling with Alloy and Pyroscope can improve performance optimization. The authors used real-world examples from a C++ developer challenge on the TON blockchain to demonstrate the effectiveness of modern profiling tools in accelerating optimization. They leveraged Alloy's pyroscope.ebpf component to capture detailed profiling data, which allowed them to identify hotspots and track optimization progress.</p>
-                    
                     <a class="read-more" href="https://grafana.com/blog/finding-performance-bottlenecks-with-pyroscope-and-alloy-an-example-using-ton-blockchain/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="2f2d7e8dd2d6261b">
                     <div class="article-header">
-                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana security release: Critical and high severity security fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        <h3><a href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Grafana Security Release with Critical and High Severity Fixes for CVE-2026-27876 and CVE-2026-27880</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
                         
                         
                         <button class="btn-read" data-id="2f2d7e8dd2d6261b" aria-label="Mark as read">Read</button>
                     </div>
                     
-                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    <p class="summary">Grafana has released version 12.4.2 with critical and high severity security fixes for two vulnerabilities, CVE-2026-27876 and CVE-2026-27880. The patches are also available for versions 12.3, 12.2, 12.1, and 11.6. These fixes address a potential remote code execution vulnerability in the SQL expressions feature, which can be exploited by an attacker with access to execute data source queries.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security updates</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://grafana.com/blog/grafana-security-release-critical-and-high-severity-security-fixes-for-cve-2026-27876-and-cve-2026-27880/" target="_blank" rel="noopener">Read full article →</a>
                 </div>
@@ -1305,7 +1347,7 @@
                 
                 <div class="article" data-id="b2dbfb19342257b2">
                     <div class="article-header">
-                        <h3><a href="https://www.golem.de/news/bixonimania-ki-chatbots-fielen-auf-eine-erfundene-krankheit-herein-2604-207473.html" target="_blank" rel="noopener">Bixonimania: KI Chatbots fall for invented disease</a></h3>
+                        <h3><a href="https://www.golem.de/news/bixonimania-ki-chatbots-fielen-auf-eine-erfundene-krankheit-herein-2604-207473.html" target="_blank" rel="noopener">Bixonimania: AI Chatbots fall for invented disease</a></h3>
                         
                         
                         <button class="btn-read" data-id="b2dbfb19342257b2" aria-label="Mark as read">Read</button>
@@ -1313,14 +1355,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">A researcher created a fictional skin disease, and multiple AI systems quickly identified it as an accepted diagnosis, sparking concern about the reliability of artificial intelligence in medicine.</p>
+                    <p class="summary">A researcher created a non-existent skin disease, and multiple AI chatbots quickly accepted it as a recognized diagnosis. This should have raised alarm bells.</p>
                     
                     <a class="read-more" href="https://www.golem.de/news/bixonimania-ki-chatbots-fielen-auf-eine-erfundene-krankheit-herein-2604-207473.html" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="6456701dad866d4c">
                     <div class="article-header">
-                        <h3><a href="https://www.golem.de/news/digitale-souveraenitaet-99-prozent-wollen-unabhaengigkeit-aber-wechseln-nicht-2604-207472.html" target="_blank" rel="noopener">Digital Sovereignty: 99% want independence, but won't change</a></h3>
+                        <h3><a href="https://www.golem.de/news/digitale-souveraenitaet-99-prozent-wollen-unabhaengigkeit-aber-wechseln-nicht-2604-207472.html" target="_blank" rel="noopener">Digital Sovereignty: 99 Percent Want Independence But Don't Switch</a></h3>
                         
                         
                         <button class="btn-read" data-id="6456701dad866d4c" aria-label="Mark as read">Read</button>
@@ -1328,14 +1370,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The majority of Germans value digital sovereignty, yet few actually take action to assert their independence from European providers.</p>
+                    <p class="summary">A survey found that most Germans value digital sovereignty, but few take action to switch to independent providers. Despite this, European companies still use the least number of independent services.</p>
                     
                     <a class="read-more" href="https://www.golem.de/news/digitale-souveraenitaet-99-prozent-wollen-unabhaengigkeit-aber-wechseln-nicht-2604-207472.html" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="b2622c0a148bc538">
                     <div class="article-header">
-                        <h3><a href="https://www.golem.de/news/digitale-souveraenitaet-frankreich-wirft-windows-raus-2604-207471.html" target="_blank" rel="noopener">France Ditches Windows in Bid for Digital Sovereignty</a></h3>
+                        <h3><a href="https://www.golem.de/news/digitale-souveraenitaet-frankreich-wirft-windows-raus-2604-207471.html" target="_blank" rel="noopener">France Abandons Windows for Digital Sovereignty</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1345,19 +1387,19 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">France has announced its decision to abandon Microsoft's Windows operating system in favor of an open-source alternative, aiming to assert its digital sovereignty and challenge the dominance of Western tech giants.</p>
+                    <p class="summary">France has decided to abandon the use of Windows, a move aimed at promoting its concept of digital sovereignty. This decision reflects France's growing determination to assert its independence in the tech industry, following similar moves by other European Union countries.</p>
                     
                     <div class="labels">
                         
-                        <span class="label-tag">eu</span>
+                        <span class="label-tag">europe</span>
                         
                         <span class="label-tag">microsoft</span>
                         
+                        <span class="label-tag">digital sovereignty</span>
+                        
+                        <span class="label-tag">france</span>
+                        
                         <span class="label-tag">open source</span>
-                        
-                        <span class="label-tag">sov</span>
-                        
-                        <span class="label-tag">windows</span>
                         
                     </div>
                     
@@ -1366,7 +1408,9 @@
                 
                 <div class="article" data-id="9096c878bd842a4e">
                     <div class="article-header">
-                        <h3><a href="https://www.golem.de/news/jobangebot-faa-wirbt-mit-gaming-um-neue-fluglotsen-2604-207470.html" target="_blank" rel="noopener">FAA job opening via gaming campaign</a></h3>
+                        <h3><a href="https://www.golem.de/news/jobangebot-faa-wirbt-mit-gaming-um-neue-fluglotsen-2604-207470.html" target="_blank" rel="noopener">Job Offer: FAA recruits with gaming to attract new air traffic controllers</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
                         
                         
                         <button class="btn-read" data-id="9096c878bd842a4e" aria-label="Mark as read">Read</button>
@@ -1374,14 +1418,14 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The Federal Aviation Administration (FAA) is using a unique recruiting strategy to find new air traffic controllers by partnering with the gaming industry. This unusual approach aims to attract younger, tech-savvy individuals who might be interested in the field of aviation.</p>
+                    <p class="summary">The Federal Aviation Administration (FAA) is using a unique approach to recruit new air traffic controllers by promoting the job through gaming platforms and online communities. The goal is to appeal to younger, tech-savvy individuals who might be interested in this career path.</p>
                     
                     <a class="read-more" href="https://www.golem.de/news/jobangebot-faa-wirbt-mit-gaming-um-neue-fluglotsen-2604-207470.html" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="253401d348b4c2bc">
                     <div class="article-header">
-                        <h3><a href="https://www.golem.de/news/anzeige-amazon-fire-tv-stick-hd-jetzt-fuer-nur-24-99-euro-2604-207449.html" target="_blank" rel="noopener">Amazon Fire TV Stick HD now available for $24.99</a></h3>
+                        <h3><a href="https://www.golem.de/news/anzeige-amazon-fire-tv-stick-hd-jetzt-fuer-nur-24-99-euro-2604-207449.html" target="_blank" rel="noopener">Amazon Fire TV Stick HD Now Available for 24.99 Euro</a></h3>
                         
                         
                         <button class="btn-read" data-id="253401d348b4c2bc" aria-label="Mark as read">Read</button>
@@ -1389,21 +1433,7 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The new Amazon Fire TV Stick HD is a streaming device that turns any TV into a smart center, and it's now priced at $24.99, which is almost half off the original price.</p>
-                    
-                    <div class="labels">
-                        
-                        <span class="label-tag">amazon-fire-tv-stick-hd</span>
-                        
-                        <span class="label-tag">streaming-device</span>
-                        
-                        <span class="label-tag">smart-tv</span>
-                        
-                        <span class="label-tag">tv-streaming</span>
-                        
-                        <span class="label-tag">affordable-gadgets</span>
-                        
-                    </div>
+                    <p class="summary">The new Amazon Fire TV Stick HD transforms any TV into a smart hub and is now priced at nearly half the original price, making it an affordable option.</p>
                     
                     <a class="read-more" href="https://www.golem.de/news/anzeige-amazon-fire-tv-stick-hd-jetzt-fuer-nur-24-99-euro-2604-207449.html" target="_blank" rel="noopener">Read full article →</a>
                 </div>
@@ -1423,7 +1453,7 @@
                 
                 <div class="article" data-id="980cc6c4e28b5143">
                     <div class="article-header">
-                        <h3><a href="https://www.heise.de/news/Jetzt-patchen-Adobe-veroeffentlicht-Notfall-Sicherheitsupdate-fuer-Acrobat-Reader-11253367.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Now Patching! Adobe Releases Emergency Security Update for Acrobat Reader</a></h3>
+                        <h3><a href="https://www.heise.de/news/Jetzt-patchen-Adobe-veroeffentlicht-Notfall-Sicherheitsupdate-fuer-Acrobat-Reader-11253367.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Now patching! Adobe releases emergency security update for Acrobat Reader</a></h3>
                         
                         
                         <button class="btn-read" data-id="980cc6c4e28b5143" aria-label="Mark as read">Read</button>
@@ -1431,14 +1461,28 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">A critical vulnerability in Adobe Acrobat Reader has been exploited by attackers, and a security patch is now available for macOS and Windows to fix the issue.</p>
+                    <p class="summary">A critical vulnerability has been discovered in Adobe Acrobat Reader, allowing attackers to exploit it. An emergency security patch is now available for macOS and Windows users.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">adobe</span>
+                        
+                        <span class="label-tag">reader</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">update</span>
+                        
+                        <span class="label-tag">macos</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://www.heise.de/news/Jetzt-patchen-Adobe-veroeffentlicht-Notfall-Sicherheitsupdate-fuer-Acrobat-Reader-11253367.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="c3eb3c8ee74d794c">
                     <div class="article-header">
-                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-bestes-tablet-im-test-apple-samsung-xiaomi-und-co-im-vergleich/xdbnr3b?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Top 10 Tablets in Review - Apple, Samsung, Xiaomi and More Compared</a></h3>
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-bestes-tablet-im-test-apple-samsung-xiaomi-und-co-im-vergleich/xdbnr3b?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Top 10: Bestes Tablet im Test – Apple, Samsung, Xiaomi & Co. im Vergleich</a></h3>
                         
                         
                         <button class="btn-read" data-id="c3eb3c8ee74d794c" aria-label="Mark as read">Read</button>
@@ -1446,14 +1490,30 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The article reviews the top 10 tablets available on the market, comparing their features and performance across various brands such as Apple, Samsung, and Xiaomi. The review focuses on tablets with Android and iPadOS operating systems.</p>
+                    <p class="summary">This article reviews and compares the best tablets on the market, including models with Android and iPadOS operating systems. It tests various features such as gaming, working, and streaming to determine the top-rated tablets.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">android</span>
+                        
+                        <span class="label-tag">tablet</span>
+                        
+                        <span class="label-tag">comparison</span>
+                        
+                        <span class="label-tag">testing</span>
+                        
+                        <span class="label-tag">apple</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-10-bestes-tablet-im-test-apple-samsung-xiaomi-und-co-im-vergleich/xdbnr3b?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="c607dd53cc205a20">
                     <div class="article-header">
-                        <h3><a href="https://www.heise.de/news/US-Regierung-traf-sich-vor-Mythos-Preview-Rollout-mit-KI-Herstellern-11253281.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">US Government met with AI manufacturers before Preview Rollout</a></h3>
+                        <h3><a href="https://www.heise.de/news/US-Regierung-traf-sich-vor-Mythos-Preview-Rollout-mit-KI-Herstellern-11253281.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">US Government Met with AI Manufacturers Before Preview Release</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
                         
                         
                         <button class="btn-read" data-id="c607dd53cc205a20" aria-label="Mark as read">Read</button>
@@ -1461,19 +1521,19 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The US government met with major AI manufacturers before the upcoming Mythos-Preview Rollout. Meanwhile, American banks are testing the new AI system.</p>
+                    <p class="summary">The US government recently met with major AI manufacturers before a preview release of the Mythos Preview rollout. Meanwhile, US banks are testing the new AI system.</p>
                     
                     <div class="labels">
+                        
+                        <span class="label-tag">ai manufacturers</span>
                         
                         <span class="label-tag">kubernetes</span>
                         
                         <span class="label-tag">containerization</span>
                         
-                        <span class="label-tag">artificial intelligence</span>
+                        <span class="label-tag">open source</span>
                         
-                        <span class="label-tag">machine learning</span>
-                        
-                        <span class="label-tag">finance</span>
+                        <span class="label-tag">monitoring</span>
                         
                     </div>
                     
@@ -1482,7 +1542,7 @@
                 
                 <div class="article" data-id="26fedcb22e64c591">
                     <div class="article-header">
-                        <h3><a href="https://www.heise.de/bestenlisten/testbericht/ecovacs-t90-pro-omni-im-test-saugroboter-saugt-stark-und-laedt-klug/j1tydeh?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Ecovacs T90 Pro Omni in Review: Strong Vacuum and Clever Charging</a></h3>
+                        <h3><a href="https://www.heise.de/bestenlisten/testbericht/ecovacs-t90-pro-omni-im-test-saugroboter-saugt-stark-und-laedt-klug/j1tydeh?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Ecovacs T90 Pro Omni Review: Robotic Vacuum Cleaner Effectively Sucks and Charges</a></h3>
                         
                         
                         <button class="btn-read" data-id="26fedcb22e64c591" aria-label="Mark as read">Read</button>
@@ -1490,14 +1550,28 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The Ecovacs T90 Pro Omni is a mid-range vacuum cleaner with 30,000 Pa suction power and a detachable dusting brush. It's designed to provide strong cleaning performance and smart charging capabilities.</p>
+                    <p class="summary">The Ecovacs T90 Pro Omni is a mid-range robotic vacuum cleaner with 30,000 Pa suction power and an adjustable dusting brush. It performs well in cleaning up dust and debris, but its ability to handle deeper messes is limited.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">robotics</span>
+                        
+                        <span class="label-tag">cleaning</span>
+                        
+                        <span class="label-tag">automation</span>
+                        
+                        <span class="label-tag">home appliances</span>
+                        
+                        <span class="label-tag">artificial intelligence</span>
+                        
+                    </div>
                     
                     <a class="read-more" href="https://www.heise.de/bestenlisten/testbericht/ecovacs-t90-pro-omni-im-test-saugroboter-saugt-stark-und-laedt-klug/j1tydeh?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
                 </div>
                 
                 <div class="article" data-id="45e6a60f77eba6d6">
                     <div class="article-header">
-                        <h3><a href="https://www.heise.de/news/Digitale-Souveraenitaet-in-der-Praxis-Cloud-KI-und-Security-krisensicher-machen-11222625.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Heise offer: Digital sovereignty in practice - Cloud, AI and Security crisis-proof</a></h3>
+                        <h3><a href="https://www.heise.de/news/Digitale-Souveraenitaet-in-der-Praxis-Cloud-KI-und-Security-krisensicher-machen-11222625.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Heise Offer: Digital Sovereignty in Practice – Cloud, AI and Security Made Crisis-Proof</a></h3>
                         
                         <span class="badge-for-you">For you</span>
                         
@@ -1507,21 +1581,7 @@
                     
                     <p class="date">2026-04-11</p>
                     
-                    <p class="summary">The article discusses the importance of establishing digital sovereignty in light of geopolitical developments that highlight the risks of relying on a few large tech companies. It explores ways to achieve this through measures such as cloud security, artificial intelligence, and robust security protocols.</p>
-                    
-                    <div class="labels">
-                        
-                        <span class="label-tag">kubernetes</span>
-                        
-                        <span class="label-tag">open source</span>
-                        
-                        <span class="label-tag">cloud computing</span>
-                        
-                        <span class="label-tag">security</span>
-                        
-                        <span class="label-tag">ai</span>
-                        
-                    </div>
+                    <p class="summary">The article discusses the importance of establishing digital sovereignty to protect against the risks of relying on a few large tech companies. By taking steps to secure cloud services, artificial intelligence, and security, individuals can reduce their vulnerability to geopolitical threats.</p>
                     
                     <a class="read-more" href="https://www.heise.de/news/Digitale-Souveraenitaet-in-der-Praxis-Cloud-KI-und-Security-krisensicher-machen-11222625.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
                 </div>
@@ -1540,24 +1600,29 @@
             <div class="run-stats-grid">
                 <div class="run-stat-item">
                     <div class="label">Started</div>
-                    <div class="value">02:29:53</div>
+                    <div class="value">02:31:02</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Finished</div>
-                    <div class="value">02:30:01</div>
+                    <div class="value">02:50:03</div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">Duration</div>
-                    <div class="value">0m 8s</div>
+                    <div class="value">19m 1s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.8</div>
                 </div>
                 
                 <div class="run-stat-item">
                     <div class="label">Ollama</div>
-                    <div class="value dim">0 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                    <div class="value">25 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
                 </div>
                 <div class="run-stat-item">
                     <div class="label">From cache</div>
-                    <div class="value dim">25</div>
+                    <div class="value dim">0</div>
                 </div>
                 
             </div>
@@ -1566,7 +1631,7 @@
 
 
             <footer>
-                Generated 2026-04-12 02:30 ·
+                Generated 2026-04-12 02:50 ·
                 <a href="index.html" style="color: var(--accent);">← Archive</a> ·
                 <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
             </footer>
