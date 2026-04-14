@@ -1,0 +1,1771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Wednesday, April 15, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        details.feed-section.low-score-section {
+            margin-top: 2rem;
+            border-color: var(--border-alt, #e5e7eb);
+            opacity: 0.8;
+        }
+
+        details.feed-section.low-score-section > summary {
+            color: var(--text-muted);
+            background: rgba(107, 114, 128, 0.05);
+        }
+
+        details.feed-section.low-score-section[open] > summary {
+            color: var(--text-muted);
+        }
+
+        .low-score-article {
+            opacity: 0.75;
+        }
+
+        .low-score-article .summary {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        details.feed-subsection {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-light, #f0f0f0);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.feed-subsection > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(107, 114, 128, 0.03);
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        details.feed-subsection > summary::-webkit-details-marker { display: none; }
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .btn-read-all {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .btn-read-all:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-14-07-17.html" >
+                        <span>Tuesday, April 14, 2026 – 07:17</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-13-07-10.html" >
+                        <span>Monday, April 13, 2026 – 07:10</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-07-01.html" >
+                        <span>Sunday, April 12, 2026 – 07:01</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-03-30.html" >
+                        <span>Sunday, April 12, 2026 – 03:30</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-54.html" >
+                        <span>Sunday, April 12, 2026 – 02:54</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-50.html" >
+                        <span>Sunday, April 12, 2026 – 02:50</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-25.html" >
+                        <span>Sunday, April 12, 2026 – 02:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-35.html" >
+                        <span>Sunday, April 12, 2026 – 01:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-07.html" >
+                        <span>Sunday, April 12, 2026 – 01:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-36.html" >
+                        <span>Sunday, April 12, 2026 – 00:36</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-14.html" >
+                        <span>Sunday, April 12, 2026 – 00:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-23-39.html" >
+                        <span>Saturday, April 11, 2026 – 23:39</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-14-57.html" >
+                        <span>Saturday, April 11, 2026 – 14:57</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-07-33.html" >
+                        <span>Saturday, April 11, 2026 – 07:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-10-07-41.html" >
+                        <span>Friday, April 10, 2026 – 07:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-09-07-34.html" >
+                        <span>Thursday, April 09, 2026 – 07:34</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-08-07-28.html" >
+                        <span>Wednesday, April 08, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-07-07-07.html" >
+                        <span>Tuesday, April 07, 2026 – 07:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-23-27.html" >
+                        <span>Monday, April 06, 2026 – 23:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-21-51.html" >
+                        <span>Monday, April 06, 2026 – 21:51</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-20-55.html" >
+                        <span>Monday, April 06, 2026 – 20:55</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" >
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" >
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" >
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Wednesday, April 15, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>30</strong> articles</span>
+                <span class="stat"><strong>7</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <button class="btn-read-all" data-feed-all="Kubernetes subreddit" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="9ffcc519ac60454c">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sl47ep/weekly_questions_and_advice/" target="_blank" rel="noopener">Weekly: Questions and advice</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="9ffcc519ac60454c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sl47ep/weekly_questions_and_advice/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="b1c10a898af73de7">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sl8fs5/added_cilium_jaeger_certmanager_envoy_grafana/" target="_blank" rel="noopener">Added Cilium, Jaeger, cert-manager, Envoy, Grafana Tempo and Mimir alerting rules to awesome-prometheus-alerts</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="b1c10a898af73de7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sl8fs5/added_cilium_jaeger_certmanager_envoy_grafana/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="5baa5231b5e59317">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1skued7/used_claude_code_for_all_my_k8s_dev_work_for_a/" target="_blank" rel="noopener">Author Let Claude Code Build a Kubernetes Operator for a Month, Experiences Debugging Challenges</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="5baa5231b5e59317" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">The author built a Kubernetes database operator using Claude Code and encountered several debugging challenges. Despite success with the infrastructure side of things, they found that the operator's development was more complicated than expected. Two main issues were identified: race conditions in the reconcile logic and the operator's tendency to add unnecessary delays (sleep) without resolving the issue. These challenges highlighted limitations in Claude Code.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">debugging</span>
+                        
+                        <span class="label-tag">chaos testing</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1skued7/used_claude_code_for_all_my_k8s_dev_work_for_a/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8aa893fb55adb82f">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sl9kvq/how_we_replaced_falco_with_an_embedded_ebpf/" target="_blank" rel="noopener">How we replaced Falco with an embedded eBPF sensor for runtime enforcement in K8s</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="8aa893fb55adb82f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sl9kvq/how_we_replaced_falco_with_an_embedded_ebpf/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7c1f5e727758e085">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sl8wic/massive_minecraft_on_kubernetes_why_cubecraft/" target="_blank" rel="noopener">Massive Minecraft on Kubernetes - Why CubeCraft moved and contributed to OKD</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="7c1f5e727758e085" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sl8wic/massive_minecraft_on_kubernetes_why_cubecraft/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Red Hat Cloud Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Red Hat Cloud Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Red Hat Cloud Blog"></span>
+                <button class="btn-read-all" data-feed-all="Red Hat Cloud Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="63f8c6fa65a3c938">
+                    <div class="article-header">
+                        <h3><a href="https://www.redhat.com/en/blog/233-3-year-return-investment-and-13-months-payback-red-hat-ai" target="_blank" rel="noopener">233% 3-year return on investment and 13 months to payback with Red Hat AI</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="63f8c6fa65a3c938" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-13</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.redhat.com/en/blog/233-3-year-return-investment-and-13-months-payback-red-hat-ai" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <button class="btn-read-all" data-feed-all="Hacker News (Top)" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="1323a6560bf68af0">
+                    <div class="article-header">
+                        <h3><a href="https://honeypot.net/2026/04/14/i-wrote-to-flocks-privacy.html" target="_blank" rel="noopener">I wrote to Flock's privacy contact to opt out of their domestic spying program</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="1323a6560bf68af0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://honeypot.net/2026/04/14/i-wrote-to-flocks-privacy.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ec12b5a965e3410c">
+                    <div class="article-header">
+                        <h3><a href="https://bandaancha.eu/articulos/telefonica-consigue-bloqueos-ips-11731" target="_blank" rel="noopener">Spain to expand internet blocks to tennis, golf, movies broadcasting times</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="ec12b5a965e3410c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://bandaancha.eu/articulos/telefonica-consigue-bloqueos-ips-11731" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="dbf1010e44874e2e">
+                    <div class="article-header">
+                        <h3><a href="https://code.claude.com/docs/en/routines" target="_blank" rel="noopener">Claude Code Routines</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="dbf1010e44874e2e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://code.claude.com/docs/en/routines" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7660cf7a33cd0c58">
+                    <div class="article-header">
+                        <h3><a href="https://aphyr.com/posts/418-the-future-of-everything-is-lies-i-guess-work" target="_blank" rel="noopener">The future of everything is lies, I guess: Work</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="7660cf7a33cd0c58" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://aphyr.com/posts/418-the-future-of-everything-is-lies-i-guess-work" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7e96c61ff1c15023">
+                    <div class="article-header">
+                        <h3><a href="https://techcrunch.com/2026/04/13/thousands-of-rare-concert-recordings-are-landing-on-the-internet-archive-listen-now/" target="_blank" rel="noopener">Rare concert recordings are landing on the Internet Archive</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="7e96c61ff1c15023" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://techcrunch.com/2026/04/13/thousands-of-rare-concert-recordings-are-landing-on-the-internet-archive-listen-now/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="GCP Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                GCP Blog
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="GCP Blog"></span>
+                <button class="btn-read-all" data-feed-all="GCP Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="0eb1745acbc0a776">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/topics/public-sector/securing-the-ai-era-across-the-public-sector/" target="_blank" rel="noopener">Securing the AI era across the public sector</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="0eb1745acbc0a776" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/topics/public-sector/securing-the-ai-era-across-the-public-sector/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="933fe1dd72a9766a">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/data-analytics/introducing-bigquery-graph/" target="_blank" rel="noopener">Introducing BigQuery Graph: Unlock hidden relationships in your data</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="933fe1dd72a9766a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/data-analytics/introducing-bigquery-graph/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="61f4e1e76d796e06">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/data-analytics/using-bigquery-graph-with-kineviz-graphxr/" target="_blank" rel="noopener">Scaling unstructured enterprise knowledge with BigQuery Graph, and Kineviz GraphXR</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="61f4e1e76d796e06" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/data-analytics/using-bigquery-graph-with-kineviz-graphxr/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="3d556977f4414a89">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/products/data-analytics/the-unified-graph-solution-with-spanner-graph-and-bigquery-graph/" target="_blank" rel="noopener">From operational to analytical: The unified Spanner Graph and BigQuery Graph solution</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="3d556977f4414a89" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/products/data-analytics/the-unified-graph-solution-with-spanner-graph-and-bigquery-graph/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <button class="btn-read-all" data-feed-all="Grafana Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="97c89e069418494b">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafanacon-2026-in-barcelona-what-not-to-miss/" target="_blank" rel="noopener">Your guide to GrafanaCON 2026 in Barcelona</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="97c89e069418494b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafanacon-2026-in-barcelona-what-not-to-miss/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d413fdc8eecca207">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/grafana-alerting-respond-faster-and-get-situational-awareness-with-alert-enrichment-in-grafana-cloud/" target="_blank" rel="noopener">Grafana Alerting: Respond faster and get situational awareness with alert enrichment in Grafana Cloud</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="d413fdc8eecca207" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/grafana-alerting-respond-faster-and-get-situational-awareness-with-alert-enrichment-in-grafana-cloud/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="40d78a81b43f6351">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/how-to-manage-synthetic-monitoring-checks-as-code-with-terraform-and-grafana-cloud/" target="_blank" rel="noopener">How to manage synthetic monitoring checks as code with Terraform and Grafana Cloud</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="40d78a81b43f6351" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/how-to-manage-synthetic-monitoring-checks-as-code-with-terraform-and-grafana-cloud/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="85ca18377c138867">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/a-faster-way-to-pinpoint-performance-bottlenecks-using-profiles-drilldown-with-grafana-cloud-knowledge-graph/" target="_blank" rel="noopener">Using Profiles Drilldown with Grafana Cloud Knowledge Graph to Pinpoint Performance Bottlenecks</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="85ca18377c138867" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This article discusses how to use Profiles Drilldown, an intuitive application for exploring profiling data, in combination with Grafana Cloud's Knowledge Graph. The goal is to help users identify the exact code paths responsible for performance bottlenecks, making it easier and faster to resolve issues.</p><p class="summary">The integration of Profiles Drilldown with the Knowledge Graph brings CPU profiling data directly into existing workflows, allowing users to correlate telemetry and investigations across their stack. By modeling the environment as entities and relationships, users can resolve issues faster.</p><p class="summary">With this integration, users can move from infrastructure signals to code-level profiling data without leaving their investigation workflow. They can open Profiles Drilldown directly from the Knowledge Graph KPI drawer for a service or pod, inheriting entity context, filters, and time window.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">performance-bottlenecks</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/a-faster-way-to-pinpoint-performance-bottlenecks-using-profiles-drilldown-with-grafana-cloud-knowledge-graph/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="9d304a26da83f664">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/kubernetes-monitoring-helm-chart-v4-biggest-update-ever-/" target="_blank" rel="noopener">Kubernetes Monitoring Helm chart v4 biggest update ever!</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="9d304a26da83f664" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This is a major update to the Kubernetes Monitoring Helm chart, addressing real pain points in user monitoring setups as their clusters grow. The new version introduces significant changes that make it more predictable, flexible, and maintainable. Destinations are now defined by individual configurations rather than lists, solving issues with shared config files, GitOps tooling, and reordering. This update simplifies the chart's functionality while improving its overall performance.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">helm</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">grafana</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/kubernetes-monitoring-helm-chart-v4-biggest-update-ever-/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <button class="btn-read-all" data-feed-all="Golem" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="4963e9e45c688695">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/wasserstoffspeicher-potenzial-unterirdischer-speicher-bisher-unterschaetzt-2604-207565.html" target="_blank" rel="noopener">Wasserstoffspeicher: Potenzial unterirdischer Speicher bisher unterschätzt</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="4963e9e45c688695" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/wasserstoffspeicher-potenzial-unterirdischer-speicher-bisher-unterschaetzt-2604-207565.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="5ee546cc2ab2058e">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-google-pixel-10-guenstig-wie-nie-zuvor-bei-amazon-sichern-2604-207566.html" target="_blank" rel="noopener">Anzeige: Google Pixel 10 günstig wie nie zuvor bei Amazon sichern</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="5ee546cc2ab2058e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-google-pixel-10-guenstig-wie-nie-zuvor-bei-amazon-sichern-2604-207566.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c33ea3c202060882">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-ambilight-zum-nachruesten-fuer-unter-80-euro-2604-207561.html" target="_blank" rel="noopener">Anzeige: Ambilight zum Nachrüsten für unter 80 Euro</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="c33ea3c202060882" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-ambilight-zum-nachruesten-fuer-unter-80-euro-2604-207561.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="f2288b6ed776c49f">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/mission-1-gopro-bringt-8k-kinokameras-im-kleinformat-2604-207564.html" target="_blank" rel="noopener">Mission 1: Gopro bringt 8K-Kinokameras im Kleinformat</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="f2288b6ed776c49f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/mission-1-gopro-bringt-8k-kinokameras-im-kleinformat-2604-207564.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8a051805eb90ccf4">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/alienware-aw2726dm-oled-und-240-hz-fuer-einen-guenstigen-preis-2604-207563.html" target="_blank" rel="noopener">Alienware AW2726DM: OLED und 240 Hz für einen günstigen Preis</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="8a051805eb90ccf4" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/alienware-aw2726dm-oled-und-240-hz-fuer-einen-guenstigen-preis-2604-207563.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <button class="btn-read-all" data-feed-all="Heise IT" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="42a73c1f6a77b64c">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Microsoft-uebernimmt-Rechenzentrum-von-OpenAI-in-Norwegen-11257724.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Microsoft übernimmt Rechenzentrum von OpenAI in Norwegen</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="42a73c1f6a77b64c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Microsoft-uebernimmt-Rechenzentrum-von-OpenAI-in-Norwegen-11257724.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d5fbd2572e7eae8b">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/KI-Halluzinationen-vor-Gericht-11257460.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">KI-Halluzinationen vor Gericht</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="d5fbd2572e7eae8b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/KI-Halluzinationen-vor-Gericht-11257460.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0eb5c4ef451188f3">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Anthropic-KI-Sicherheitsmodell-nur-fuer-die-USA-11257464.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Anthropic: KI-Sicherheitsmodell nur für die USA?</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="0eb5c4ef451188f3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Anthropic-KI-Sicherheitsmodell-nur-fuer-die-USA-11257464.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d96ccc321115d838">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Digitale-Souveraenitaet-Wildberger-will-weniger-Microsoft-und-Palantir-11257484.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Digitale Souveränität: Wildberger will weniger Microsoft und Palantir</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="d96ccc321115d838" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Digitale-Souveraenitaet-Wildberger-will-weniger-Microsoft-und-Palantir-11257484.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="625bb3dca1f2da45">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Neue-Demo-des-Flipper-One-Tech-Gadget-hat-DisplayPort-und-Ethernet-Buchse-11257021.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Neue Demo des Flipper One: Tech-Gadget hat DisplayPort und Ethernet-Buchse</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="625bb3dca1f2da45" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-14</p>
+                    
+                    <p class="summary">Summary unavailable – Ollama failed.</p>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Neue-Demo-des-Flipper-One-Tech-Gadget-hat-DisplayPort-und-Ethernet-Buchse-11257021.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">00:25:40</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">00:25:49</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">0m 9s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value dim">0 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">30</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-15 00:25 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read-all');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const feedName = btn.dataset.feedAll;
+            const section = document.querySelector(`.feed-section[data-feed="${CSS.escape(feedName)}"]`);
+            if (!section) return;
+            const read = getRead();
+            section.querySelectorAll('.article[data-id]').forEach(card => {
+                read[card.dataset.id] = true;
+            });
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
