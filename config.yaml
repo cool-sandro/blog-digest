@@ -1,8 +1,4 @@
-# Blog Digest Configuration
-# Add RSS feeds to track here
-
 feeds:
-  # Kubernetes & Cloud Native
   - name: "Kubernetes Blog"
     url: "https://kubernetes.io/feed.xml"
   - name: "CNCF Blog"
@@ -20,7 +16,6 @@ feeds:
   - name: "Netapp Trident Releases"
     url: "https://github.com/netApp/trident/releases.atom"
 
-  # DevOps & Infrastructure
   - name: "Hacker News (Top)"
     url: "https://hnrss.org/best?count=20"
   - name: "Fedora Magazine"
@@ -29,7 +24,7 @@ feeds:
     url: "https://cloudblog.withgoogle.com/rss"
   - name: "Argo Project Blog"
     url: "https://blog.argoproj.io/feed"
-    ssl_verify: false  # server sends incomplete cert chain
+    ssl_verify: false
   - name: "Grafana Blog"
     url: "https://grafana.com/blog/index.xml"
   - name: "OpenTelemtry Blog"
@@ -40,9 +35,7 @@ feeds:
     url: "https://rss.golem.de/rss.php?feed=ATOM1.0"
   - name: "Heise IT"
     url: "https://www.heise.de/rss/heise-Rubrik-IT-atom.xml"
-  
 
-# AI Settings
 ai:
   ollama:
     base_url: "http://localhost:11434"
@@ -54,11 +47,9 @@ ai:
 summary:
   max_articles_per_feed: 5
   max_age_hours: 24
-  max_summary_length: 200  # words per article
-  max_labels: 5             # max keyword/topic labels per article
+  max_summary_length: 200
+  max_labels: 5
 
-# User profile – teach the AI about your interests
-# Articles that match these will be tagged "For you"
 user_profile:
   interests:
     - kubernetes
@@ -67,12 +58,22 @@ user_profile:
     - monitoring
     - otlp
 
-# Output
 output:
   directory: "./docs"
 
-# Schedule
 schedule:
-  cron: "0 7 * * *"          # standard cron format: min hour day month weekday
+  cron: "0 7 * * *"
   timezone: "Europe/Berlin"
+
+observability:
+  enabled: true
+  otlp_endpoint: "http://localhost:4318"
+  service_name: "blog-digest"
+  service_version: "0.1.0"
+  timeout: 15
+  metrics_export_interval_ms: 30000
+  instrument_requests: true
+  headers: {}
+  resource_attributes:
+    deployment.environment: "dev"
 

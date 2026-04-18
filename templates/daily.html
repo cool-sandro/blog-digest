@@ -308,6 +308,54 @@
             height: 8px;
             border-radius: 50%;
             background: var(--accent);
+        }
+
+        details.feed-section.low-score-section {
+            margin-top: 2rem;
+            border-color: var(--border-alt, #e5e7eb);
+            opacity: 0.8;
+        }
+
+        details.feed-section.low-score-section > summary {
+            color: var(--text-muted);
+            background: rgba(107, 114, 128, 0.05);
+        }
+
+        details.feed-section.low-score-section[open] > summary {
+            color: var(--text-muted);
+        }
+
+        .low-score-article {
+            opacity: 0.75;
+        }
+
+        .low-score-article .summary {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        details.feed-subsection {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-light, #f0f0f0);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.feed-subsection > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(107, 114, 128, 0.03);
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        details.feed-subsection > summary::-webkit-details-marker { display: none; }
             flex-shrink: 0;
         }
 
@@ -409,6 +457,24 @@
             background: var(--surface);
         }
 
+        .btn-read-all {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .btn-read-all:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
         .badge-for-you {
             flex-shrink: 0;
             background: linear-gradient(135deg, #f97316, #ea580c);
@@ -419,6 +485,18 @@
             border-radius: 4px;
             white-space: nowrap;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
             letter-spacing: 0.5px;
         }
 
@@ -681,6 +759,7 @@
                 {{ feed_name }}
                 <span class="feed-count">({{ articles | length }})</span>
                 <span class="feed-read-badge" data-feed-badge="{{ feed_name }}"></span>
+                <button class="btn-read-all" data-feed-all="{{ feed_name }}" aria-label="Mark all as read">Mark all read</button>
                 <span class="feed-chevron">▼</span>
             </summary>
             <div class="articles-wrapper">
@@ -690,6 +769,9 @@
                         <h3><a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a></h3>
                         {% if article.for_you %}
                         <span class="badge-for-you">For you</span>
+                        {% endif %}
+                        {% if article.score %}
+                        <span class="badge-score">{{ article.score }}/10</span>
                         {% endif %}
                         <button class="btn-read" data-id="{{ article.id }}" aria-label="Mark as read">Read</button>
                     </div>
@@ -710,6 +792,56 @@
             </div>
         </details>
         {% endfor %}
+
+        {% if scoring_enabled and articles_by_feed_low %}
+        <details class="feed-section low-score-section">
+            <summary>
+                <span class="feed-dot"></span>
+                Low Scores &mdash; Quality Below {{ score_threshold }}
+                <span class="feed-count">({{ total_articles_low }})</span>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                {% for feed_name, articles in articles_by_feed_low.items() %}
+                <details class="feed-subsection" data-feed="{{ feed_name }}">
+                    <summary>
+                        <span class="feed-dot"></span>
+                        {{ feed_name }}
+                        <span class="feed-count">({{ articles | length }})</span>
+                    </summary>
+                    <div class="articles-wrapper">
+                        {% for article in articles %}
+                        <div class="article low-score-article" data-id="{{ article.id }}">
+                            <div class="article-header">
+                                <h3><a href="{{ article.url }}" target="_blank" rel="noopener">{{ article.title }}</a></h3>
+                                {% if article.for_you %}
+                                <span class="badge-for-you">For you</span>
+                                {% endif %}
+                                {% if article.score %}
+                                <span class="badge-score">{{ article.score }}/10</span>
+                                {% endif %}
+                                <button class="btn-read" data-id="{{ article.id }}" aria-label="Mark as read">Read</button>
+                            </div>
+                            {% if article.published %}
+                            <p class="date">{{ article.published[:10] }}</p>
+                            {% endif %}
+                            <p class="summary">{{ article.summary }}</p>
+                            {% if article.labels %}
+                            <div class="labels">
+                                {% for label in article.labels %}
+                                <span class="label-tag">{{ label }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <a class="read-more" href="{{ article.url }}" target="_blank" rel="noopener">Read full article →</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
 
         <div id="no-results">No articles match your search.</div>
 
@@ -865,6 +997,22 @@
             } else {
                 read[id] = true;
             }
+            saveRead(read);
+            applyRead();
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read-all');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const feedName = btn.dataset.feedAll;
+            const section = document.querySelector(`.feed-section[data-feed="${CSS.escape(feedName)}"]`);
+            if (!section) return;
+            const read = getRead();
+            section.querySelectorAll('.article[data-id]').forEach(card => {
+                read[card.dataset.id] = true;
+            });
             saveRead(read);
             applyRead();
         });

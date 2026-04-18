@@ -13,6 +13,7 @@ import hashlib
 import logging
 import argparse
 import subprocess
+from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -21,16 +22,173 @@ import feedparser
 import requests
 from bs4 import BeautifulSoup
 from jinja2 import Environment, FileSystemLoader
+import urllib3
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+# Suppress InsecureRequestWarning for feeds with ssl_verify=false
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
+class JsonFormatter(logging.Formatter):
+    """Emit each log record as a single JSON line, merging structured payloads."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        msg = record.getMessage()
+        try:
+            payload = json.loads(msg)
+        except (json.JSONDecodeError, TypeError):
+            payload = {"message": msg}
+        payload["timestamp"] = datetime.fromtimestamp(record.created).strftime("%Y-%m-%d %H:%M:%S")
+        payload["level"] = record.levelname
+        # Move timestamp and level to front for readability
+        ordered = {"timestamp": payload.pop("timestamp"), "level": payload.pop("level")}
+        ordered.update(payload)
+        return json.dumps(ordered)
+
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(JsonFormatter())
+logging.root.setLevel(logging.INFO)
+logging.root.handlers = [_handler]
+
 log = logging.getLogger("blog-digest")
+log.setLevel(logging.INFO)
+
+# Suppress noisy DEBUG output from third-party libraries at module load time
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 BASE_DIR = Path(__file__).parent
 CACHE_FILE = BASE_DIR / ".article_cache.json"
+
+TRACER = None
+METRICS: dict[str, object] = {}
+
+
+def telemetry_span(name: str):
+    """Return a context manager for an OpenTelemetry span if enabled."""
+    if TRACER:
+        return TRACER.start_as_current_span(name)
+    return nullcontext()
+
+
+def telemetry_counter_add(metric_name: str, value: int, attributes: dict | None = None):
+    """Safely increment an OTel counter if telemetry is enabled."""
+    metric = METRICS.get(metric_name)
+    if metric:
+        try:
+            metric.add(value, attributes=attributes or {})
+        except Exception:
+            pass
+
+
+def telemetry_histogram_record(metric_name: str, value: float, attributes: dict | None = None):
+    """Safely record a value to an OTel histogram if telemetry is enabled."""
+    metric = METRICS.get(metric_name)
+    if metric:
+        try:
+            metric.record(value, attributes=attributes or {})
+        except Exception:
+            pass
+
+
+def setup_observability(config: dict):
+    """Initialize OpenTelemetry trace/metric export to an OTLP endpoint (e.g. Grafana Alloy)."""
+    global TRACER, METRICS
+
+    obs_cfg = config.get("observability", {})
+    if not obs_cfg.get("enabled", False):
+        return
+
+    try:
+        from opentelemetry import metrics, trace
+        from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from opentelemetry.instrumentation.requests import RequestsInstrumentor
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+        from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+        service_name = obs_cfg.get("service_name", "blog-digest")
+        service_version = obs_cfg.get("service_version", "0.1.0")
+        endpoint = obs_cfg.get("otlp_endpoint", "http://localhost:4318").rstrip("/")
+        timeout = obs_cfg.get("timeout", 15)
+        metric_interval_ms = obs_cfg.get("metrics_export_interval_ms", 30000)
+        headers = obs_cfg.get("headers", {})
+
+        resource_attrs = {
+            SERVICE_NAME: service_name,
+            SERVICE_VERSION: service_version,
+        }
+        resource_attrs.update(obs_cfg.get("resource_attributes", {}))
+        resource = Resource.create(resource_attrs)
+
+        tracer_provider = TracerProvider(resource=resource)
+        tracer_provider.add_span_processor(
+            BatchSpanProcessor(
+                OTLPSpanExporter(
+                    endpoint=f"{endpoint}/v1/traces",
+                    timeout=timeout,
+                    headers=headers,
+                )
+            )
+        )
+        trace.set_tracer_provider(tracer_provider)
+        TRACER = trace.get_tracer(service_name)
+
+        metric_reader = PeriodicExportingMetricReader(
+            exporter=OTLPMetricExporter(
+                endpoint=f"{endpoint}/v1/metrics",
+                timeout=timeout,
+                headers=headers,
+            ),
+            export_interval_millis=metric_interval_ms,
+        )
+        metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[metric_reader]))
+        meter = metrics.get_meter(service_name)
+
+        METRICS = {
+            "runs_total": meter.create_counter(
+                "blog_digest_runs_total", description="Number of digest runs"
+            ),
+            "articles_processed_total": meter.create_counter(
+                "blog_digest_articles_processed_total", description="Number of processed articles"
+            ),
+            "articles_failed_total": meter.create_counter(
+                "blog_digest_articles_failed_total", description="Number of failed articles"
+            ),
+            "cache_hits_total": meter.create_counter(
+                "blog_digest_cache_hits_total", description="Number of cache hits"
+            ),
+            "run_duration_seconds": meter.create_histogram(
+                "blog_digest_run_duration_seconds", unit="s", description="End-to-end run duration"
+            ),
+            "summarize_duration_seconds": meter.create_histogram(
+                "blog_digest_summarize_duration_seconds", unit="s", description="Summarization latency"
+            ),
+            "score_duration_seconds": meter.create_histogram(
+                "blog_digest_score_duration_seconds", unit="s", description="Scoring latency"
+            ),
+            "fetch_duration_seconds": meter.create_histogram(
+                "blog_digest_fetch_duration_seconds", unit="s", description="Feed fetch latency"
+            ),
+        }
+
+        if obs_cfg.get("instrument_requests", True):
+            RequestsInstrumentor().instrument()
+
+        # Re-silence urllib3 after OTel instrumentation may have reset its level
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+        log.info(json.dumps({
+            "step": "OTEL",
+            "status": "enabled",
+            "otlp_endpoint": endpoint,
+            "service_name": service_name,
+        }))
+    except Exception as e:
+        log.warning(json.dumps({"step": "OTEL", "status": "failed", "error": str(e)}))
 
 
 def load_config() -> dict:
@@ -69,7 +227,7 @@ def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20, verify
             return resp
         except requests.RequestException as e:
             if attempt < max_retries - 1:
-                log.warning(f"Attempt {attempt + 1}/{max_retries} failed for {url}: {e}. Retrying in {delay}s…")
+                log.warning(json.dumps({"step": "FETCH", "attempt": attempt + 1, "max_retries": max_retries, "url": url, "error": str(e), "retry_delay": delay}))
                 time.sleep(delay)
                 delay *= 2
             else:
@@ -78,61 +236,80 @@ def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20, verify
 
 def fetch_feeds(config: dict) -> list[dict]:
     """Fetch all RSS feeds and return list of articles."""
-    articles = []
-    max_age = timedelta(hours=config["summary"]["max_age_hours"])
-    max_per_feed = config["summary"]["max_articles_per_feed"]
-    cutoff = datetime.now(timezone.utc) - max_age
+    with telemetry_span("fetch_feeds"):
+        fn_start = time.time()
+        articles = []
+        max_age = timedelta(hours=config["summary"]["max_age_hours"])
+        max_per_feed = config["summary"]["max_articles_per_feed"]
+        cutoff = datetime.now(timezone.utc) - max_age
 
-    for feed_cfg in config["feeds"]:
-        name = feed_cfg["name"]
-        url = feed_cfg["url"]
-        verify_ssl = feed_cfg.get("ssl_verify", True)
-        log.info(f"Fetching feed: {name}")
+        for feed_cfg in config["feeds"]:
+            name = feed_cfg["name"]
+            url = feed_cfg["url"]
+            verify_ssl = feed_cfg.get("ssl_verify", True)
+            log.info(json.dumps({"step": "FETCH", "feed": name}))
 
-        try:
-            resp = fetch_with_backoff(url, verify_ssl=verify_ssl)
-            feed = feedparser.parse(resp.content)
-            count = 0
-            for entry in feed.entries:
-                if count >= max_per_feed:
-                    break
-
-                # Parse publication date
-                published = None
-                for date_field in ("published_parsed", "updated_parsed"):
-                    parsed = getattr(entry, date_field, None)
-                    if parsed:
-                        published = datetime.fromtimestamp(time.mktime(parsed), tz=timezone.utc)
+            try:
+                feed_start = time.time()
+                resp = fetch_with_backoff(url, verify_ssl=verify_ssl)
+                feed = feedparser.parse(resp.content)
+                count = 0
+                for entry in feed.entries:
+                    if count >= max_per_feed:
                         break
 
-                if published and published < cutoff:
-                    continue
+                    # Parse publication date
+                    published = None
+                    for date_field in ("published_parsed", "updated_parsed"):
+                        parsed = getattr(entry, date_field, None)
+                        if parsed:
+                            published = datetime.fromtimestamp(time.mktime(parsed), tz=timezone.utc)
+                            break
 
-                link = getattr(entry, "link", "")
-                title = getattr(entry, "title", "No Title")
+                    if published and published < cutoff:
+                        continue
 
-                # Get summary/content from feed
-                content = ""
-                if hasattr(entry, "content"):
-                    content = entry.content[0].get("value", "")
-                elif hasattr(entry, "summary"):
-                    content = entry.summary
+                    link = getattr(entry, "link", "")
+                    title = getattr(entry, "title", "No Title")
 
-                articles.append({
-                    "id": article_id(link),
-                    "feed": name,
-                    "title": title,
-                    "url": link,
-                    "published": published.isoformat() if published else "",
-                    "content_raw": content,
-                })
-                count += 1
+                    # Get summary/content from feed
+                    content = ""
+                    if hasattr(entry, "content"):
+                        content = entry.content[0].get("value", "")
+                    elif hasattr(entry, "summary"):
+                        content = entry.summary
 
-        except Exception as e:
-            log.warning(f"Failed to fetch {name}: {e}")
+                    articles.append({
+                        "id": article_id(link),
+                        "feed": name,
+                        "title": title,
+                        "url": link,
+                        "published": published.isoformat() if published else "",
+                        "content_raw": content,
+                    })
+                    count += 1
 
-    log.info(f"Fetched {len(articles)} articles from {len(config['feeds'])} feeds")
-    return articles
+                telemetry_histogram_record(
+                    "fetch_duration_seconds",
+                    time.time() - feed_start,
+                    {"feed": name, "status": "ok"},
+                )
+
+            except Exception as e:
+                telemetry_histogram_record(
+                    "fetch_duration_seconds",
+                    time.time() - feed_start,
+                    {"feed": name, "status": "error"},
+                )
+                log.warning(json.dumps({"step": "FETCH", "feed": name, "error": str(e)}))
+
+        log.info(json.dumps({"step": "FETCH", "status": "completed", "articles": len(articles), "feeds": len(config['feeds'])}))
+        telemetry_histogram_record(
+            "fetch_duration_seconds",
+            time.time() - fn_start,
+            {"scope": "all_feeds"},
+        )
+        return articles
 
 
 def extract_article_text(html: str, max_chars: int = 5000) -> str:
@@ -153,7 +330,7 @@ def fetch_full_article(url: str, max_chars: int = 5000) -> str:
         resp.raise_for_status()
         return extract_article_text(resp.text, max_chars)
     except Exception as e:
-        log.warning(f"Could not fetch full article {url}: {e}")
+        log.warning(json.dumps({"step": "FETCH", "operation": "full_article", "url": url, "error": str(e)}))
         return ""
 
 
@@ -187,6 +364,7 @@ def deduplicate_labels(labels: list[str]) -> list[str]:
 def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None, str] | None:
     """Summarize and extract labels using local Ollama in a single call.
     Returns (summary, labels, for_you, tokens_per_sec, title_translated) or None."""
+    fn_start = time.time()
     ollama_cfg = config["ai"]["ollama"]
     base_url = ollama_cfg["base_url"]
     model = ollama_cfg["model"]
@@ -196,9 +374,12 @@ def summarize_ollama(text: str, title: str, config: dict) -> tuple[str, list[str
     # Get user interests if available
     user_interests = config.get("user_profile", {}).get("interests", [])
     interests_text = ""
+    for_you_format = ""
+    for_you_example = ""
     if user_interests:
-        interests_text = f"\nUser interests: {', '.join(user_interests)}"
-        interests_text += "\nAfter LABELS, add FOR_YOU: on a new line with YES or NO."
+        interests_text = f"\n\nReader interests (for FOR_YOU only, not labels): {', '.join(user_interests)}"
+        for_you_format = "\nAfter LABELS, on a new line write FOR_YOU: YES or NO (based on reader interests listed below)."
+        for_you_example = "\nFOR_YOU: YES"
 
     prompt = f"""Translate the title to English if needed, then summarize this blog post in {max_words} words or less.
 Write plain flowing prose only — no bullet points, no numbered lists, no markdown, no headers, no bold or italic text.
@@ -209,11 +390,11 @@ Then the summary.
 After the summary, on a new line, write LABELS: followed by up to {max_labels} short comma-separated keyword/topic labels in lowercase.
 Labels should be DIVERSE and SPECIFIC (not variations or synonyms of each other).
 Avoid redundant labels like both "kubernetes" and "k8s", or "containers" and "containerization".
-Pick the most important, distinct topics the article covers.
+Pick the most important, distinct topics the article covers.{for_you_format}
 Example format:
 TITLE: Kubernetes Best Practices
 Your summary here...
-LABELS: kubernetes, security, performance-optimization{interests_text}
+LABELS: kubernetes, security, performance-optimization{for_you_example}{interests_text}
 
 Original Title: {title}
 
@@ -228,11 +409,16 @@ Response:"""
         payload = {"model": model, "prompt": prompt, "stream": False}
         if not thinking:
             payload["think"] = False
+        
+        start_time = time.time()
+        log.debug(json.dumps({"step": "SUMMARIZE", "status": "starting", "title": title[:50]}))
         resp = requests.post(
             f"{base_url}/api/generate",
             json=payload,
             timeout=timeout,
         )
+        elapsed = time.time() - start_time
+        log.debug(json.dumps({"step": "SUMMARIZE", "status": "response_received", "elapsed_sec": round(elapsed, 2), "title": title[:50]}))
         resp.raise_for_status()
         data = resp.json()
         raw = data.get("response", "").strip()
@@ -247,9 +433,15 @@ Response:"""
         for title_marker in ("TITLE:", "Title:", "title:"):
             if title_marker in raw:
                 title_part = raw.split(title_marker, 1)[1]
-                # Find where title ends (before the next line that looks like content)
-                title_lines = title_part.split("\n")
-                title_en = title_lines[0].strip().strip('"') if title_lines else title
+                # Find first non-empty line — model sometimes puts the title on the next line
+                title_en = ""
+                for line in title_part.split("\n"):
+                    cleaned = line.strip().strip('"')
+                    if cleaned:
+                        title_en = cleaned
+                        break
+                if not title_en:
+                    title_en = title
                 break
 
         # Extract summary and labels
@@ -263,9 +455,13 @@ Response:"""
                     if title_marker in summary:
                         title_split = summary.split(title_marker, 1)
                         after_marker = title_split[1]
-                        # Remove everything up to and including the first newline
                         if '\n' in after_marker:
-                            summary = after_marker.split('\n', 1)[1]
+                            title_first_line, title_rest = after_marker.split('\n', 1)
+                            if not title_first_line.strip():
+                                # Title was on the following line; skip it too
+                                summary = title_rest.split('\n', 1)[1] if '\n' in title_rest else ""
+                            else:
+                                summary = title_rest
                         else:
                             summary = ""
                         break
@@ -273,7 +469,7 @@ Response:"""
                 
                 # Extract labels first
                 for_you_marker = None
-                for fy_marker in ("FOR_YOU:", "For_you:", "for_you:"):
+                for fy_marker in ("FOR_YOU:", "For_you:", "for_you:", "For you:", "For You:", "for you:"):
                     if fy_marker in rest:
                         for_you_marker = fy_marker
                         break
@@ -287,10 +483,17 @@ Response:"""
                     label_str = rest
                 
                 labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
+                # Reject fragments that contain newlines (FOR_YOU leftovers) or are too long
+                labels = [l.split('\n')[0].strip() for l in labels]
                 labels = [l for l in labels if l and len(l) < 40 and len(l.split()) <= 4]
                 # Deduplicate similar labels before truncating
                 labels = deduplicate_labels(labels)
                 labels = labels[:max_labels]
+                # Sanity check: if every label is a verbatim user interest, the model
+                # echoed the interests instead of generating real labels — discard them
+                interests_lower = {i.lower() for i in user_interests}
+                if labels and interests_lower and all(l in interests_lower for l in labels):
+                    labels = []
                 break
         else:
             # No LABELS marker found — strip TITLE and FOR_YOU lines from raw summary
@@ -298,9 +501,17 @@ Response:"""
                 if title_marker in summary:
                     title_split = summary.split(title_marker, 1)
                     after_marker = title_split[1]
-                    summary = after_marker.split('\n', 1)[1] if '\n' in after_marker else ""
+                    if '\n' in after_marker:
+                        first_line, rest = after_marker.split('\n', 1)
+                        if not first_line.strip():
+                            # Title was on the following line; skip it too
+                            summary = rest.split('\n', 1)[1] if '\n' in rest else ""
+                        else:
+                            summary = rest
+                    else:
+                        summary = ""
                     break
-            for fy_marker in ("FOR_YOU:", "For_you:", "for_you:"):
+            for fy_marker in ("FOR_YOU:", "For_you:", "for_you:", "For you:", "For You:", "for you:"):
                 if fy_marker in summary:
                     fy_split = summary.split(fy_marker, 1)
                     summary = fy_split[0].strip()
@@ -314,17 +525,65 @@ Response:"""
         eval_duration = data.get("eval_duration")  # nanoseconds
         if eval_count and eval_duration and eval_duration > 0:
             tps = round(eval_count / (eval_duration / 1e9), 1)
+        
+        total_time = time.time() - fn_start
+        telemetry_histogram_record(
+            "summarize_duration_seconds",
+            total_time,
+            {"status": "ok", "model": model},
+        )
+        log.debug(json.dumps({"step": "SUMMARIZE", "status": "completed", "elapsed_sec": round(total_time, 2), "tps": tps, "title": title[:50]}))
         return summary, labels, for_you, tps, title_en
     except Exception as e:
-        log.warning(f"Ollama failed: {e}")
+        telemetry_histogram_record(
+            "summarize_duration_seconds",
+            time.time() - fn_start,
+            {"status": "error", "model": model},
+        )
+        log.warning(json.dumps({"step": "SUMMARIZE", "status": "failed", "error": str(e)}))
         return None
 
 
 def clean_summary(text: str) -> str:
     """Convert any leftover markdown in LLM output to plain HTML."""
     import re
-    # Remove leading label like "Summary:" or "**Summary:**"
+
+    # ── Strip leading/trailing bare quote characters left by title removal ──
+    text = re.sub(r'^[\s"\u201c\u201d\u2018\u2019]+', '', text)
+
+    # ── Remove all title-translation preamble variants ──
+    # "The title translates to '...'."
+    text = re.sub(r'(?i)^the title translates to\s+[^\n.!?]*[.!?]\s*', '', text)
+    # "The title '...' translates to English as '...'."
+    text = re.sub(r'(?i)^the title\s+[^\n]*translates to[^\n]*[.!?]\s*', '', text)
+    # "Title translation: '...'"
+    text = re.sub(r'(?i)^title translation[:\s][^\n]*\n?', '', text)
+    # "The translated title is: '...'"
+    text = re.sub(r'(?i)^the translated title is[:\s][^\n]*\n?', '', text)
+    # "Here is a translation of the title into English:"
+    text = re.sub(r'(?i)^here is a translation of the title[^\n]*\n?', '', text)
+    # "Translation: ..."
+    text = re.sub(r'(?i)^translation:\s*[^\n]*\n?', '', text)
+
+    # ── Remove summary preambles ──
+    # "Summary:" / "**Summary:**"
     text = re.sub(r'^\s*\*{0,2}Summary:\*{0,2}\s*', '', text, flags=re.IGNORECASE)
+    # "The summary is as follows:"
+    text = re.sub(r'(?i)^the summary is as follows[:\s]*\n?', '', text)
+    # "Here is a summary:"
+    text = re.sub(r'(?i)^here is a summary[:\s]*\n?', '', text)
+
+    # ── Remove leaked interests echoes (any position) ──
+    text = re.sub(r'(?i)you can access this information[^.!?]*[.!?]\s*', '', text)
+    text = re.sub(r'(?i)this (move|article|post) is likely to be met with interest from[^.!?]*[.!?]\s*', '', text)
+    text = re.sub(r'(?i)(particularly those|especially those) (familiar with|interested in)[^.!?]*[.!?]\s*', '', text)
+
+    # ── Remove any trailing FOR_YOU lines that slipped through ──
+    text = re.sub(r'(?im)^(for[_ ]you|for_you|for you)[:\s]+\w+\s*$', '', text)
+
+    # ── Strip leading/trailing bare quote characters again after removals ──
+    text = re.sub(r'^[\s"\u201c\u201d\u2018\u2019]+', '', text)
+    text = text.strip()
     # Convert **bold** and __bold__
     text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
     text = re.sub(r'__(.+?)__', r'<strong>\1</strong>', text)
@@ -336,9 +595,91 @@ def clean_summary(text: str) -> str:
     text = re.sub(r'^[\s]*\d+\.\s+', '', text, flags=re.MULTILINE)
     # Collapse multiple blank lines into paragraph breaks; flatten single newlines to spaces
     paragraphs = [' '.join(p.split('\n')).strip() for p in re.split(r'\n{2,}', text) if p.strip()]
+    # Drop short leading paragraphs that look like title echoes or fragments
+    # (fewer than 7 words and not ending with sentence-ending punctuation)
+    while len(paragraphs) > 1 and len(paragraphs[0].split()) < 7 and not re.search(r'[.!?]$', paragraphs[0]):
+        paragraphs.pop(0)
     if len(paragraphs) > 1:
         return '</p><p class="summary">'.join(paragraphs)
     return paragraphs[0] if paragraphs else text
+
+
+def score_article(summary: str, title: str, config: dict) -> int:
+    """Score an article (1-10) based on its summary and readability.
+    Uses Ollama with thinking mode for better reasoning on quality/relevance.
+    Returns score as int (1-10), defaults to 5 if extraction fails."""
+    fn_start = time.time()
+    ollama_cfg = config["ai"]["ollama"]
+    base_url = ollama_cfg["base_url"]
+    model = ollama_cfg["model"]
+    use_thinking = config.get("scoring", {}).get("thinking", True)
+
+    # Get user interests if available for context
+    user_interests = config.get("user_profile", {}).get("interests", [])
+    interests_text = ""
+    if user_interests:
+        interests_text = f"\nReader interests: {', '.join(user_interests)}"
+
+    prompt = f"""Rate article relevance (1-10): clarity, depth, insights, relevance.{interests_text}
+Score 1: spam/deals/promo/job-posts. 2-3: thin. 4-5: okay. 6-7: good. 8-10: excellent.
+Title: {title}
+Summary: {summary[:500]}
+SCORE:"""
+
+    try:
+        timeout = ollama_cfg.get("timeout", 300)
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+        }
+        # Add thinking directive if enabled
+        if use_thinking:
+            payload["think"] = True
+        
+        start_time = time.time()
+        log.debug(json.dumps({"step": "SCORE", "status": "starting", "title": title[:50]}))
+        resp = requests.post(
+            f"{base_url}/api/generate",
+            json=payload,
+            timeout=timeout,
+        )
+        elapsed = time.time() - start_time
+        log.debug(json.dumps({"step": "SCORE", "status": "response_received", "elapsed_sec": round(elapsed, 2), "title": title[:50]}))
+        resp.raise_for_status()
+        data = resp.json()
+        raw = data.get("response", "").strip()
+
+        # Extract score from response
+        import re
+        score = 5  # default
+        for score_marker in ("SCORE:", "Score:", "score:"):
+            if score_marker in raw:
+                score_part = raw.split(score_marker, 1)[1].strip()
+                # Extract first number
+                match = re.search(r'\d+', score_part)
+                if match:
+                    score = int(match.group())
+                    # Clamp to valid range
+                    score = max(1, min(10, score))
+                    break
+        
+        total_time = time.time() - fn_start
+        telemetry_histogram_record(
+            "score_duration_seconds",
+            total_time,
+            {"status": "ok", "model": model},
+        )
+        log.info(json.dumps({"step": "SCORE", "status": "completed", "elapsed_sec": round(total_time, 2), "score": score, "title": title[:50]}))
+        return score
+    except Exception as e:
+        telemetry_histogram_record(
+            "score_duration_seconds",
+            time.time() - fn_start,
+            {"status": "error", "model": model},
+        )
+        log.warning(json.dumps({"step": "SCORE", "status": "failed", "default_score": 5, "error": str(e)}))
+        return 5
 
 
 def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None, str]:
@@ -346,7 +687,6 @@ def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool
     result = summarize_ollama(text, title, config)
     if result:
         summary, labels, for_you, tps, title_en = result
-        log.info(f"  Summarized with Ollama: {title[:50]}")
         return summary, labels, for_you, tps, title_en
 
     return "Summary unavailable – Ollama failed.", [], False, None, title
@@ -354,113 +694,160 @@ def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool
 
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
     """Summarize articles, using cache to skip already processed ones."""
-    cache = load_cache()
-    processed = []
-    stats = {"ollama": 0, "failed": 0, "cached": 0, "tps_samples": []}
+    with telemetry_span("process_articles"):
+        cache = load_cache()
+        processed = []
+        stats = {"ollama": 0, "failed": 0, "skipped": 0, "cached": 0, "tps_samples": []}
 
-    for article in articles:
-        aid = article["id"]
+        for article in articles:
+            aid = article["id"]
 
-        # Check cache
-        if aid in cache:
-            log.info(f"  Cached: {article['title'][:50]}")
-            processed.append(cache[aid])
-            stats["cached"] += 1
-            continue
+            # Check cache
+            if aid in cache:
+                cached_entry = cache[aid]
+                first_seen = cached_entry.get("first_seen", "")
+                today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                if first_seen and first_seen[:10] < today_str:
+                    log.info(json.dumps({"step": "PROCESS", "operation": "deduplicated", "reason": "seen_previous_day", "first_seen": first_seen[:10], "title": article['title'][:50]}))
+                    stats["cached"] += 1
+                    telemetry_counter_add("cache_hits_total", 1, {"type": "seen_previous_day"})
+                    continue
+                log.info(json.dumps({"step": "PROCESS", "operation": "cached", "title": article['title'][:50]}))
+                processed.append(cached_entry)
+                stats["cached"] += 1
+                telemetry_counter_add("cache_hits_total", 1, {"type": "same_day"})
+                continue
 
-        # Get article text
-        text = extract_article_text(article["content_raw"])
-        if len(text) < 100:
-            text = fetch_full_article(article["url"])
+            # Get article text
+            text = extract_article_text(article["content_raw"])
+            if len(text) < 100:
+                text = fetch_full_article(article["url"])
 
-        if len(text) < 50:
-            log.warning(f"  Skipping (no content): {article['title']}")
-            stats["failed"] += 1
-            continue
+            if len(text) < 50:
+                log.warning(json.dumps({"step": "PROCESS", "operation": "skipped", "reason": "no_content", "title": article['title']}))
+                stats["skipped"] += 1
+                telemetry_counter_add("articles_failed_total", 1, {"reason": "no_content"})
+                continue
 
-        # Summarize + extract labels (single LLM call)
-        summary, labels, for_you, tps, title_en = summarize(text, article["title"], config)
-        summary = clean_summary(summary)
+            # Summarize + extract labels (single LLM call)
+            summarize_start = time.time()
+            summary, labels, for_you, tps, title_en = summarize(text, article["title"], config)
+            summary = clean_summary(summary)
+            log.info(json.dumps({"step": "PROCESS", "operation": "summarized", "elapsed_sec": round(time.time() - summarize_start, 2), "tps": tps, "title": article["title"][:50]}))
 
-        if tps is not None:
-            stats["ollama"] += 1
-            stats["tps_samples"].append(tps)
-        else:
-            stats["failed"] += 1
+            if tps is not None:
+                stats["ollama"] += 1
+                stats["tps_samples"].append(tps)
+                telemetry_counter_add("articles_processed_total", 1, {"status": "ok"})
+            else:
+                stats["failed"] += 1
+                telemetry_counter_add("articles_failed_total", 1, {"reason": "summary_failed"})
 
-        result = {
-            "id": aid,
-            "feed": article["feed"],
-            "title": title_en,
-            "url": article["url"],
-            "published": article["published"],
-            "summary": summary,
-            "labels": labels,
-            "for_you": for_you,
-        }
+            # Score the article if scoring is enabled
+            score = None  # no score when scoring is disabled
+            if config.get("scoring", {}).get("enabled", False):
+                score = score_article(summary, article["title"], config)
 
-        cache[aid] = result
-        processed.append(result)
+            result = {
+                "id": aid,
+                "feed": article["feed"],
+                "title": title_en,
+                "url": article["url"],
+                "published": article["published"],
+                "summary": summary,
+                "labels": labels,
+                "for_you": for_you,
+                "score": score,
+                "first_seen": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+            }
 
-    # Prune old cache entries – keep at least 7 days, or longer if max_age_hours exceeds that
-    prune_hours = max(config["summary"]["max_age_hours"], 24 * 7)
-    prune_cutoff = (datetime.now(timezone.utc) - timedelta(hours=prune_hours)).isoformat()
-    cache = {k: v for k, v in cache.items() if v.get("published", "") >= prune_cutoff or not v.get("published")}
-    save_cache(cache)
+            cache[aid] = result
+            processed.append(result)
 
-    return processed, stats
+        # Prune old cache entries – keep at least 7 days, or longer if max_age_hours exceeds that
+        prune_hours = max(config["summary"]["max_age_hours"], 24 * 7)
+        prune_cutoff = (datetime.now(timezone.utc) - timedelta(hours=prune_hours)).isoformat()
+        cache = {k: v for k, v in cache.items() if v.get("published", "") >= prune_cutoff or not v.get("published")}
+        save_cache(cache)
+
+        return processed, stats
 
 
 def generate_html(articles: list[dict], config: dict, run_stats: dict | None = None):
     """Generate the static HTML digest page."""
-    env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
-    template = env.get_template("daily.html")
+    with telemetry_span("generate_html"):
+        env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
+        template = env.get_template("daily.html")
 
-    # Group articles by feed
-    by_feed = {}
-    for a in articles:
-        by_feed.setdefault(a["feed"], []).append(a)
+        # Split articles by score tier (if scoring enabled)
+        score_threshold = config.get("scoring", {}).get("threshold", 7)
+        scoring_enabled = config.get("scoring", {}).get("enabled", False)
+        
+        articles_high = []
+        articles_low = []
+        if scoring_enabled:
+            articles_high = [a for a in articles if a.get("score", 5) >= score_threshold]
+            articles_low = [a for a in articles if a.get("score", 5) < score_threshold]
+        else:
+            articles_high = articles
+            articles_low = []
 
-    today = datetime.now().strftime("%A, %B %d, %Y")
-    
-    out_dir = Path(config["output"]["directory"])
-    if not out_dir.is_absolute():
-        out_dir = BASE_DIR / out_dir
+        # Group high-score articles by feed
+        by_feed_high = {}
+        for a in articles_high:
+            by_feed_high.setdefault(a["feed"], []).append(a)
+        
+        # Group low-score articles by feed
+        by_feed_low = {}
+        for a in articles_low:
+            by_feed_low.setdefault(a["feed"], []).append(a)
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Build digest archive list for sidebar navigation
-    today_str = datetime.now().strftime("%Y-%m-%d")
-    reports = []
-    for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
-        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
-        try:
-            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
-            label = dt.strftime("%A, %B %d, %Y – %H:%M")
-        except ValueError:
-            label = date_str
-        reports.append({
-            "filename": f.name,
-            "label": label,
-            "date_short": date_str[:10],
-            "is_today": date_str[:10] == today_str,
-        })
+        today = datetime.now().strftime("%A, %B %d, %Y")
+        
+        out_dir = Path(config["output"]["directory"])
+        if not out_dir.is_absolute():
+            out_dir = BASE_DIR / out_dir
 
-    html = template.render(
-        articles_by_feed=by_feed,
-        total_articles=len(articles),
-        date=today,
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        run_stats=run_stats or {},
-        reports=reports,
-    )
+        out_dir.mkdir(parents=True, exist_ok=True)
+        log.debug(json.dumps({"step": "RENDER", "output_dir": str(out_dir)}))
+        
+        # Build digest archive list for sidebar navigation
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        reports = []
+        for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
+            date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
+            try:
+                dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
+                label = dt.strftime("%A, %B %d, %Y – %H:%M")
+            except ValueError:
+                label = date_str
+            reports.append({
+                "filename": f.name,
+                "label": label,
+                "date_short": date_str[:10],
+                "is_today": date_str[:10] == today_str,
+            })
 
-    filename = f"digest-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.html"
-    (out_dir / filename).write_text(html)
-    log.info(f"HTML written to {out_dir / filename}")
+        html = template.render(
+            articles_by_feed=by_feed_high,
+            articles_by_feed_low=by_feed_low,
+            total_articles=len(articles),
+            total_articles_high=len(articles_high),
+            total_articles_low=len(articles_low),
+            score_threshold=score_threshold,
+            scoring_enabled=scoring_enabled,
+            date=today,
+            generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            run_stats=run_stats or {},
+            reports=reports,
+        )
 
-    generate_index(out_dir)
-    return out_dir
+        filename = f"digest-{datetime.now().strftime('%Y-%m-%d-%H-%M')}.html"
+        (out_dir / filename).write_text(html)
+        log.info(json.dumps({"step": "RENDER", "operation": "html_written", "path": str(out_dir / filename)}))
+
+        generate_index(out_dir)
+        return out_dir
 
 
 def generate_index(out_dir: Path):
@@ -489,34 +876,35 @@ def generate_index(out_dir: Path):
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
     )
     (out_dir / "index.html").write_text(html)
-    log.info(f"Index updated: {out_dir / 'index.html'} ({len(reports)} reports)")
+    log.info(json.dumps({"step": "RENDER", "operation": "index_updated", "path": str(out_dir / 'index.html'), "reports": len(reports)}))
 
 
 def git_push(output_dir: Path):
     """Commit and push to GitHub Pages."""
-    try:
-        os.chdir(output_dir)
-        today = datetime.now().strftime("%Y-%m-%d")
+    with telemetry_span("git_push"):
+        try:
+            os.chdir(output_dir)
+            today = datetime.now().strftime("%Y-%m-%d")
 
-        subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        result = subprocess.run(
-            ["git", "status", "--porcelain"], capture_output=True, text=True
-        )
+            subprocess.run(["git", "add", "."], check=True, capture_output=True)
+            result = subprocess.run(
+                ["git", "status", "--porcelain"], capture_output=True, text=True
+            )
 
-        if not result.stdout.strip():
-            log.info("No changes to push")
-            return
+            if not result.stdout.strip():
+                log.info(json.dumps({"step": "GIT", "status": "no_changes"}))
+                return
 
-        subprocess.run(
-            ["git", "commit", "-m", f"Daily digest {today}"],
-            check=True, capture_output=True,
-        )
-        subprocess.run(["git", "push"], check=True, capture_output=True)
-        log.info("Pushed to GitHub Pages")
-    except subprocess.CalledProcessError as e:
-        log.error(f"Git push failed: {e}")
-    except Exception as e:
-        log.error(f"Git error: {e}")
+            subprocess.run(
+                ["git", "commit", "-m", f"Daily digest {today}"],
+                check=True, capture_output=True,
+            )
+            subprocess.run(["git", "push"], check=True, capture_output=True)
+            log.info(json.dumps({"step": "GIT", "status": "pushed"}))
+        except subprocess.CalledProcessError as e:
+            log.error(json.dumps({"step": "GIT", "status": "failed", "error": str(e)}))
+        except Exception as e:
+            log.error(json.dumps({"step": "GIT", "status": "error", "error": str(e)}))
 
 
 def main():
@@ -528,45 +916,59 @@ def main():
     if args.model and not args.debug:
         parser.error("--model can only be used with --debug")
 
-    if args.debug and CACHE_FILE.exists():
-        CACHE_FILE.unlink()
-        log.info("DEBUG mode – deleted article cache for fresh run")
+    if args.debug:
+        logging.root.setLevel(logging.DEBUG)
+        logging.getLogger("blog-digest").setLevel(logging.DEBUG)
+        if CACHE_FILE.exists():
+            CACHE_FILE.unlink()
+            log.info(json.dumps({"step": "MAIN", "mode": "debug", "action": "cache_cleared"}))
 
-    log.info("=" * 50)
-    log.info("Blog Digest - Starting daily run")
-    log.info("=" * 50)
+    log.info(json.dumps({"step": "MAIN", "status": "starting"}))
 
     start_time = datetime.now()
     config = load_config()
+    setup_observability(config)
+    telemetry_counter_add("runs_total", 1, {"debug": str(args.debug).lower()})
 
     if args.model:
         config["ai"]["ollama"]["model"] = args.model
-        log.info(f"Model override: {args.model}")
+        log.info(json.dumps({"step": "MAIN", "action": "model_override", "model": args.model}))
 
     # 1. Fetch feeds
     articles = fetch_feeds(config)
     if not articles:
-        log.warning("No articles found. Exiting.")
+        log.warning(json.dumps({"step": "MAIN", "status": "abort", "reason": "no_articles_found"}))
         sys.exit(0)
 
     # 2. Summarize articles
     processed, proc_stats = process_articles(articles, config)
-    log.info(f"Processed {len(processed)} articles")
+    log.info(json.dumps({"step": "MAIN", "action": "processed", "articles": len(processed)}))
 
     # Abort if too many summaries failed (don't publish broken digests)
-    newly_summarized = proc_stats["ollama"] + proc_stats["failed"]
+    newly_summarized = proc_stats["ollama"] + proc_stats["failed"]  # skipped (no_content) excluded
+    if newly_summarized == 0:
+        log.warning(json.dumps({"step": "MAIN", "status": "abort", "reason": "all_from_cache"}))
+        sys.exit(0)
+
     if newly_summarized > 0:
         failure_ratio = proc_stats["failed"] / newly_summarized
-        if failure_ratio > 0.5:
+        if failure_ratio > 0.1:
             log.error(
-                f"Aborting: {proc_stats['failed']}/{newly_summarized} new summaries failed "
-                f"({failure_ratio:.0%}). Not publishing a broken digest."
+                json.dumps({
+                    "step": "MAIN",
+                    "status": "abort",
+                    "reason": "too_many_failures",
+                    "failed": proc_stats["failed"],
+                    "total": newly_summarized,
+                    "failure_ratio": f"{failure_ratio:.1%}"
+                })
             )
             sys.exit(1)
 
     end_time = datetime.now()
     duration = end_time - start_time
     duration_str = f"{int(duration.total_seconds() // 60)}m {int(duration.total_seconds() % 60)}s"
+    telemetry_histogram_record("run_duration_seconds", duration.total_seconds(), {"status": "done"})
 
     tps_samples = proc_stats.pop("tps_samples", [])
     avg_tps = round(sum(tps_samples) / len(tps_samples), 1) if tps_samples else None
@@ -588,7 +990,7 @@ def main():
     # 4. Push to GitHub Pages
     git_push(output_dir)
 
-    log.info("Done!")
+    log.info(json.dumps({"step": "MAIN", "status": "done"}))
 
 
 if __name__ == "__main__":
