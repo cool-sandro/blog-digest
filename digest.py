@@ -59,6 +59,18 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 BASE_DIR = Path(__file__).parent
 CACHE_FILE = BASE_DIR / ".article_cache.json"
+REQUEST_HEADERS = {"User-Agent": "BlogDigest/1.0 (RSS Aggregator)"}
+
+TITLE_MARKERS = ("TITLE:", "Title:", "title:")
+LABEL_MARKERS = ("LABELS:", "Labels:", "labels:")
+FOR_YOU_MARKERS = (
+    "FOR_YOU:",
+    "For_you:",
+    "for_you:",
+    "For you:",
+    "For You:",
+    "for you:",
+)
 
 TRACER = None
 METRICS: dict[str, object] = {}
@@ -208,6 +220,114 @@ def save_cache(cache: dict):
         json.dump(cache, f, indent=2)
 
 
+def split_on_markers(text: str, markers: tuple[str, ...]) -> tuple[str, str] | None:
+    """Split text at the first configured marker, preserving marker priority order."""
+    for marker in markers:
+        if marker in text:
+            return text.split(marker, 1)
+    return None
+
+
+def extract_title_from_raw(raw: str, fallback_title: str) -> str:
+    """Extract translated title from model output, falling back to original title."""
+    split = split_on_markers(raw, TITLE_MARKERS)
+    if not split:
+        return fallback_title
+
+    _, title_part = split
+    for line in title_part.split("\n"):
+        cleaned = line.strip().strip('"')
+        if cleaned:
+            return cleaned
+    return fallback_title
+
+
+def strip_title_preamble(text: str) -> str:
+    """Remove TITLE preamble from text while handling title-on-next-line responses."""
+    split = split_on_markers(text, TITLE_MARKERS)
+    if not split:
+        return text
+
+    _, after_marker = split
+    if "\n" not in after_marker:
+        return ""
+
+    first_line, rest = after_marker.split("\n", 1)
+    if not first_line.strip():
+        return rest.split("\n", 1)[1] if "\n" in rest else ""
+    return rest
+
+
+def split_for_you(text: str) -> tuple[str, bool]:
+    """Split FOR_YOU flag from trailing text and return cleaned content + boolean."""
+    split = split_on_markers(text, FOR_YOU_MARKERS)
+    if not split:
+        return text, False
+
+    content, for_you_part = split
+    token = for_you_part.strip().split()[0].upper() if for_you_part.strip() else ""
+    return content.strip(), token.startswith("Y")
+
+
+def parse_labels(label_str: str, max_labels: int, user_interests: list[str]) -> list[str]:
+    """Normalize, filter, and deduplicate model-produced labels."""
+    labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
+    labels = [l.split("\n")[0].strip() for l in labels]
+    labels = [l for l in labels if l and len(l) < 40 and len(l.split()) <= 4]
+    labels = deduplicate_labels(labels)[:max_labels]
+
+    interests_lower = {i.lower() for i in user_interests}
+    if labels and interests_lower and all(l in interests_lower for l in labels):
+        return []
+    return labels
+
+
+def parse_entry_published(entry) -> datetime | None:
+    """Best-effort parse for published timestamps from feed entries."""
+    for date_field in ("published_parsed", "updated_parsed"):
+        parsed = getattr(entry, date_field, None)
+        if parsed:
+            return datetime.fromtimestamp(time.mktime(parsed), tz=timezone.utc)
+    return None
+
+
+def extract_entry_content(entry) -> str:
+    """Return best available raw article content from a feed entry."""
+    if hasattr(entry, "content") and entry.content:
+        return entry.content[0].get("value", "")
+    if hasattr(entry, "summary"):
+        return entry.summary
+    return ""
+
+
+def group_articles_by_feed(articles: list[dict]) -> dict[str, list[dict]]:
+    """Group article dictionaries by feed name."""
+    grouped: dict[str, list[dict]] = {}
+    for article in articles:
+        grouped.setdefault(article["feed"], []).append(article)
+    return grouped
+
+
+def build_reports(out_dir: Path, today: str) -> list[dict]:
+    """Build report metadata list from digest files, newest first."""
+    reports = []
+    for report_file in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
+        date_str = report_file.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
+            label = dt.strftime("%A, %B %d, %Y – %H:%M")
+        except ValueError:
+            label = date_str
+
+        reports.append({
+            "filename": report_file.name,
+            "label": label,
+            "date_short": date_str[:10],
+            "is_today": date_str[:10] == today,
+        })
+    return reports
+
+
 def article_id(url: str) -> str:
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
@@ -220,7 +340,7 @@ def fetch_with_backoff(url: str, max_retries: int = 3, timeout: int = 20, verify
             resp = requests.get(
                 url,
                 timeout=timeout,
-                headers={"User-Agent": "BlogDigest/1.0 (RSS Aggregator)"},
+                headers=REQUEST_HEADERS,
                 verify=verify_ssl,
             )
             resp.raise_for_status()
@@ -258,26 +378,14 @@ def fetch_feeds(config: dict) -> list[dict]:
                     if count >= max_per_feed:
                         break
 
-                    # Parse publication date
-                    published = None
-                    for date_field in ("published_parsed", "updated_parsed"):
-                        parsed = getattr(entry, date_field, None)
-                        if parsed:
-                            published = datetime.fromtimestamp(time.mktime(parsed), tz=timezone.utc)
-                            break
+                    published = parse_entry_published(entry)
 
                     if published and published < cutoff:
                         continue
 
                     link = getattr(entry, "link", "")
                     title = getattr(entry, "title", "No Title")
-
-                    # Get summary/content from feed
-                    content = ""
-                    if hasattr(entry, "content"):
-                        content = entry.content[0].get("value", "")
-                    elif hasattr(entry, "summary"):
-                        content = entry.summary
+                    content = extract_entry_content(entry)
 
                     articles.append({
                         "id": article_id(link),
@@ -324,9 +432,7 @@ def extract_article_text(html: str, max_chars: int = 5000) -> str:
 def fetch_full_article(url: str, max_chars: int = 5000) -> str:
     """Fetch and extract text from a full article URL."""
     try:
-        resp = requests.get(url, timeout=15, headers={
-            "User-Agent": "BlogDigest/1.0 (RSS Aggregator)"
-        })
+        resp = requests.get(url, timeout=15, headers=REQUEST_HEADERS)
         resp.raise_for_status()
         return extract_article_text(resp.text, max_chars)
     except Exception as e:
@@ -424,100 +530,22 @@ Response:"""
         raw = data.get("response", "").strip()
 
         # Extract TITLE, summary, LABELS, and FOR_YOU
-        title_en = title  # fallback to original
+        title_en = extract_title_from_raw(raw, title)
         summary = raw
         labels = []
         for_you = False
 
-        # Extract title first
-        for title_marker in ("TITLE:", "Title:", "title:"):
-            if title_marker in raw:
-                title_part = raw.split(title_marker, 1)[1]
-                # Find first non-empty line — model sometimes puts the title on the next line
-                title_en = ""
-                for line in title_part.split("\n"):
-                    cleaned = line.strip().strip('"')
-                    if cleaned:
-                        title_en = cleaned
-                        break
-                if not title_en:
-                    title_en = title
-                break
-
         # Extract summary and labels
-        for marker in ("LABELS:", "Labels:", "labels:"):
-            if marker in raw:
-                parts = raw.split(marker, 1)
-                summary = parts[0].strip()
-                rest = parts[1].strip()
-                # Remove TITLE line from summary if present
-                for title_marker in ("TITLE:", "Title:", "title:"):
-                    if title_marker in summary:
-                        title_split = summary.split(title_marker, 1)
-                        after_marker = title_split[1]
-                        if '\n' in after_marker:
-                            title_first_line, title_rest = after_marker.split('\n', 1)
-                            if not title_first_line.strip():
-                                # Title was on the following line; skip it too
-                                summary = title_rest.split('\n', 1)[1] if '\n' in title_rest else ""
-                            else:
-                                summary = title_rest
-                        else:
-                            summary = ""
-                        break
-                summary = summary.strip()
-                
-                # Extract labels first
-                for_you_marker = None
-                for fy_marker in ("FOR_YOU:", "For_you:", "for_you:", "For you:", "For You:", "for you:"):
-                    if fy_marker in rest:
-                        for_you_marker = fy_marker
-                        break
-                
-                if for_you_marker:
-                    label_part, for_you_part = rest.split(for_you_marker, 1)
-                    label_str = label_part.strip()
-                    for_you_str = for_you_part.strip().split()[0].upper()  # Get first word (YES/NO)
-                    for_you = for_you_str.startswith("Y")
-                else:
-                    label_str = rest
-                
-                labels = [l.strip().lower().strip('"\' ') for l in label_str.split(",")]
-                # Reject fragments that contain newlines (FOR_YOU leftovers) or are too long
-                labels = [l.split('\n')[0].strip() for l in labels]
-                labels = [l for l in labels if l and len(l) < 40 and len(l.split()) <= 4]
-                # Deduplicate similar labels before truncating
-                labels = deduplicate_labels(labels)
-                labels = labels[:max_labels]
-                # Sanity check: if every label is a verbatim user interest, the model
-                # echoed the interests instead of generating real labels — discard them
-                interests_lower = {i.lower() for i in user_interests}
-                if labels and interests_lower and all(l in interests_lower for l in labels):
-                    labels = []
-                break
+        split = split_on_markers(raw, LABEL_MARKERS)
+        if split:
+            summary_part, rest = split
+            summary = strip_title_preamble(summary_part).strip()
+            label_str, for_you = split_for_you(rest.strip())
+            labels = parse_labels(label_str, max_labels, user_interests)
         else:
             # No LABELS marker found — strip TITLE and FOR_YOU lines from raw summary
-            for title_marker in ("TITLE:", "Title:", "title:"):
-                if title_marker in summary:
-                    title_split = summary.split(title_marker, 1)
-                    after_marker = title_split[1]
-                    if '\n' in after_marker:
-                        first_line, rest = after_marker.split('\n', 1)
-                        if not first_line.strip():
-                            # Title was on the following line; skip it too
-                            summary = rest.split('\n', 1)[1] if '\n' in rest else ""
-                        else:
-                            summary = rest
-                    else:
-                        summary = ""
-                    break
-            for fy_marker in ("FOR_YOU:", "For_you:", "for_you:", "For you:", "For You:", "for you:"):
-                if fy_marker in summary:
-                    fy_split = summary.split(fy_marker, 1)
-                    summary = fy_split[0].strip()
-                    for_you_str = fy_split[1].strip().split()[0].upper() if fy_split[1].strip() else ""
-                    for_you = for_you_str.startswith("Y")
-                    break
+            summary = strip_title_preamble(summary)
+            summary, for_you = split_for_you(summary)
             summary = summary.strip()
 
         tps = None
@@ -548,51 +576,45 @@ def clean_summary(text: str) -> str:
     """Convert any leftover markdown in LLM output to plain HTML."""
     import re
 
-    # ── Strip leading/trailing bare quote characters left by title removal ──
-    text = re.sub(r'^[\s"\u201c\u201d\u2018\u2019]+', '', text)
+    def strip_quotes(value: str) -> str:
+        return re.sub(r'^[\s"\u201c\u201d\u2018\u2019]+', '', value)
 
-    # ── Remove all title-translation preamble variants ──
-    # "The title translates to '...'."
-    text = re.sub(r'(?i)^the title translates to\s+[^\n.!?]*[.!?]\s*', '', text)
-    # "The title '...' translates to English as '...'."
-    text = re.sub(r'(?i)^the title\s+[^\n]*translates to[^\n]*[.!?]\s*', '', text)
-    # "Title translation: '...'"
-    text = re.sub(r'(?i)^title translation[:\s][^\n]*\n?', '', text)
-    # "The translated title is: '...'"
-    text = re.sub(r'(?i)^the translated title is[:\s][^\n]*\n?', '', text)
-    # "Here is a translation of the title into English:"
-    text = re.sub(r'(?i)^here is a translation of the title[^\n]*\n?', '', text)
-    # "Translation: ..."
-    text = re.sub(r'(?i)^translation:\s*[^\n]*\n?', '', text)
+    text = strip_quotes(text)
 
-    # ── Remove summary preambles ──
-    # "Summary:" / "**Summary:**"
-    text = re.sub(r'^\s*\*{0,2}Summary:\*{0,2}\s*', '', text, flags=re.IGNORECASE)
-    # "The summary is as follows:"
-    text = re.sub(r'(?i)^the summary is as follows[:\s]*\n?', '', text)
-    # "Here is a summary:"
-    text = re.sub(r'(?i)^here is a summary[:\s]*\n?', '', text)
+    for pattern in (
+        r'(?i)^the title translates to\s+[^\n.!?]*[.!?]\s*',
+        r'(?i)^the title\s+[^\n]*translates to[^\n]*[.!?]\s*',
+        r'(?i)^title translation[:\s][^\n]*\n?',
+        r'(?i)^the translated title is[:\s][^\n]*\n?',
+        r'(?i)^here is a translation of the title[^\n]*\n?',
+        r'(?i)^translation:\s*[^\n]*\n?',
+        r'(?i)^\s*\*{0,2}summary:\*{0,2}\s*',
+        r'(?i)^the summary is as follows[:\s]*\n?',
+        r'(?i)^here is a summary[:\s]*\n?',
+    ):
+        text = re.sub(pattern, '', text)
 
-    # ── Remove leaked interests echoes (any position) ──
-    text = re.sub(r'(?i)you can access this information[^.!?]*[.!?]\s*', '', text)
-    text = re.sub(r'(?i)this (move|article|post) is likely to be met with interest from[^.!?]*[.!?]\s*', '', text)
-    text = re.sub(r'(?i)(particularly those|especially those) (familiar with|interested in)[^.!?]*[.!?]\s*', '', text)
+    for pattern in (
+        r'(?i)you can access this information[^.!?]*[.!?]\s*',
+        r'(?i)this (move|article|post) is likely to be met with interest from[^.!?]*[.!?]\s*',
+        r'(?i)(particularly those|especially those) (familiar with|interested in)[^.!?]*[.!?]\s*',
+        r'(?im)^(for[_ ]you|for_you|for you)[:\s]+\w+\s*$',
+    ):
+        text = re.sub(pattern, '', text)
 
-    # ── Remove any trailing FOR_YOU lines that slipped through ──
-    text = re.sub(r'(?im)^(for[_ ]you|for_you|for you)[:\s]+\w+\s*$', '', text)
+    for pattern, replacement in (
+        (r'\*\*(.+?)\*\*', r'<strong>\1</strong>'),
+        (r'__(.+?)__', r'<strong>\1</strong>'),
+        (r'\*(.+?)\*', r'<em>\1</em>'),
+        (r'_(.+?)_', r'<em>\1</em>'),
+        (r'^[\s]*[-*]\s+', ''),
+        (r'^[\s]*\d+\.\s+', ''),
+    ):
+        flags = re.MULTILINE if replacement == '' else 0
+        text = re.sub(pattern, replacement, text, flags=flags)
 
-    # ── Strip leading/trailing bare quote characters again after removals ──
-    text = re.sub(r'^[\s"\u201c\u201d\u2018\u2019]+', '', text)
-    text = text.strip()
-    # Convert **bold** and __bold__
-    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
-    text = re.sub(r'__(.+?)__', r'<strong>\1</strong>', text)
-    # Convert *italic* and _italic_
-    text = re.sub(r'\*(.+?)\*', r'<em>\1</em>', text)
-    text = re.sub(r'_(.+?)_', r'<em>\1</em>', text)
-    # Convert markdown bullet/numbered list items into inline sentences
-    text = re.sub(r'^[\s]*[-*]\s+', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^[\s]*\d+\.\s+', '', text, flags=re.MULTILINE)
+    text = strip_quotes(text).strip()
+
     # Collapse multiple blank lines into paragraph breaks; flatten single newlines to spaces
     paragraphs = [' '.join(p.split('\n')).strip() for p in re.split(r'\n{2,}', text) if p.strip()]
     # Drop short leading paragraphs that look like title echoes or fragments
@@ -682,22 +704,14 @@ SCORE:"""
         return 5
 
 
-def summarize(text: str, title: str, config: dict) -> tuple[str, list[str], bool, float | None, str]:
-    """Summarize with Ollama. Returns (summary, labels, for_you, tps, title_en)."""
-    result = summarize_ollama(text, title, config)
-    if result:
-        summary, labels, for_you, tps, title_en = result
-        return summary, labels, for_you, tps, title_en
-
-    return "Summary unavailable – Ollama failed.", [], False, None, title
-
-
 def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], dict]:
     """Summarize articles, using cache to skip already processed ones."""
     with telemetry_span("process_articles"):
         cache = load_cache()
         processed = []
         stats = {"ollama": 0, "failed": 0, "skipped": 0, "cached": 0, "tps_samples": []}
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        scoring_enabled = config.get("scoring", {}).get("enabled", False)
 
         for article in articles:
             aid = article["id"]
@@ -706,7 +720,6 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
             if aid in cache:
                 cached_entry = cache[aid]
                 first_seen = cached_entry.get("first_seen", "")
-                today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                 if first_seen and first_seen[:10] < today_str:
                     log.info(json.dumps({"step": "PROCESS", "operation": "deduplicated", "reason": "seen_previous_day", "first_seen": first_seen[:10], "title": article['title'][:50]}))
                     stats["cached"] += 1
@@ -731,7 +744,17 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
 
             # Summarize + extract labels (single LLM call)
             summarize_start = time.time()
-            summary, labels, for_you, tps, title_en = summarize(text, article["title"], config)
+            summary_result = summarize_ollama(text, article["title"], config)
+            if summary_result is None:
+                summary, labels, for_you, tps, title_en = (
+                    "Summary unavailable – Ollama failed.",
+                    [],
+                    False,
+                    None,
+                    article["title"],
+                )
+            else:
+                summary, labels, for_you, tps, title_en = summary_result
             summary = clean_summary(summary)
             log.info(json.dumps({"step": "PROCESS", "operation": "summarized", "elapsed_sec": round(time.time() - summarize_start, 2), "tps": tps, "title": article["title"][:50]}))
 
@@ -745,7 +768,7 @@ def process_articles(articles: list[dict], config: dict) -> tuple[list[dict], di
 
             # Score the article if scoring is enabled
             score = None  # no score when scoring is disabled
-            if config.get("scoring", {}).get("enabled", False):
+            if scoring_enabled:
                 score = score_article(summary, article["title"], config)
 
             result = {
@@ -792,15 +815,8 @@ def generate_html(articles: list[dict], config: dict, run_stats: dict | None = N
             articles_high = articles
             articles_low = []
 
-        # Group high-score articles by feed
-        by_feed_high = {}
-        for a in articles_high:
-            by_feed_high.setdefault(a["feed"], []).append(a)
-        
-        # Group low-score articles by feed
-        by_feed_low = {}
-        for a in articles_low:
-            by_feed_low.setdefault(a["feed"], []).append(a)
+        by_feed_high = group_articles_by_feed(articles_high)
+        by_feed_low = group_articles_by_feed(articles_low)
 
         today = datetime.now().strftime("%A, %B %d, %Y")
         
@@ -812,21 +828,7 @@ def generate_html(articles: list[dict], config: dict, run_stats: dict | None = N
         log.debug(json.dumps({"step": "RENDER", "output_dir": str(out_dir)}))
         
         # Build digest archive list for sidebar navigation
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        reports = []
-        for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
-            date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
-            try:
-                dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
-                label = dt.strftime("%A, %B %d, %Y – %H:%M")
-            except ValueError:
-                label = date_str
-            reports.append({
-                "filename": f.name,
-                "label": label,
-                "date_short": date_str[:10],
-                "is_today": date_str[:10] == today_str,
-            })
+        reports = build_reports(out_dir, datetime.now().strftime("%Y-%m-%d"))
 
         html = template.render(
             articles_by_feed=by_feed_high,
@@ -857,19 +859,7 @@ def generate_index(out_dir: Path):
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    reports = []
-    for f in sorted(out_dir.glob("digest-????-??-??-??-??.html"), reverse=True):
-        date_str = f.stem.replace("digest-", "")  # YYYY-MM-DD-HH-MM
-        try:
-            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
-            label = dt.strftime("%A, %B %d, %Y – %H:%M")
-        except ValueError:
-            label = date_str
-        reports.append({
-            "filename": f.name,
-            "label": label,
-            "is_today": date_str[:10] == today,
-        })
+    reports = build_reports(out_dir, today)
 
     html = template.render(
         reports=reports,
@@ -950,20 +940,19 @@ def main():
         log.warning(json.dumps({"step": "MAIN", "status": "abort", "reason": "all_from_cache"}))
         sys.exit(0)
 
-    if newly_summarized > 0:
-        failure_ratio = proc_stats["failed"] / newly_summarized
-        if failure_ratio > 0.1:
-            log.error(
-                json.dumps({
-                    "step": "MAIN",
-                    "status": "abort",
-                    "reason": "too_many_failures",
-                    "failed": proc_stats["failed"],
-                    "total": newly_summarized,
-                    "failure_ratio": f"{failure_ratio:.1%}"
-                })
-            )
-            sys.exit(1)
+    failure_ratio = proc_stats["failed"] / newly_summarized
+    if failure_ratio > 0.1:
+        log.error(
+            json.dumps({
+                "step": "MAIN",
+                "status": "abort",
+                "reason": "too_many_failures",
+                "failed": proc_stats["failed"],
+                "total": newly_summarized,
+                "failure_ratio": f"{failure_ratio:.1%}"
+            })
+        )
+        sys.exit(1)
 
     end_time = datetime.now()
     duration = end_time - start_time
