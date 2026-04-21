@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Tuesday, April 21, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        details.feed-section.low-score-section {
+            margin-top: 2rem;
+            border-color: var(--border-alt, #e5e7eb);
+            opacity: 0.8;
+        }
+
+        details.feed-section.low-score-section > summary {
+            color: var(--text-muted);
+            background: rgba(107, 114, 128, 0.05);
+        }
+
+        details.feed-section.low-score-section[open] > summary {
+            color: var(--text-muted);
+        }
+
+        .low-score-article {
+            opacity: 0.75;
+        }
+
+        .low-score-article .summary {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        details.feed-subsection {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-light, #f0f0f0);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.feed-subsection > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(107, 114, 128, 0.03);
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        details.feed-subsection > summary::-webkit-details-marker { display: none; }
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .btn-read-all {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .btn-read-all:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-20-07-18.html" >
+                        <span>Monday, April 20, 2026 – 07:18</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-19-07-28.html" >
+                        <span>Sunday, April 19, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-22-11.html" >
+                        <span>Saturday, April 18, 2026 – 22:11</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-07-24.html" >
+                        <span>Saturday, April 18, 2026 – 07:24</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-17-07-32.html" >
+                        <span>Friday, April 17, 2026 – 07:32</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-07-14.html" >
+                        <span>Thursday, April 16, 2026 – 07:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-00-41.html" >
+                        <span>Thursday, April 16, 2026 – 00:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-20-28.html" >
+                        <span>Wednesday, April 15, 2026 – 20:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-35.html" >
+                        <span>Wednesday, April 15, 2026 – 00:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-25.html" >
+                        <span>Wednesday, April 15, 2026 – 00:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-14-07-17.html" >
+                        <span>Tuesday, April 14, 2026 – 07:17</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-13-07-10.html" >
+                        <span>Monday, April 13, 2026 – 07:10</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-07-01.html" >
+                        <span>Sunday, April 12, 2026 – 07:01</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-03-30.html" >
+                        <span>Sunday, April 12, 2026 – 03:30</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-54.html" >
+                        <span>Sunday, April 12, 2026 – 02:54</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-50.html" >
+                        <span>Sunday, April 12, 2026 – 02:50</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-25.html" >
+                        <span>Sunday, April 12, 2026 – 02:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-35.html" >
+                        <span>Sunday, April 12, 2026 – 01:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-07.html" >
+                        <span>Sunday, April 12, 2026 – 01:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-36.html" >
+                        <span>Sunday, April 12, 2026 – 00:36</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-14.html" >
+                        <span>Sunday, April 12, 2026 – 00:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-23-39.html" >
+                        <span>Saturday, April 11, 2026 – 23:39</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-14-57.html" >
+                        <span>Saturday, April 11, 2026 – 14:57</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-07-33.html" >
+                        <span>Saturday, April 11, 2026 – 07:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-10-07-41.html" >
+                        <span>Friday, April 10, 2026 – 07:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-09-07-34.html" >
+                        <span>Thursday, April 09, 2026 – 07:34</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-08-07-28.html" >
+                        <span>Wednesday, April 08, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-07-07-07.html" >
+                        <span>Tuesday, April 07, 2026 – 07:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-23-27.html" >
+                        <span>Monday, April 06, 2026 – 23:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-21-51.html" >
+                        <span>Monday, April 06, 2026 – 21:51</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-20-55.html" >
+                        <span>Monday, April 06, 2026 – 20:55</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" >
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" >
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" >
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Tuesday, April 21, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>21</strong> articles</span>
+                <span class="stat"><strong>6</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="CNCF Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                CNCF Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="CNCF Blog"></span>
+                <button class="btn-read-all" data-feed-all="CNCF Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="c14ff4ca6ccba428">
+                    <div class="article-header">
+                        <h3><a href="https://www.cncf.io/blog/2026/04/20/from-public-static-void-main-to-golden-kubestronaut-the-art-of-unlearning/" target="_blank" rel="noopener">From public static void main to Golden Kubestronaut: The Art of unlearning</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="c14ff4ca6ccba428" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The author's journey from being a traditional Java developer to becoming a cloud-native architect was marked by frustration and a deep understanding of the need to "unlearn." They were stuck in an enterprise application with issues stemming from a monolithic architecture, which led them to transition into infrastructure. However, this new world revealed that relying on stateful, monolithic assumptions would not suffice. The author had to unlearn the concept of preserving state and minimizing network round trips, as these became antipatterns in Kubernetes environments. They discovered that designing for reliability deliberately was crucial, rather than relying solely on writing good code.</p><p class="summary">The author also had to shift their mindset from containing failures to accepting them as a necessary part of cloud-native architecture. This meant embracing the idea that networks calls between isolated microservices were architecturally superior to optimized local method calls within monoliths.</p><p class="summary">As they progressed through their Kubernetes certifications, including achieving the CNCF Golden Kubestronaut designation, the author learned to prioritize resilience over latency and understand that feeding the beast (i.e., constantly optimizing performance) was not always the best approach. They came to realize that distributing the load effectively was key in a distributed system like Kubernetes.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">architecture</span>
+                        
+                        <span class="label-tag">cloud-native</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.cncf.io/blog/2026/04/20/from-public-static-void-main-to-golden-kubestronaut-the-art-of-unlearning/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <button class="btn-read-all" data-feed-all="Kubernetes subreddit" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="099e5842cf931d5d">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sqw44t/homelabbers_whats_your_observability_stack/" target="_blank" rel="noopener">observability stack for home lab kubernetes environment</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="099e5842cf931d5d" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The blog post discusses a user's desire to centralize metrics, logs, and traces in their Kubernetes home lab environment. The user is considering using an OpenTelemetry Collector as the entry point for monitoring data, but is unsure about the best backends to use for processing this data. They mention being aware of popular options like Prometheus, Loki, Jaeger, and Grafana, although these tools are becoming more SaaS-focused. Additionally, they bring up Victoria Metrics, Logs, and Traces as potential alternatives that have been submitted by a user named DiscoDave86.</p><p class="summary">The post seems to be seeking inspiration and advice from the community on how to set up an effective observability stack for their Kubernetes environment.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">home lab</span>
+                        
+                        <span class="label-tag">open telemetry collector</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sqw44t/homelabbers_whats_your_observability_stack/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="b9566e03e0587a47">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sr3a8i/add_a_remote_worker_node/" target="_blank" rel="noopener">Adding a Remote Worker Node to a Kubernetes Cluster Without VPN</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="b9566e03e0587a47" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">This article discusses adding a remote worker node to a Kubernetes cluster without setting up a site-to-site VPN. The author mentions using Wireguard in Calico for encryption but notes that it only adds encryption and not allows for remote access.</p><p class="summary">The community shares their experiences with implementing a solution to add remote nodes, highlighting the challenges and potential approaches.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">networking</span>
+                        
+                        <span class="label-tag">wireguard</span>
+                        
+                        <span class="label-tag">remote-access</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sr3a8i/add_a_remote_worker_node/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="857a5bf65bef6213">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1srcvfp/shipped_healthcheck_plugins_for_both_gh_and/" target="_blank" rel="noopener">shipped health check plugins for both gh and gcloud</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="857a5bf65bef6213" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-21</p>
+                    
+                    <p class="summary">The article discusses the recent release of Opus 4.7, Haiku 3 retirement, and other breaking changes that affected the behavior of GitHub and Google Cloud CLI health checks. The authors developed two new read-only plugins to mitigate these issues. The first plugin, github-cli-health-check, bypasses sandbox blocking by running a secondary path on the user's actual machine, while the second plugin, gcloud-cli-health-check, provides 11 read-only checks for GCP projects using environment variables.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                        <span class="label-tag">troubleshooting</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1srcvfp/shipped_healthcheck_plugins_for_both_gh_and/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="28b9dc5541c03d60">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sqjoj0/how_we_monitor_a_multitenant_kubernetes_saas/" target="_blank" rel="noopener">Monitoring a Multi-Tenant Kubernetes SaaS Across Six Regions</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="28b9dc5541c03d60" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">We previously struggled with our internal monitoring system crashing under its own telemetry volume when we first deployed a multi-tenant SigNoz Cloud across three regional Kubernetes clusters. To address this issue, our engineering team implemented several changes to improve the scalability and efficiency of our monitoring system. We introduced Daemonsets for local metric and log collection, using annotation-driven per-container scraping instead of pod-level scraping. This approach allowed us to collect telemetry data from each container in isolation, reducing the load on our internal monitoring system.</p><p class="summary">We also deployed synthetic probing nodes to simulate customer endpoints and monitor Kubernetes API events, including persisting cluster-level events past the default 1-hour retention period. Our pipeline consists of Envoy → OTel Gateway → Redpanda → central SigNoz instance, which uses nearly all seven OTel Collector deployment patterns together. By implementing these changes, we improved the performance and efficiency of our monitoring system, enabling us to monitor a multi-tenant Kubernetes SaaS across six regions.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">scalability</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sqjoj0/how_we_monitor_a_multitenant_kubernetes_saas/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <button class="btn-read-all" data-feed-all="Hacker News (Top)" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="eddf605ff0cd560a">
+                    <div class="article-header">
+                        <h3><a href="https://www.apple.com/newsroom/2026/04/tim-cook-to-become-apple-executive-chairman-john-ternus-to-become-apple-ceo/" target="_blank" rel="noopener">John Ternus to become Apple CEO</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="eddf605ff0cd560a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">John Ternus is set to replace Tim Cook as the chief executive officer of Apple, a move that has significant implications for the company's future. According to Apple, Ternus will serve as the new CEO and executive chairman after serving in various roles within the organization.</p><p class="summary">In his current role, Ternus oversees global manufacturing, supply chain management, and product life cycle development. He is credited with playing a crucial part in Apple's resurgence under Cook's leadership and has made significant contributions to the company's success.</p><p class="summary">As Ternus takes on the new role, he will face numerous challenges, including navigating the rapidly changing technology landscape and ensuring the continued growth of Apple's products and services.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">apple</span>
+                        
+                        <span class="label-tag">ceo</span>
+                        
+                        <span class="label-tag">tim cook</span>
+                        
+                        <span class="label-tag">john ternus</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.apple.com/newsroom/2026/04/tim-cook-to-become-apple-executive-chairman-john-ternus-to-become-apple-ceo/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="53438aba5557cfce">
+                    <div class="article-header">
+                        <h3><a href="https://stephvee.ca/blog/artificial%20intelligence/ai-resistance-is-growing/" target="_blank" rel="noopener">Recent Anti-AI Sentiment Worth Discussing</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="53438aba5557cfce" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The article discusses a growing trend of anti-AI sentiment, with various individuals and groups expressing concerns about the potential risks and negative consequences of artificial intelligence. This sentiment is not limited to technology experts but also includes ordinary people who are worried about job losses, bias in AI decision-making, and the loss of human touch in automation.</p><p class="summary">The article highlights recent examples of this resistance, including comments on a Hacker News post and articles published by mainstream media outlets. It also touches on the diversity of concerns, ranging from economic and social implications to philosophical questions about the nature of intelligence and consciousness.</p><p class="summary">While some experts argue that AI can bring significant benefits, others are more cautious, highlighting the need for careful consideration and regulation of AI development.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai-resistance</span>
+                        
+                        <span class="label-tag">ethics</span>
+                        
+                        <span class="label-tag">job-displacement</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://stephvee.ca/blog/artificial%20intelligence/ai-resistance-is-growing/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ac81f237999d3994">
+                    <div class="article-header">
+                        <h3><a href="https://warontherocks.com/cogs-of-war/the-f-35-is-a-masterpiece-built-for-the-wrong-war/" target="_blank" rel="noopener">The F-35 is Built for the Wrong War</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="ac81f237999d3994" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The article discusses how the development and production of the F-35 fighter jet have been driven by a focus on low observability, stealth capabilities, and advanced sensors. However, this emphasis has come at the cost of more practical considerations such as maintenance costs, pilot training requirements, and operational flexibility.</p><p class="summary">The author argues that the F-35's features were designed with the intention of giving it an advantage in the conflict against asymmetric threats like those faced during the 2003 invasion of Iraq. While these designs may have been effective in certain contexts, they are now proving to be less relevant in modern conflicts where more traditional air-to-air combat is becoming increasingly rare.</p><p class="summary">Furthermore, the author notes that this focus on stealth has also made it difficult for the F-35 to integrate with other military systems and platforms, limiting its effectiveness in certain operational scenarios. Overall, the article suggests that the development of the F-35 represents a case where innovation was driven by an overly narrow definition of what constitutes a "war" or conflict.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">f-35</span>
+                        
+                        <span class="label-tag">military</span>
+                        
+                        <span class="label-tag">warfare</span>
+                        
+                        <span class="label-tag">stealth technology</span>
+                        
+                        <span class="label-tag">asymmetric threats</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://warontherocks.com/cogs-of-war/the-f-35-is-a-masterpiece-built-for-the-wrong-war/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="7aaedf6b1500ffd8">
+                    <div class="article-header">
+                        <h3><a href="https://theonion.com/at-long-last-infowars-is-ours/" target="_blank" rel="noopener">The Onion Acquires InfoWars</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="7aaedf6b1500ffd8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The Onion has acquired InfoWars, a right-wing news website founded by conspiracy theorist Alex Jones. In an effort to satirize the media landscape and highlight its absurdity, The Onion is now the owner of a platform known for spreading misinformation.</p><p class="summary">This move serves as a commentary on the state of modern media, where facts are often disputed and sensationalism reigns supreme. By acquiring InfoWars, The Onion aims to create a humorous and ironic contrast between fact-based journalism and InfoWars' conspiracy-laden content.</p><p class="summary">The Onion's acquisition of InfoWars is seen as a satirical take on the current state of media and the importance of critical thinking in today's world. This move serves as a commentary on the need for balance and accuracy in reporting, particularly in the face of misinformation and disinformation.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">satire</span>
+                        
+                        <span class="label-tag">media</span>
+                        
+                        <span class="label-tag">misinformation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://theonion.com/at-long-last-infowars-is-ours/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="723ebdff12d5c15e">
+                    <div class="article-header">
+                        <h3><a href="https://vivianvoss.net/blog/why-we-accepted-surveillance" target="_blank" rel="noopener">The Acceptance of Surveillance as Default in Our Tech</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="723ebdff12d5c15e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The blog post discusses how the tech industry has largely accepted surveillance as a default feature in many software applications, particularly those related to data collection and monitoring. This acceptance is often justified by the need for security and tracking, but it also raises concerns about user privacy and data protection. The author suggests that this trend is a result of a broader societal shift towards the normalization of technological invasion into our personal lives.</p><p class="summary">The post highlights examples from various tech companies, including Google and Facebook, which have implemented features that collect user data without explicit consent. These features are often presented as necessary for security or functionality, but they can also be used to manipulate users and sell their data.</p><p class="summary">The author concludes by questioning the moral implications of accepting surveillance as a default feature in our technology, particularly when it comes at the cost of individual privacy and autonomy.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">privacy</span>
+                        
+                        <span class="label-tag">surveillance</span>
+                        
+                        <span class="label-tag">tech-industry</span>
+                        
+                        <span class="label-tag">open-source-security</span>
+                        
+                        <span class="label-tag">user-tracking</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://vivianvoss.net/blog/why-we-accepted-surveillance" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Grafana Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Grafana Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Grafana Blog"></span>
+                <button class="btn-read-all" data-feed-all="Grafana Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="47623b2392971053">
+                    <div class="article-header">
+                        <h3><a href="https://grafana.com/blog/monitor-databricks-with-grafana-cloud-for-instant-visibility-into-your-workloads/" target="_blank" rel="noopener">Monitor Databricks with Grafana Cloud for Instant Visibility into Your Workloads</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="47623b2392971053" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="summary">This blog post introduces a new integration between Databricks and Grafana Cloud, allowing users to monitor their workloads and receive real-time visibility into various metrics such as billing, job reliability, and SQL warehouse performance. The integration provides three pre-built dashboards catering to different teams: FinOps, Platform/SRE, and Analytics/BI. Each dashboard offers unique insights into specific areas of interest, including cost trends, DBU consumption, job and pipeline performance, and query latency.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">monitoring</span>
+                        
+                        <span class="label-tag">data engineering</span>
+                        
+                        <span class="label-tag">analytics</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://grafana.com/blog/monitor-databricks-with-grafana-cloud-for-instant-visibility-into-your-workloads/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <button class="btn-read-all" data-feed-all="Golem" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="78e3b1cfdd3ecdff">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/tim-cook-tritt-ab-apple-hardware-chef-uebernimmt-die-konzernfuehrung-2604-207789.html" target="_blank" rel="noopener">Apple's New CEO Takes Over as Hardware-Chef Steps Down</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="78e3b1cfdd3ecdff" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">Apple has just announced that its hardware chief, Johny Srouji, will be taking over as the company's new CEO in a few months. This move comes after Tim Cook's unsuccessful attempt to carry on Steve Jobs' legacy of innovation. The news marks an interesting shift for Apple, as it seems to signal a return to a more traditional management structure.</p><p class="summary">The fact that the hardware chief is now taking over as CEO suggests that Apple is placing greater emphasis on its products and manufacturing capabilities. This could be seen as a response to changing market conditions and increasing competition in the tech industry.</p><p class="summary">As a result, Apple fans may want to keep an eye on how Srouji navigates this new role and how it affects the company's product lineup and overall strategy.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">apple</span>
+                        
+                        <span class="label-tag">leadership</span>
+                        
+                        <span class="label-tag">innovation</span>
+                        
+                        <span class="label-tag">ceo-transition</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/tim-cook-tritt-ab-apple-hardware-chef-uebernimmt-die-konzernfuehrung-2604-207789.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="90f8ae15b60781c7">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/tim-hoettges-telekom-sieht-sich-als-klempner-fuer-neue-ki-welt-2604-207785.html" target="_blank" rel="noopener">Telekom sees itself as a repairman for the new AI world</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="90f8ae15b60781c7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The article discusses Tim Höttges, the CEO of Deutsche Telekom, who recently spoke about his company's role in the field of artificial intelligence in Germany. According to Höttges, the current state of AI is chaotic and fragmented, with many companies trying to develop their own solutions without thinking about the bigger picture. He believes that this approach will lead to a situation where different systems are mutually incompatible, making it difficult for them to work together seamlessly.</p><p class="summary">Höttges thinks that Telekom can play a key role in bridging this gap by providing neutral infrastructure and platforms that enable AI applications from different companies to communicate with each other. By doing so, he aims to create a more cohesive and efficient AI ecosystem in Germany.</p><p class="summary">In essence, Höttges is calling for the development of standards and open-source solutions that would allow various AI systems to work together seamlessly, much like how cars can talk to each other through standardized communication protocols.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">ai-ecosystem</span>
+                        
+                        <span class="label-tag">standardization</span>
+                        
+                        <span class="label-tag">telecommunications</span>
+                        
+                        <span class="label-tag">kai</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/tim-hoettges-telekom-sieht-sich-als-klempner-fuer-neue-ki-welt-2604-207785.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="82258a61865cc7d3">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/hannover-messe-merz-will-westlichen-6g-standard-zusammen-mit-trump-2604-207784.html" target="_blank" rel="noopener">German Merz and Trump to Set Western 6G Standard Together</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="82258a61865cc7d3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">Merz, a German politician, has announced plans with US President Donald Trump to set the western standard for the next-generation of wireless communication technology, known as 6G. This initiative aims to establish a unified global standard for 6G, which is expected to be significantly faster and more powerful than its predecessors. The collaboration between Merz and Trump is seen as an attempt to counterbalance the influence of Asian nations in shaping the future of telecommunications.</p><p class="summary">Merz's proposal has sparked both excitement and skepticism among industry experts, who see this move as a significant step forward for global cooperation on 6G development. However, concerns about intellectual property protection and regulatory differences between the US and Europe have raised questions about the feasibility of a unified standard.</p><p class="summary">The proposed collaboration between Merz and Trump is seen as an attempt to create a new era of international cooperation in the development of 6G technology, with potential benefits for global communication networks and economic growth.</p>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/hannover-messe-merz-will-westlichen-6g-standard-zusammen-mit-trump-2604-207784.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="5a9044cc84d55779">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-bosch-ratschenschraubendreher-mit-12-bits-kostet-nur-15-euro-2604-207783.html" target="_blank" rel="noopener">Bosch Cordless Drill Set with 12 Bits for 15 Euros</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="5a9044cc84d55779" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">This blog post does not seem to be relevant to the provided text, as it appears to be a misleading advertising message from Amazon.</p><p class="summary">The original content is about a Bosch cordless drill set with 12 bits being sold on Amazon for 15 euros, which is a relatively affordable price considering its quality and features. The author seems to be excited about this deal and might share some personal experience or tips on how to get the most out of this tool.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-bosch-ratschenschraubendreher-mit-12-bits-kostet-nur-15-euro-2604-207783.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c4d8bdf64b72e78e">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-akku-gartenschere-von-gardena-reduziert-bei-amazon-2604-207781.html" target="_blank" rel="noopener">Electric Pruning Shears by Gardena Reduced in Price at Amazon</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="c4d8bdf64b72e78e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">This blog post reviews an electric pruning shear by Gardena that is now available on Amazon at a reduced price. The product offers ergonomic design, making it easier to perform pruning tasks. However, the focus of the article seems to be somewhat off-topic as it appears to be a review for a gardening tool rather than a blog about software development or related topics.</p><p class="summary">The post highlights the benefits of using an electric pruning shear, such as reduced fatigue and improved accuracy. It also mentions that the product is now available at a discounted price on Amazon. The article concludes by encouraging readers to consider purchasing the product if they are in the market for a new gardening tool.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-akku-gartenschere-von-gardena-reduziert-bei-amazon-2604-207781.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <button class="btn-read-all" data-feed-all="Heise IT" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="4622d930b9650fec">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Marvell-Bericht-ueber-Verhandlungen-mit-Google-zur-Entwicklung-zweier-KI-Chips-11265011.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Report on Talks with Google about Development of Two AI Chips</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="4622d930b9650fec" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">Google has been working primarily with Broadcom in the chip development area, but now Marvell is entering the scene. The talks suggest a double strategy by Google.</p><p class="summary">The latest news from the tech world is that Marvell, a well-known semiconductor company, has started discussing a potential collaboration with Google to develop two new artificial intelligence (AI) chips. This move could be seen as a strategic attempt by Google to expand its chip development capabilities and strengthen its position in the AI market.</p><p class="summary">According to reports, Marvell's discussions with Google aim to create two specialized AI chips that can handle specific tasks, such as image recognition and natural language processing. The partnership may also involve the sharing of technology and expertise between the two companies.</p><p class="summary">The implications of this deal are significant, as it could lead to further advancements in the field of AI and machine learning. Marvell's involvement also highlights the growing importance of semiconductor companies in the development of critical technologies like AI.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">google</span>
+                        
+                        <span class="label-tag">marvell</span>
+                        
+                        <span class="label-tag">ai-chips</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Marvell-Bericht-ueber-Verhandlungen-mit-Google-zur-Entwicklung-zweier-KI-Chips-11265011.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="20424ae06fe9aeb1">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Bundeskanzler-Merz-Europaeische-KI-Regulierung-erleichtern-11264933.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Simplifying European AI Regulation to Support Industry Growth</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="20424ae06fe9aeb1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The article discusses the comments made by German Chancellor Olaf Scholz's predecessor, Chancellor Merz, on the European Union's Artificial Intelligence Act (AI Act) at the Hannover Messe trade show. Chancellor Merz expressed support for changes to the regulation that would make it more business-friendly and easier to implement. He noted that this would enable industry players to grow without excessive bureaucratic burdens.</p><p class="summary">This development is seen as a positive step by German industry, which had been calling for reforms to the AI Act. The current version of the regulation has been criticized for its complexity and potential impact on innovation. Chancellor Merz's comments suggest that a more streamlined approach could be taken, making it easier for companies to integrate AI technology into their operations.</p><p class="summary">The article highlights the significance of this development in terms of promoting European industry growth. By simplifying the regulatory environment, Germany aims to support businesses in adopting cutting-edge technologies like AI, which are crucial for competitiveness.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">eu-aia act</span>
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">open source</span>
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">hannover messe</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Bundeskanzler-Merz-Europaeische-KI-Regulierung-erleichtern-11264933.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="52254efbde238cb8">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-das-beste-mittelklasse-smartphone-im-test-viel-leistung-und-gute-kamera/z2jyxsr?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">The Best Mid-Range Smartphone Under €600</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="52254efbde238cb8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">This blog post reviews the top mid-range smartphones available in the market, with a focus on those under €600. The author compares various devices from different brands and tests their performance, camera quality, battery life, and overall value for money.</p><p class="summary">The article highlights the strengths and weaknesses of each smartphone, providing readers with an informed decision-making guide when choosing a new device. The reviewer emphasizes that mid-range smartphones offer a great balance between performance and affordability, making them an attractive option for those looking to upgrade without breaking the bank.</p><p class="summary">Readers interested in learning about the best mid-range smartphones and making an informed purchasing decision will benefit from this review.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">smartphone</span>
+                        
+                        <span class="label-tag">midrange</span>
+                        
+                        <span class="label-tag">budget</span>
+                        
+                        <span class="label-tag">europe</span>
+                        
+                        <span class="label-tag">feature-phones</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-10-das-beste-mittelklasse-smartphone-im-test-viel-leistung-und-gute-kamera/z2jyxsr?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="40353e669b4d32b4">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/KI-von-Siemens-Eigen-Agent-automatisiert-Ingenieuraufgaben-11264879.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Intelligent Agent from Siemens for Automated Engineering Tasks</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="40353e669b4d32b4" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">The article discusses an intelligent agent developed by Siemens that aims to automate complex engineering tasks. The agent is designed to break down intricate tasks into simple steps, freeing up experts from menial work. This technology has the potential to significantly improve efficiency and productivity in various industries.</p><p class="summary">The intelligent agent leverages artificial intelligence (AI) capabilities to analyze data, identify patterns, and make decisions autonomously. By automating routine tasks, it enables engineers to focus on more strategic and creative aspects of their work. The agent can also learn from experience and adapt to new situations, making it a valuable tool for companies looking to streamline their operations.</p><p class="summary">The technology has been showcased at Hannover Messe, a prominent trade show for industrial automation and robotics. Siemens' intelligent agent is an example of the innovative solutions being developed in the field of artificial intelligence and automation.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">automation</span>
+                        
+                        <span class="label-tag">german-engineering</span>
+                        
+                        <span class="label-tag">ai-in-industry</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/KI-von-Siemens-Eigen-Agent-automatisiert-Ingenieuraufgaben-11264879.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="4f1c19a6605729ec">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/TeamViewer-Hardware-fuer-Fernzugriff-auf-Industrieanlagen-11264400.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">TeamViewer to Showcase Secure Remote Access Solutions for Industrial Facilities</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="4f1c19a6605729ec" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-20</p>
+                    
+                    <p class="summary">TeamViewer is set to showcase its latest technology for secure remote access and monitoring of industrial facilities at the Hannover Messe. The company's solution utilizes hardware gateways and artificial intelligence (AI)-powered maintenance to simplify operations. By integrating with existing infrastructure, TeamViewer aims to provide a seamless experience for facility managers and maintenance personnel.</p><p class="summary">This move demonstrates the growing importance of secure remote access solutions in industries such as manufacturing and energy. As the demand for efficient monitoring and maintenance increases, companies are looking for innovative ways to streamline their operations without compromising on security. TeamViewer's solution is poised to address these needs by providing a reliable and scalable platform for remote access and AI-powered maintenance.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">industrial-security</span>
+                        
+                        <span class="label-tag">remote-access</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/TeamViewer-Hardware-fuer-Fernzugriff-auf-Industrieanlagen-11264400.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">07:00:02</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">07:22:51</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">22m 49s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.8</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">21 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">4</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-21 07:22 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read-all');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const feedName = btn.dataset.feedAll;
+            const section = document.querySelector(`.feed-section[data-feed="${CSS.escape(feedName)}"]`);
+            if (!section) return;
+            const read = getRead();
+            section.querySelectorAll('.article[data-id]').forEach(card => {
+                read[card.dataset.id] = true;
+            });
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
