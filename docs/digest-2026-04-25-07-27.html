@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Saturday, April 25, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        details.feed-section.low-score-section {
+            margin-top: 2rem;
+            border-color: var(--border-alt, #e5e7eb);
+            opacity: 0.8;
+        }
+
+        details.feed-section.low-score-section > summary {
+            color: var(--text-muted);
+            background: rgba(107, 114, 128, 0.05);
+        }
+
+        details.feed-section.low-score-section[open] > summary {
+            color: var(--text-muted);
+        }
+
+        .low-score-article {
+            opacity: 0.75;
+        }
+
+        .low-score-article .summary {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        details.feed-subsection {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-light, #f0f0f0);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.feed-subsection > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(107, 114, 128, 0.03);
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        details.feed-subsection > summary::-webkit-details-marker { display: none; }
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .btn-read-all {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .btn-read-all:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-24-07-25.html" >
+                        <span>Friday, April 24, 2026 – 07:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-23-07-32.html" >
+                        <span>Thursday, April 23, 2026 – 07:32</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-22-07-44.html" >
+                        <span>Wednesday, April 22, 2026 – 07:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-21-07-22.html" >
+                        <span>Tuesday, April 21, 2026 – 07:22</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-20-07-18.html" >
+                        <span>Monday, April 20, 2026 – 07:18</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-19-07-28.html" >
+                        <span>Sunday, April 19, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-22-11.html" >
+                        <span>Saturday, April 18, 2026 – 22:11</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-07-24.html" >
+                        <span>Saturday, April 18, 2026 – 07:24</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-17-07-32.html" >
+                        <span>Friday, April 17, 2026 – 07:32</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-07-14.html" >
+                        <span>Thursday, April 16, 2026 – 07:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-00-41.html" >
+                        <span>Thursday, April 16, 2026 – 00:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-20-28.html" >
+                        <span>Wednesday, April 15, 2026 – 20:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-35.html" >
+                        <span>Wednesday, April 15, 2026 – 00:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-25.html" >
+                        <span>Wednesday, April 15, 2026 – 00:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-14-07-17.html" >
+                        <span>Tuesday, April 14, 2026 – 07:17</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-13-07-10.html" >
+                        <span>Monday, April 13, 2026 – 07:10</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-07-01.html" >
+                        <span>Sunday, April 12, 2026 – 07:01</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-03-30.html" >
+                        <span>Sunday, April 12, 2026 – 03:30</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-54.html" >
+                        <span>Sunday, April 12, 2026 – 02:54</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-50.html" >
+                        <span>Sunday, April 12, 2026 – 02:50</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-25.html" >
+                        <span>Sunday, April 12, 2026 – 02:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-35.html" >
+                        <span>Sunday, April 12, 2026 – 01:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-07.html" >
+                        <span>Sunday, April 12, 2026 – 01:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-36.html" >
+                        <span>Sunday, April 12, 2026 – 00:36</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-14.html" >
+                        <span>Sunday, April 12, 2026 – 00:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-23-39.html" >
+                        <span>Saturday, April 11, 2026 – 23:39</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-14-57.html" >
+                        <span>Saturday, April 11, 2026 – 14:57</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-07-33.html" >
+                        <span>Saturday, April 11, 2026 – 07:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-10-07-41.html" >
+                        <span>Friday, April 10, 2026 – 07:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-09-07-34.html" >
+                        <span>Thursday, April 09, 2026 – 07:34</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-08-07-28.html" >
+                        <span>Wednesday, April 08, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-07-07-07.html" >
+                        <span>Tuesday, April 07, 2026 – 07:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-23-27.html" >
+                        <span>Monday, April 06, 2026 – 23:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-21-51.html" >
+                        <span>Monday, April 06, 2026 – 21:51</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-20-55.html" >
+                        <span>Monday, April 06, 2026 – 20:55</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" >
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" >
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" >
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Saturday, April 25, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>24</strong> articles</span>
+                <span class="stat"><strong>7</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes Blog"></span>
+                <button class="btn-read-all" data-feed-all="Kubernetes Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="f8e1b7bcea6cf1c0">
+                    <div class="article-header">
+                        <h3><a href="https://kubernetes.io/blog/2026/04/24/kubernetes-v1-36-fine-grained-kubelet-authorization-ga/" target="_blank" rel="noopener">Kubernetes fine-grained Kubelet API authorization now Generally Available</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="f8e1b7bcea6cf1c0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The Kubernetes community has announced the graduation of fine-grained Kubelet API authorization to General Availability in version 1.36. This feature allows for more precise, least-privilege access control over the kubelet's HTTPS API, replacing the need for broad nodes/proxy permissions. The current coarse-grained model granted overly permissive access to monitoring and observability tools, which could be exploited by attackers if compromised.</p><p class="summary">Fine-grained authorization maps commonly used kubelet API paths to their own dedicated subresources, reducing the risk of security incidents. This feature addresses a long-standing issue in Kubernetes, where granting nodes/proxy permission to monitoring agents or other workloads violated the principle of least privilege.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">api-authorization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://kubernetes.io/blog/2026/04/24/kubernetes-v1-36-fine-grained-kubelet-authorization-ga/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <button class="btn-read-all" data-feed-all="Kubernetes subreddit" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="89a80bc2f795df93">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1subavz/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Share Your Successes</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="89a80bc2f795df93" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">This blog post is about a community forum where people can share their accomplishments and successes, whether it's solving a problem or achieving a goal. The author encourages readers to share their experiences and offer words of encouragement to others who may be struggling.</p><p class="summary">The post highlights the importance of sharing successes and acknowledges that everyone faces challenges, but with the help of the community, progress can be made. It invites readers to participate by sharing their own stories of overcoming obstacles or achieving something new.</p><p class="summary">For those interested in kubernetes, containerization, open source, monitoring, and otlp, this post offers a chance to connect with others who may have similar experiences and learn from their successes.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">community-building</span>
+                        
+                        <span class="label-tag">progress-sharing</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1subavz/weekly_share_your_victories_thread/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="141d91370d2b06b5">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1suuwzh/how_are_you_managing_cve_backlog_in_your_clusters/" target="_blank" rel="noopener">Managing CVE Backlog in Kubernetes Clusters</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="141d91370d2b06b5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The article discusses the issue of managing a high volume of security alerts (CVEs) from vulnerability scanners in Kubernetes clusters. The team's scanner is generating hundreds of alerts, making it difficult to identify and prioritize important findings amidst noise. They suspect that many of these false positives are due to unused packages in container images, but have struggled to address the issue effectively.</p><p class="summary">The team is seeking advice on how to get their CVE backlog under control, particularly regarding runtime-aware hardening and compliance. They want to know if this approach is worth implementing and how to handle it from a regulatory perspective.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">containers</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1suuwzh/how_are_you_managing_cve_backlog_in_your_clusters/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="e50dd9da8ea0db49">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sv2g44/the_kernel_ate_the_sidecar_ebpf_reconfigured/" target="_blank" rel="noopener">The kernel ate the sidecar: eBPF reconfigured production Kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="e50dd9da8ea0db49" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-25</p>
+                    
+                    <p class="summary">The migration from traditional sidecars to eBPF-based dataplanes has already occurred, with Cilium becoming the default CNI for several major cloud providers. This shift is attributed to significant performance improvements and reduced latency, as demonstrated by Datadog's experience running Cilium across tens of thousands of nodes. The acquisition economy has further solidified this trend, with Cisco acquiring Isovalent to own Cilium and other key projects. While the transition was not framed as a direct replacement for sidecars, it is now widely recognized as such.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">ebpf</span>
+                        
+                        <span class="label-tag">cilium</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sv2g44/the_kernel_ate_the_sidecar_ebpf_reconfigured/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="8d6542372c2de712">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sur05b/for_platform_engineering_teams_with_large_scale/" target="_blank" rel="noopener">Managing Operators in Large Scale Kubernetes Environments</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="8d6542372c2de712" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Managing operators and cluster-scoped access can be a significant challenge for platform engineering teams in large scale environments. With many users consuming multiple clusters, it's essential to determine who supports the operator, especially when creating resources such as CRDs, webhook configurations, and roles. The question remains whether application teams have direct access to deploy these resources or if they need to rely on the platform engineering team.</p><p class="summary">In such scenarios, the decision of which operators to support is crucial, especially with multi-tenancy issues arising from conflicting requirements between teams. Choosing a single version of an operator for multiple clusters can be complicated, and it's not always possible to accept every operator requested by application teams.</p><p class="summary">The key takeaway is that effective cluster management requires clear guidelines on who supports the operator, how to handle conflicting requests, and how to ensure consistency across different clusters.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">scalability</span>
+                        
+                        <span class="label-tag">governance</span>
+                        
+                        <span class="label-tag">multi-tenancy</span>
+                        
+                        <span class="label-tag">access-control</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sur05b/for_platform_engineering_teams_with_large_scale/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="592ff5e6f75189b0">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1suds1n/bitwarden_cli_was_compromised_for_90_min_what_in/" target="_blank" rel="noopener">bitwarden CLI was compromised due to version mismatch in GitHub Actions dependency.</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="592ff5e6f75189b0" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">A recent incident on npm revealed that the Bitwarden CLI package had been live for about 90 minutes, but this was only discovered after it was pulled. The compromise is believed to have originated from a Checkmarx GitHub Actions dependency in their pipeline, which resulted in a version mismatch between the package.json and the build metadata inside the bundle. This meant that the normal install would not show any issues, as the version mismatch did not trigger any security flags or scanning.</p><p class="summary">A typical pipeline would not detect this issue without a CVE or signal, as the payload exits silently on developer machines and only triggers in CI when running tests after SSH keys, cloud credentials, kubeconfig, .npmrc. The bug was discovered after rotating all scope-related configurations, highlighting the need for pipeline vigilance and security testing.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">npm</span>
+                        
+                        <span class="label-tag">gitlab</span>
+                        
+                        <span class="label-tag">github-actions</span>
+                        
+                        <span class="label-tag">bitwarden</span>
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1suds1n/bitwarden_cli_was_compromised_for_90_min_what_in/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <button class="btn-read-all" data-feed-all="Hacker News (Top)" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="42bc6115e91c3fab">
+                    <div class="article-header">
+                        <h3><a href="https://github.com/libsdl-org/SDL/pull/15377" target="_blank" rel="noopener">SDL Now Supports DOS</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="42bc6115e91c3fab" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The article discusses a significant development in the SDL library, which is now officially supported on Windows Subsystem for Linux (WSL). This change opens up new possibilities for developers who want to create games and applications that can run seamlessly across different platforms. The addition of support for WSL allows developers to take advantage of the stability and security features of Linux while still being able to deploy their applications on Windows.</p><p class="summary">The SDL library is an open-source project that provides a set of tools and APIs for creating games and other multimedia applications. With this new support, developers can now create cross-platform applications with ease, which can help reduce development time and increase productivity.</p><p class="summary">This change is particularly significant for developers who are working on projects that require the combination of Windows and Linux environments. The addition of WSL support to SDL is a major milestone in the evolution of the library and its ability to serve as a bridge between different platforms.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">sdl</span>
+                        
+                        <span class="label-tag">wsl</span>
+                        
+                        <span class="label-tag">linux</span>
+                        
+                        <span class="label-tag">windows</span>
+                        
+                        <span class="label-tag">game development</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://github.com/libsdl-org/SDL/pull/15377" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0a76186af6bc882e">
+                    <div class="article-header">
+                        <h3><a href="https://www.bloomberg.com/news/articles/2026-04-24/google-plans-to-invest-up-to-40-billion-in-anthropic" target="_blank" rel="noopener">Google invests up to $40 billion in AI startup Anthropic</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="0a76186af6bc882e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Google plans to significantly expand its investment in the artificial intelligence (AI) startup Anthropic, with a potential valuation of over $15 billion. The move is seen as part of Google's efforts to develop more advanced AI models that can compete with other leading players. Anthropic has been working on developing a new type of large language model that could potentially revolutionize natural language processing.</p><p class="summary">The investment in Anthropic marks a significant shift for Google, which has traditionally focused on internal research and development rather than external investments. The company's decision to invest so heavily in an AI startup suggests that it sees great potential in the technology. However, some experts have raised concerns about the risks associated with investing in AI startups.</p><p class="summary">The investment is also seen as a strategic move by Google to strengthen its position in the rapidly evolving field of AI. By backing Anthropic, Google hopes to gain access to cutting-edge AI technology and expertise that can help it stay ahead of competitors.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">google</span>
+                        
+                        <span class="label-tag">venture capital</span>
+                        
+                        <span class="label-tag">machine learning</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.bloomberg.com/news/articles/2026-04-24/google-plans-to-invest-up-to-40-billion-in-anthropic" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="87ee8b56db584fc5">
+                    <div class="article-header">
+                        <h3><a href="https://nickyreinert.de/en/2026/2026-04-24-claude-critics/" target="_blank" rel="noopener">I Cancelled Claude: Token Issues, Declining Quality, and Poor Support</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="87ee8b56db584fc5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The author of the blog post shares their negative experience with using the open-source tool Claude. The author discovered that their token was not being renewed after a certain period, which left them unable to access the service they relied on. This issue led to a decline in the quality of the support provided by the creators and an overall poor user experience.</p><p class="summary">The author attributes this decline to various issues, including token expiration, slow response times, and unhelpful support team. The author states that these problems are not isolated incidents but rather symptoms of a larger problem within the Claude project.</p><p class="summary">As the author cancelled their account, they note that many others have also lost faith in Claude due to similar reasons.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                        <span class="label-tag">decline</span>
+                        
+                        <span class="label-tag">user-experience</span>
+                        
+                        <span class="label-tag">issues</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://nickyreinert.de/en/2026/2026-04-24-claude-critics/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="61428e0bf481fe2e">
+                    <div class="article-header">
+                        <h3><a href="https://www.bloomberg.com/news/articles/2026-04-24/norway-wants-kids-to-be-kids-with-social-media-ban-for-under-16s" target="_blank" rel="noopener">Norway Plans to Ban Social Media for Minors Under 16</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="61428e0bf481fe2e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Norway is set to become the latest country to implement a ban on social media for minors under the age of 16. The proposed law aims to protect children from online harassment, cyberbullying, and exposure to mature content. Proponents argue that this move will allow young people to develop naturally without the pressures of online fame and social comparison. The ban is expected to affect popular platforms such as Instagram, TikTok, and Snapchat.</p><p class="summary">The decision has sparked debate among experts and parents, with some arguing that it may stifle self-expression and creativity in children. Others see it as a necessary step to ensure children's safety and well-being in the digital age. As Norway prepares to implement its new law, it will be watching closely to see how other countries handle similar issues.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">education policy</span>
+                        
+                        <span class="label-tag">child welfare</span>
+                        
+                        <span class="label-tag">online safety</span>
+                        
+                        <span class="label-tag">social media regulation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.bloomberg.com/news/articles/2026-04-24/norway-wants-kids-to-be-kids-with-social-media-ban-for-under-16s" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="301013818a8ef6b2">
+                    <div class="article-header">
+                        <h3><a href="https://kevinlynagh.com/newsletter/2026_04_overthinking/" target="_blank" rel="noopener">Overthinking and Scope Creep in Projects</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="301013818a8ef6b2" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">This blog post discusses the common pitfalls of overthinking, scope creep, and structural differences that can sabotage projects. The author argues that these issues are often rooted in poor communication, inadequate planning, and a lack of clear goals. By examining real-world examples, the author highlights the importance of setting realistic expectations, establishing clear boundaries, and fostering open communication among team members.</p><p class="summary">The post also touches on the consequences of overthinking, including increased complexity, delays, and decreased morale. It emphasizes the need for project leaders to take an active role in managing scope, setting priorities, and ensuring that all stakeholders are aligned.</p><p class="summary">Ultimately, the author suggests that by recognizing the signs of overthinking and scope creep, project leaders can take proactive steps to mitigate these issues and ensure their projects stay on track.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">project-management</span>
+                        
+                        <span class="label-tag">communication</span>
+                        
+                        <span class="label-tag">goal-setting</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://kevinlynagh.com/newsletter/2026_04_overthinking/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="GCP Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                GCP Blog
+                <span class="feed-count">(2)</span>
+                <span class="feed-read-badge" data-feed-badge="GCP Blog"></span>
+                <button class="btn-read-all" data-feed-all="GCP Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="8f5ceff9d705ad1a">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/topics/google-cloud-next/google-cloud-next-2026-wrap-up/" target="_blank" rel="noopener">Google Cloud Next '26 Recap: 260 Announcements for the Agentic Era</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="8f5ceff9d705ad1a" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Google Cloud Next 2026 took place in Las Vegas and featured over 32,000 attendees exploring the Agentic Era with Google Cloud. The event showcased various innovations, including the Gemini Enterprise Agent Platform, which enables businesses to build, scale, govern, and optimize agents. Other announcements included AI models, platforms, and agents, as well as new features for agent development, deployment, and customization.</p><p class="summary">The platform offers a comprehensive framework for building trust in an autonomous enterprise, with capabilities such as model selection, model building, and agent building. It also includes features like Agent Development Kit, which unlocks more powerful reasoning by organizing agents into a network of sub-agents.</p><p class="summary">In addition to the Gemini Enterprise Agent Platform, Google Cloud made announcements on AI Infrastructure, Agentic Defense, and Agentic Data Cloud. These innovations aim to deliver cybersecurity protection, AI capabilities, and data utilization at scale required by agentic AI.</p><p class="summary">Overall, Google Cloud Next '26 was a significant event for businesses looking to adopt an autonomous enterprise model, with numerous announcements that promise to enhance their trust and productivity.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">ai-innovation</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/topics/google-cloud-next/google-cloud-next-2026-wrap-up/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="2b5c84b0751fea5c">
+                    <div class="article-header">
+                        <h3><a href="https://cloud.google.com/blog/topics/inside-google-cloud/whats-new-google-cloud/" target="_blank" rel="noopener">Google Cloud Partners of the Year, Public Preview of Datastream’s metadata integration, and Apigee Updates</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="2b5c84b0751fea5c" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Google Cloud recently announced its Partner of the Year awards, recognizing exceptional partners who have demonstrated a commitment to customer success. Additionally, the company has released several new features, including the public preview of Datastream's metadata integration with Knowledge Catalog, which aims to provide a centralized "single pane of glass" for all data assets.</p><p class="summary">The feature automatically synchronizes Streams, Connection Profiles, and Private Connections, eliminating data silos. It also enhances discoverability, allowing users to search for Datastream assets using the same interface as BigQuery tables. Furthermore, Google Cloud has announced updates to Apigee, including the General Availability of the Model Context Protocol (MCP), which enables developers to transform APIs into AI-ready tools.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">google-cloud</span>
+                        
+                        <span class="label-tag">metadata-integration</span>
+                        
+                        <span class="label-tag">apigee</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://cloud.google.com/blog/topics/inside-google-cloud/whats-new-google-cloud/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Jeff Geerling's Blog">
+            <summary>
+                <span class="feed-dot"></span>
+                Jeff Geerling's Blog
+                <span class="feed-count">(1)</span>
+                <span class="feed-read-badge" data-feed-badge="Jeff Geerling's Blog"></span>
+                <button class="btn-read-all" data-feed-all="Jeff Geerling's Blog" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="8d69f2c94c7d7006">
+                    <div class="article-header">
+                        <h3><a href="https://www.jeffgeerling.com/blog/2026/new-10-gbe-usb-adapters-cooler-smaller-cheaper/" target="_blank" rel="noopener">New 10 GbE USB Adapters Offer Improved Performance and Affordability</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="8d69f2c94c7d7006" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">New 10 GbE USB adapters based on the RTL8159 chipset are providing an alternative to traditional Thunderbolt-based solutions. These adapters are significantly smaller, cooler, and cheaper than their predecessors, making them more accessible for laptops and other devices that require high-speed networking. This shift could mark a significant change in the way users access 10 GbE connectivity, potentially reducing costs and increasing portability.</p><p class="summary">The introduction of these new adapters may offer improved performance and increased bandwidth for applications requiring high-speed connections. However, it remains to be seen how they will compare to traditional Thunderbolt-based solutions in terms of speed, reliability, and overall system compatibility.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">usb</span>
+                        
+                        <span class="label-tag">networking</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                        <span class="label-tag">cost-effectiveness</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.jeffgeerling.com/blog/2026/new-10-gbe-usb-adapters-cooler-smaller-cheaper/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <button class="btn-read-all" data-feed-all="Golem" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="a51a912fcfd617a8">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/amazon-meta-platforms-mietet-millionen-graviton-kerne-von-aws-2604-208008.html" target="_blank" rel="noopener">Amazon Invests Millions in Graviton Processors from AWS</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="a51a912fcfd617a8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Amazon is investing heavily in the development of its own CPU architecture, the Graviton processor, which is being manufactured by Amazon Web Services (AWS). The move is seen as a strategic effort to reduce its reliance on Intel and AMD processors. With the increasing use of Artificial Intelligence (AI) in various industries, high-performance CPUs are becoming increasingly important.</p><p class="summary">The investment in Graviton is part of AWS's efforts to improve the performance and efficiency of its cloud computing services. By developing its own processor architecture, Amazon aims to reduce latency and improve processing power. This move also demonstrates AWS's commitment to being a leader in the field of cloud computing.</p><p class="summary">Amazon's decision to invest in Graviton is likely driven by its need to stay competitive in the rapidly evolving landscape of AI-driven technologies.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">cloud-computing</span>
+                        
+                        <span class="label-tag">aws</span>
+                        
+                        <span class="label-tag">processor-architecture</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/amazon-meta-platforms-mietet-millionen-graviton-kerne-von-aws-2604-208008.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="878f2d266a1b0c4b">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-segway-e-scooter-fuer-prime-kunden-billiger-als-anderswo-2604-208006.html" target="_blank" rel="noopener">Segway Ninebot F2 Pro D E-Scooter is Cheaper on Amazon than Other Retailers</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="878f2d266a1b0c4b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The article discusses the availability of the Segway Ninebot F2 Pro D E-Scooter at various retailers, comparing prices to determine which one offers the best deal. It appears that the e-scooter is currently cheaper on Amazon compared to other shops.</p><p class="summary">According to the price comparison, the Segway Ninebot F2 Pro D E-Scooter can be found for a lower price on Amazon than elsewhere, making it an attractive option for Prime customers looking for a good deal.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                        <span class="label-tag">e-scooters</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-segway-e-scooter-fuer-prime-kunden-billiger-als-anderswo-2604-208006.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="89941f59ce9e7a05">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/manus-china-wehrt-sich-gegen-ki-ausverkauf-in-die-usa-2604-208007.html" target="_blank" rel="noopener">China Resists AI Takeover by US Companies</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="89941f59ce9e7a05" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">China has taken measures to prevent similar AI takeover deals with US companies, following the sale of its Xinjiang detention center Manus to Meta. The Chinese government is making regulatory changes that will require foreign companies to obtain licenses before acquiring stakes in Chinese firms. This move aims to safeguard sensitive technologies and intellectual property from falling into US hands.</p><p class="summary">China's efforts are seen as a response to concerns over data security and national sovereignty, particularly after the sale of Manus to Meta. The new regulations will also help protect China's AI capabilities from being exploited by foreign companies. By taking these steps, China is signaling its determination to maintain control over its strategic assets in the face of growing global competition.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">china</span>
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">usa</span>
+                        
+                        <span class="label-tag">regulation</span>
+                        
+                        <span class="label-tag">national-security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/manus-china-wehrt-sich-gegen-ki-ausverkauf-in-die-usa-2604-208007.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="4473098114a1bad2">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/sci-fi-thriller-bei-apple-franka-potente-spielt-in-liminal-mit-2604-208005.html" target="_blank" rel="noopener">Sci-fi thriller at Apple starring Franka Potente</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="4473098114a1bad2" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The article discusses the upcoming sci-fi thriller film Liminal, which stars Franka Potente and Tracy Letts. The movie is based on a comic book by J. Michael Straczynski. The release date for the film has not been announced yet.</p><p class="summary">Liminal is an original story that explores themes of identity and artificial intelligence. The cast includes a number of familiar actors, adding to the anticipation surrounding the film's release.</p><p class="summary">The article appears to be a press release or promotional piece, providing some basic information about the film before its official announcement.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">apple</span>
+                        
+                        <span class="label-tag">sci-fi</span>
+                        
+                        <span class="label-tag">thriller</span>
+                        
+                        <span class="label-tag">film</span>
+                        
+                        <span class="label-tag">casting</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/sci-fi-thriller-bei-apple-franka-potente-spielt-in-liminal-mit-2604-208005.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="ac1d1867ecf320e7">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-ryzen-7-mini-pc-mit-16-gbyte-ddr5-ram-zum-jahresbestpreis-2604-208003.html" target="_blank" rel="noopener">Ryzen 7 Mini PC with 16GB DDR5 RAM at a Record Low Price</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="ac1d1867ecf320e7" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The Ryzen 7 Mini PC is currently available on Amazon for a record low price of over 90 euros, compared to the average price of the last few weeks. The Geekom A6 Mini is a compact PC that offers a good balance between performance and price.</p><p class="summary">This mini PC features a Ryzen 7 processor, 16GB of DDR5 RAM, and an AMD Radeon RX 5500M graphics card. It also comes with Windows 11 Home and a range of ports for connectivity. The price drop has made the device more attractive to buyers who want a powerful PC without breaking the bank.</p><p class="summary">The Geekom A6 Mini is a great option for those looking for a compact and affordable PC that can handle everyday tasks such as browsing, streaming, and office work.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ryzen</span>
+                        
+                        <span class="label-tag">mini pcs</span>
+                        
+                        <span class="label-tag">deals</span>
+                        
+                        <span class="label-tag">amazon</span>
+                        
+                        <span class="label-tag">consumer electronics</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-ryzen-7-mini-pc-mit-16-gbyte-ddr5-ram-zum-jahresbestpreis-2604-208003.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <button class="btn-read-all" data-feed-all="Heise IT" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="80039f67108a110b">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/High-End-Handys-Innovationen-jenseits-von-Apple-Google-Co-c-t-uplink-11269501.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Innovations beyond Apple, Google, and Samsung</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="80039f67108a110b" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-25</p>
+                    
+                    <p class="summary">The article discusses the latest advancements in smartphone technology, highlighting various innovations that surpass those of the traditional tech giants such as Apple, Google, and Samsung. The focus is on smartphones from smaller manufacturers like Oppo, Xiaomi, and Realme, which are often overlooked but offer cutting-edge features.</p><p class="summary">These innovative smartphones typically feature advanced cameras, faster processors, and longer-lasting batteries. Some devices even incorporate 5G connectivity and high-refresh-rate displays. While Apple, Google, and Samsung still dominate the market in terms of brand recognition and sales, these smaller manufacturers are gaining ground with their technical prowess.</p><p class="summary">The article suggests that consumers looking for the latest and greatest smartphone features should consider alternative options beyond the traditional tech giants.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">mobile-tech</span>
+                        
+                        <span class="label-tag">smartphone</span>
+                        
+                        <span class="label-tag">innovation</span>
+                        
+                        <span class="label-tag">camera-technology</span>
+                        
+                        <span class="label-tag">display-performance</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/High-End-Handys-Innovationen-jenseits-von-Apple-Google-Co-c-t-uplink-11269501.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="9357ef14bfc942d1">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Google-steckt-bis-zu-40-Milliarden-Dollar-mehr-in-Anthropic-11271998.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Google Invests an Additional $40 Billion in AI Firm Anthropic</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="9357ef14bfc942d1" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">Google has invested a significant amount of money into its rival firm, Anthropic, which specializes in artificial intelligence. This move marks another development in the tech giant's efforts to compete with other major players in the field, such as OpenAI.</p><p class="summary">Anthropic has been gaining attention for its innovative approaches to natural language processing and its potential applications in areas like chatbots and customer service. The investment from Google is seen as a strategic move to support Anthropic's growth and expansion into new markets.</p><p class="summary">The partnership between Google and Anthropic will likely have significant implications for the future of AI research and development. As both companies continue to push the boundaries of what is possible with artificial intelligence, their collaboration may lead to breakthroughs in areas like language understanding and decision-making.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">investment</span>
+                        
+                        <span class="label-tag">natural-language-processing</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Google-steckt-bis-zu-40-Milliarden-Dollar-mehr-in-Anthropic-11271998.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="e2516317e41e3cef">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-10-der-beste-hoehenverstellbare-schreibtisch-flexispot-ist-testsieger/187xypf?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Top 10 Best Adjustable Standing Desks - Flexispot Takes the Lead</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="e2516317e41e3cef" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">The article reviews and compares the top 10 adjustable standing desks, with a focus on their ergonomics and features that support health and concentration. The tests revealed that Flexispot is the winner, but other notable mentions include Varidesk and Stand Steady. The review highlights the importance of ergonomic design and adjustable height settings in promoting good posture and reducing eye strain.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ergonomics</span>
+                        
+                        <span class="label-tag">standing desks</span>
+                        
+                        <span class="label-tag">office furniture</span>
+                        
+                        <span class="label-tag">productivity</span>
+                        
+                        <span class="label-tag">workspace</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-10-der-beste-hoehenverstellbare-schreibtisch-flexispot-ist-testsieger/187xypf?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="bfb9af212f255de9">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/XR-Visualisierung-in-der-Industrie-Von-3D-Modellen-bis-hin-zu-Gaussian-Splats-11271807.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">3D Modeling and Real-Time Visualisation in Industry at Hannover Messe 2026</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="bfb9af212f255de9" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">At the Hannover Messe 2026, industry professionals experimented with various solutions that combined 3D modeling with real-time visualisation, including Gaussian Splats. The event featured a range of innovative applications for immersive visualization.</p><p class="summary">The integration of 3D models into the real world has opened up new possibilities for industries to showcase their products and services more effectively. By combining these elements, companies can create interactive and engaging experiences that help customers better understand complex concepts. This technology also allows for real-time data analysis, enabling faster decision-making.</p><p class="summary">The response from attendees was overwhelmingly positive, with many expressing interest in exploring this innovative technology further.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">hannover messe</span>
+                        
+                        <span class="label-tag">xr visualisation</span>
+                        
+                        <span class="label-tag">gaussian splats</span>
+                        
+                        <span class="label-tag">3d modelling</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/XR-Visualisierung-in-der-Industrie-Von-3D-Modellen-bis-hin-zu-Gaussian-Splats-11271807.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="d95aacc8bed97087">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Phishing-Urteil-aus-Koblenz-Kein-Leichtsinn-bei-taeuschend-echtem-Bankanruf-11271697.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">German Court Ruling on Online Phishing</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="d95aacc8bed97087" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-24</p>
+                    
+                    <p class="summary">A recent court ruling in Koblenz, Germany has strengthened the rights of online banking customers who have fallen victim to phishing scams. The court ruled that customers are not liable for failing to verify the authenticity of their bank's website or for falling prey to a phone call claiming to be from their bank.</p><p class="summary">The court's decision has significant implications for individuals and banks alike. It suggests that customers should not be held responsible for falling victim to sophisticated online scams, which can include fake notifications on their devices or unexpected calls from "unknown" numbers. Instead, the focus shifts to identifying the perpetrator behind such scams and seeking restitution.</p><p class="summary">This ruling highlights the need for improved security measures and awareness among both individuals and banks to prevent phishing attacks.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">german-law</span>
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">online-phishing</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Phishing-Urteil-aus-Koblenz-Kein-Leichtsinn-bei-taeuschend-echtem-Bankanruf-11271697.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">07:00:01</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">07:27:47</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">27m 45s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.7</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">24 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">6</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-25 07:27 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read-all');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const feedName = btn.dataset.feedAll;
+            const section = document.querySelector(`.feed-section[data-feed="${CSS.escape(feedName)}"]`);
+            if (!section) return;
+            const read = getRead();
+            section.querySelectorAll('.article[data-id]').forEach(card => {
+                read[card.dataset.id] = true;
+            });
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
