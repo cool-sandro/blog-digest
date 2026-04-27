@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Digest – Monday, April 27, 2026</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --accent: #58a6ff;
+            --accent-subtle: #1f6feb22;
+            --tag-bg: #1f6feb33;
+            --read-bg: #0d1117;
+            --read-border: #21262d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar navigation ─────────────────────────────────── */
+        
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.25rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .sidebar-close {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .sidebar-close:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .sidebar-list {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            display: block;
+        }
+
+        .sidebar-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item a:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .sidebar-item a.active {
+            background-color: var(--accent-subtle);
+            color: var(--accent);
+            border-left-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar-item .date-badge {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.2rem 0.4rem;
+            white-space: nowrap;
+        }
+
+        .sidebar-item a.active .date-badge {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.open {
+            display: block;
+        }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+
+        /* ── Main content area ──────────────────────────────────── */
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 1rem;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #a371f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .stat strong {
+            color: var(--accent);
+        }
+        /* ── Search bar ──────────────────────────────────────────── */
+
+        .search-wrap {
+            margin-top: 1.25rem;
+        }
+
+        #search-input {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.875rem;
+            padding: 0.5rem 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #search-input::placeholder { color: var(--text-muted); }
+
+        #search-input:focus {
+            border-color: var(--accent);
+        }
+
+        #no-results {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 0;
+            display: none;
+        }
+        /* ── Feed collapsible section ───────────────────────────── */
+
+        details.feed-section {
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        details.feed-section[open] {
+            border-color: var(--accent);
+        }
+
+        details.feed-section > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.25rem;
+            background: var(--surface);
+            cursor: pointer;
+            user-select: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        details.feed-section > summary::-webkit-details-marker { display: none; }
+
+        .feed-chevron {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        details.feed-section[open] .feed-chevron {
+            transform: rotate(180deg);
+        }
+
+        .feed-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        details.feed-section.low-score-section {
+            margin-top: 2rem;
+            border-color: var(--border-alt, #e5e7eb);
+            opacity: 0.8;
+        }
+
+        details.feed-section.low-score-section > summary {
+            color: var(--text-muted);
+            background: rgba(107, 114, 128, 0.05);
+        }
+
+        details.feed-section.low-score-section[open] > summary {
+            color: var(--text-muted);
+        }
+
+        .low-score-article {
+            opacity: 0.75;
+        }
+
+        .low-score-article .summary {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        details.feed-subsection {
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-light, #f0f0f0);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        details.feed-subsection > summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.7rem 1rem;
+            background: rgba(107, 114, 128, 0.03);
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        details.feed-subsection > summary::-webkit-details-marker { display: none; }
+            flex-shrink: 0;
+        }
+
+        .feed-count {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 0.25rem;
+        }
+
+        .feed-read-badge {
+            font-size: 0.72rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+        }
+
+        .articles-wrapper {
+            padding: 1rem 1.25rem 0.5rem;
+        }
+
+        /* ── Article card ───────────────────────────────────────── */
+
+        .article {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.2s, opacity 0.2s;
+            position: relative;
+        }
+
+        .article:hover {
+            border-color: var(--accent);
+        }
+
+        .article.is-read {
+            opacity: 0.45;
+            background: var(--read-bg);
+            border-color: var(--read-border);
+        }
+
+        .article.is-read:hover {
+            opacity: 0.75;
+            border-color: var(--border);
+        }
+
+        .article-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article h3 {
+            font-size: 0.975rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            flex: 1;
+        }
+
+        .article h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .article h3 a:hover {
+            color: var(--accent);
+        }
+
+        .article.is-read h3 a {
+            color: var(--text-muted);
+        }
+
+        .btn-read {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+
+        .btn-read:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .article.is-read .btn-read {
+            border-color: transparent;
+            color: var(--text-muted);
+            background: var(--surface);
+        }
+
+        .btn-read-all {
+            flex-shrink: 0;
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        .btn-read-all:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .badge-for-you {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-score {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .article .date {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .article .summary {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .article .labels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .article .label-tag {
+            background: var(--tag-bg);
+            color: var(--accent);
+            font-size: 0.72rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .article.is-read .label-tag {
+            opacity: 0.6;
+        }
+
+        .article .read-more {
+            display: inline-block;
+            margin-top: 0.6rem;
+            font-size: 0.78rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .article .read-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Run stats ──────────────────────────────────────────── */
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        details.run-stats {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        details.run-stats summary {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            list-style: none;
+        }
+
+        details.run-stats summary::before {
+            content: "▶  ";
+            font-size: 0.65rem;
+        }
+
+        details.run-stats[open] summary::before {
+            content: "▼  ";
+        }
+
+        .run-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .run-stat-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+        }
+
+        .run-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .run-stat-item .value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .run-stat-item .value.dim {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+
+
+        /* ── Responsive (sidebar always visible) ──────────────────── */
+
+        @media (min-width: 768px) {
+            .sidebar {
+                transform: translateX(0);
+                position: relative;
+                height: auto;
+                border-right: 1px solid var(--border);
+                z-index: auto;
+            }
+
+            .sidebar-overlay {
+                display: none !important;
+            }
+
+            .menu-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            body {
+                flex-direction: row;
+            }
+        }
+
+        /* ── Mobile responsive ──────────────────────────────────── */
+
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .menu-toggle.hidden {
+                display: none !important;
+            }
+
+            .sidebar-close {
+                display: flex;
+            }
+
+            body {
+                flex-direction: column;
+            }
+
+            .main-content {
+                padding: 4.5rem 1rem 2rem;
+                margin-left: 0;
+            }
+
+            header h1 { font-size: 1.4rem; }
+            .stats { gap: 0.5rem; }
+            .articles-wrapper { padding: 0.75rem 0.75rem 0.25rem; }
+            .article { padding: 0.85rem 0.9rem; }
+            .article h3 { font-size: 0.93rem; }
+        }
+
+        @media (max-width: 640px) {
+            .stat {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        /* ── Scrollbar styling ──────────────────────────────────── */
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Archives</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+        </div>
+        <ul class="sidebar-list">
+            
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-26-07-15.html" >
+                        <span>Sunday, April 26, 2026 – 07:15</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-25-07-27.html" >
+                        <span>Saturday, April 25, 2026 – 07:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-24-07-25.html" >
+                        <span>Friday, April 24, 2026 – 07:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-23-07-32.html" >
+                        <span>Thursday, April 23, 2026 – 07:32</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-22-07-44.html" >
+                        <span>Wednesday, April 22, 2026 – 07:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-21-07-22.html" >
+                        <span>Tuesday, April 21, 2026 – 07:22</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-20-07-18.html" >
+                        <span>Monday, April 20, 2026 – 07:18</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-19-07-28.html" >
+                        <span>Sunday, April 19, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-22-11.html" >
+                        <span>Saturday, April 18, 2026 – 22:11</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-18-07-24.html" >
+                        <span>Saturday, April 18, 2026 – 07:24</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-17-07-32.html" >
+                        <span>Friday, April 17, 2026 – 07:32</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-07-14.html" >
+                        <span>Thursday, April 16, 2026 – 07:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-16-00-41.html" >
+                        <span>Thursday, April 16, 2026 – 00:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-20-28.html" >
+                        <span>Wednesday, April 15, 2026 – 20:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-35.html" >
+                        <span>Wednesday, April 15, 2026 – 00:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-15-00-25.html" >
+                        <span>Wednesday, April 15, 2026 – 00:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-14-07-17.html" >
+                        <span>Tuesday, April 14, 2026 – 07:17</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-13-07-10.html" >
+                        <span>Monday, April 13, 2026 – 07:10</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-07-01.html" >
+                        <span>Sunday, April 12, 2026 – 07:01</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-03-30.html" >
+                        <span>Sunday, April 12, 2026 – 03:30</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-54.html" >
+                        <span>Sunday, April 12, 2026 – 02:54</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-50.html" >
+                        <span>Sunday, April 12, 2026 – 02:50</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-02-25.html" >
+                        <span>Sunday, April 12, 2026 – 02:25</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-35.html" >
+                        <span>Sunday, April 12, 2026 – 01:35</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-01-07.html" >
+                        <span>Sunday, April 12, 2026 – 01:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-36.html" >
+                        <span>Sunday, April 12, 2026 – 00:36</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-12-00-14.html" >
+                        <span>Sunday, April 12, 2026 – 00:14</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-23-39.html" >
+                        <span>Saturday, April 11, 2026 – 23:39</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-14-57.html" >
+                        <span>Saturday, April 11, 2026 – 14:57</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-11-07-33.html" >
+                        <span>Saturday, April 11, 2026 – 07:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-10-07-41.html" >
+                        <span>Friday, April 10, 2026 – 07:41</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-09-07-34.html" >
+                        <span>Thursday, April 09, 2026 – 07:34</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-08-07-28.html" >
+                        <span>Wednesday, April 08, 2026 – 07:28</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-07-07-07.html" >
+                        <span>Tuesday, April 07, 2026 – 07:07</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-23-27.html" >
+                        <span>Monday, April 06, 2026 – 23:27</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-21-51.html" >
+                        <span>Monday, April 06, 2026 – 21:51</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-20-55.html" >
+                        <span>Monday, April 06, 2026 – 20:55</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-07-04.html" >
+                        <span>Monday, April 06, 2026 – 07:04</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-43.html" >
+                        <span>Monday, April 06, 2026 – 00:43</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-06-00-33.html" >
+                        <span>Monday, April 06, 2026 – 00:33</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-23-49.html" >
+                        <span>Sunday, April 05, 2026 – 23:49</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-31.html" >
+                        <span>Sunday, April 05, 2026 – 14:31</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-14-05.html" >
+                        <span>Sunday, April 05, 2026 – 14:05</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-13-44.html" >
+                        <span>Sunday, April 05, 2026 – 13:44</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-05-00-00.html" >
+                        <span>Sunday, April 05, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+                <li class="sidebar-item">
+                    <a href="digest-2026-04-04-00-00.html" >
+                        <span>Saturday, April 04, 2026 – 00:00</span>
+                        
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+        <header>
+            <h1>📡 Blog Digest</h1>
+            <p class="meta">Monday, April 27, 2026</p>
+            <div class="stats">
+                <span class="stat"><strong>19</strong> articles</span>
+                <span class="stat"><strong>4</strong> feeds</span>
+                <span class="stat" id="read-stat" style="display:none"><strong id="read-count">0</strong> read</span>
+            </div>
+            <div class="search-wrap">
+                <input id="search-input" type="search" placeholder="Filter articles…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        
+        <details class="feed-section" data-feed="Kubernetes subreddit">
+            <summary>
+                <span class="feed-dot"></span>
+                Kubernetes subreddit
+                <span class="feed-count">(4)</span>
+                <span class="feed-read-badge" data-feed-badge="Kubernetes subreddit"></span>
+                <button class="btn-read-all" data-feed-all="Kubernetes subreddit" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="5a93ad3698a61986">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1swesrf/final_part_pcidss_on_gke_data_protection/" target="_blank" rel="noopener">Building a PCI-DSS Compliant GKE Framework for Financial Workloads</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="5a93ad3698a61986" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post discusses the final part of a series on building a PCI-DSS compliant Google Kubernetes Engine (GKE) framework for financial workloads, focusing on data protection, governance, and audit logging. The author shares their expertise on how to protect card data and demonstrate compliance with auditors. They also encourage feedback from readers who have built similar frameworks in regulated environments.</p><p class="summary">The key takeaways include the importance of implementing robust data encryption methods, regular security audits, and maintaining detailed logs for audit purposes. Additionally, the author emphasizes the need for a clear governance structure to oversee compliance and ensure that all relevant policies are enforced.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">pci-dss</span>
+                        
+                        <span class="label-tag">financial-institutions</span>
+                        
+                        <span class="label-tag">cloud-security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1swesrf/final_part_pcidss_on_gke_data_protection/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="99bdbd725308eaec">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1swph65/i_have_not_once_gotten_a_file_storage_solution/" target="_blank" rel="noopener">struggling with file storage solution on kubernetes</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="99bdbd725308eaec" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-27</p>
+                    
+                    <p class="summary">The author is having trouble setting up a file storage solution on their Kubernetes cluster, specifically with OwnCloud and FileBrowser. They tried to install the OwnCloud helm chart but were unable to resolve an issue with Longhorn, a persistent storage solution that conflicts with FileBrowser.</p><p class="summary">After struggling for some time, the author is wondering if they are being "dumb" in how they're trying to set up the file server. However, the response from others suggests that setting up a similar solution may not be straightforward and requires careful consideration of storage options and configuration.</p><p class="summary">The key takeaways are that installing a file storage solution on Kubernetes can be challenging, especially when dealing with conflicting solutions like Longhorn and FileBrowser.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">longhorn</span>
+                        
+                        <span class="label-tag">filenetworking</span>
+                        
+                        <span class="label-tag">owncloud</span>
+                        
+                        <span class="label-tag">helm</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1swph65/i_have_not_once_gotten_a_file_storage_solution/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="0909d72c51211a3e">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1sw208e/node_level_resource_restriction_with_k3s_whats/" target="_blank" rel="noopener">node-level resource restriction with k3s</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="0909d72c51211a3e" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">The author of the blog post is struggling with a small homelab cluster where some nodes are significantly smaller than others, causing issues with resource management. They've considered using requests and limits in deployments, but want to find a more elegant solution that doesn't require scaling down deployments or running each node in a separate container. The author has tried modifying kubepods.slice's resource limits, but was unsuccessful. They're seeking recommendations on how to implement node-level resource management for k3s, as the documentation suggests that modifying the Kubernetes configuration may not be applicable.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">containerization</span>
+                        
+                        <span class="label-tag">otlp</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1sw208e/node_level_resource_restriction_with_k3s_whats/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="55fea53aa726f4aa">
+                    <div class="article-header">
+                        <h3><a href="https://www.reddit.com/r/kubernetes/comments/1swgn2m/ia_in_kubernetes_clusters/" target="_blank" rel="noopener">Using Artificial Intelligence in Kubernetes Clusters</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="55fea53aa726f4aa" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">The blog post discusses the use of artificial intelligence (AI) in Kubernetes clusters, with a focus on its applications and challenges. The author is seeking information from others about their experiences with AI in Kubernetes, particularly in troubleshooting and automation tasks. They also ask for guidance on how to set up and demonstrate AI in a work environment.</p><p class="summary">The key takeaways are that AI can be used to improve the efficiency and effectiveness of Kubernetes cluster management, but it requires careful planning and integration. The author is looking for practical advice and insights from others who have experience with AI in Kubernetes.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">automation</span>
+                        
+                        <span class="label-tag">troubleshooting</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.reddit.com/r/kubernetes/comments/1swgn2m/ia_in_kubernetes_clusters/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Hacker News (Top)">
+            <summary>
+                <span class="feed-dot"></span>
+                Hacker News (Top)
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Hacker News (Top)"></span>
+                <button class="btn-read-all" data-feed-all="Hacker News (Top)" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="4f38294d736c6bb3">
+                    <div class="article-header">
+                        <h3><a href="https://www.smithsonianmag.com/science-nature/butterflies-are-in-dramatic-decline-across-north-america-a-close-look-at-the-western-monarch-shows-why-180988582/" target="_blank" rel="noopener">Butterflies are in decline across North America, a look at the Western Monarch</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="4f38294d736c6bb3" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">The article discusses the alarming decline of butterfly populations in North America, focusing on the Western Monarch. The author examines the reasons behind this decline, including habitat loss, pesticide use, climate change, and human activities such as urbanization and agriculture. The article also highlights the importance of conservation efforts, such as protecting milkweed habitats that are essential for monarch caterpillars to survive.</p><p class="summary">The decline of the Western Monarch is a significant concern due to its impact on ecosystems and biodiversity. The loss of this species would not only affect the environment but also have economic implications, particularly in regions where monarchs are an important tourist attraction. The article concludes by emphasizing the need for urgent action to address the causes of the decline and protect this iconic species.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">conservation</span>
+                        
+                        <span class="label-tag">biodiversity</span>
+                        
+                        <span class="label-tag">climate-change</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.smithsonianmag.com/science-nature/butterflies-are-in-dramatic-decline-across-north-america-a-close-look-at-the-western-monarch-shows-why-180988582/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="df77b72747898d71">
+                    <div class="article-header">
+                        <h3><a href="https://www.bbc.com/sport/athletics/articles/crm1m7e0zwzo" target="_blank" rel="noopener">Sabastian Sawe becomes first athlete to run a sub-two-hour marathon in a competitive race</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="df77b72747898d71" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">Sabastian Sawe has achieved an incredible feat by becoming the first athlete to complete a sub-two-hour marathon in a competitive setting. This milestone, set at the Adidas Breaking2 Project's final event in Rio de Janeiro, showcases Sawe's exceptional endurance and training.</p><p class="summary">Sawe's record-breaking performance breaks previous barriers, as he completed the 21.1-mile course in an astonishing 1:59:23. This achievement not only highlights his dedication to training but also pushes the boundaries of human potential.</p><p class="summary">As news of this incredible feat spreads, it is likely that athletes and non-athletes alike will be inspired by Sawe's perseverance and determination.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">marathons</span>
+                        
+                        <span class="label-tag">athletics</span>
+                        
+                        <span class="label-tag">endurance-testing</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.bbc.com/sport/athletics/articles/crm1m7e0zwzo" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="35225f68cc262af5">
+                    <div class="article-header">
+                        <h3><a href="https://ca98am79.medium.com/i-bought-friendster-for-30k-heres-what-i-m-doing-with-it-d5e8ddb3991d" target="_blank" rel="noopener">I bought Friendster for $30,000 – Here's what I'm doing with it</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="35225f68cc262af5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">The founder of Friendster, a pioneering social networking site that sold to NBCUniversal in 2005, has purchased the company again for $30,000. The new owner plans to revive the platform and offer it as an open-source alternative to existing social media sites.</p><p class="summary">The founder aims to create a decentralized social network that rewards users with cryptocurrency for sharing content and engaging with others on the platform. This approach is expected to promote a more transparent and trustworthy online environment. Additionally, the new version of Friendster will include features such as a reputation system, which would incentivize users to behave in a certain way.</p><p class="summary">The plan also involves incorporating blockchain technology into the site's infrastructure, allowing for secure and transparent transactions between users. This could potentially create a more reliable and efficient platform for sharing information and interacting with others online.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">friendster</span>
+                        
+                        <span class="label-tag">social-networking</span>
+                        
+                        <span class="label-tag">cryptocurrency</span>
+                        
+                        <span class="label-tag">decentralization</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://ca98am79.medium.com/i-bought-friendster-for-30k-heres-what-i-m-doing-with-it-d5e8ddb3991d" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="b5e92edef6c44406">
+                    <div class="article-header">
+                        <h3><a href="https://www.sentinelone.com/labs/fast16-mystery-shadowbrokers-reference-reveals-high-precision-software-sabotage-5-years-before-stuxnet/" target="_blank" rel="noopener">High-Precision Software Sabotage 5 Years Before Stuxnet</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="b5e92edef6c44406" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post discusses a mysterious software sabotage that was uncovered by SentinelOne, revealing high-precision attacks that were carried out five years before the notorious Stuxnet malware. The Fast16 threat was discovered through an analysis of the Shadow Brokers leak, which contained hacking tools and exploits developed by North Korean agents. Researchers found that Fast16 used advanced techniques to evade detection and manipulate software on compromised systems, including the use of kernel-mode rootkits and custom-built backdoors.</p><p class="summary">The authors argue that this revelation highlights the sophistication and capabilities of North Korean state-sponsored actors in the cyber threat landscape. The article concludes by emphasizing the importance of monitoring and detecting such high-precision attacks, particularly for organizations operating in sensitive industries.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">north-korea</span>
+                        
+                        <span class="label-tag">stuxnet</span>
+                        
+                        <span class="label-tag">sentinelone</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.sentinelone.com/labs/fast16-mystery-shadowbrokers-reference-reveals-high-precision-software-sabotage-5-years-before-stuxnet/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="61c0ebef1413db31">
+                    <div class="article-header">
+                        <h3><a href="https://www.koshyjohn.com/blog/ai-should-elevate-your-thinking-not-replace-it/" target="_blank" rel="noopener">AI should elevate your thinking, not replace it</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="61c0ebef1413db31" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post explores the idea that artificial intelligence (AI) should augment human capabilities rather than replacing them. The author argues that while AI can process vast amounts of data and provide insights, it is ultimately limited by its own programming and algorithms. In contrast, humans possess a unique ability to think creatively, make connections between seemingly unrelated ideas, and navigate complex ethical dilemmas.</p><p class="summary">The post suggests that the most effective way to harness the power of AI is to use it as a tool to support human thinking, rather than relying solely on it. This approach can help overcome some of the limitations of AI, such as its lack of common sense and emotional intelligence.</p><p class="summary">By embracing the strengths of both humans and machines, we can create more effective solutions that balance efficiency with creativity and nuance.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">critical-thinking</span>
+                        
+                        <span class="label-tag">artificial-intelligence</span>
+                        
+                        <span class="label-tag">human-centered-design</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.koshyjohn.com/blog/ai-should-elevate-your-thinking-not-replace-it/" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Golem">
+            <summary>
+                <span class="feed-dot"></span>
+                Golem
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Golem"></span>
+                <button class="btn-read-all" data-feed-all="Golem" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="472c19b634586397">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/sci-fi-serie-alien-earth-soll-mehrere-staffeln-bekommen-2604-208019.html" target="_blank" rel="noopener">Alien: Earth to Get Several Seasons</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="472c19b634586397" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">Alien: Earth, the upcoming sci-fi series based on the popular franchise, is set to become a long-term series according to showrunner Noah Hawley. The production team plans to relocate to Pinewood Studios in the future.</p><p class="summary">The series has been in development for some time and has attracted attention from fans of both Alien and Game of Thrones, creators of which also worked with Hawley on his previous projects. Although no release date has been announced, it is expected that Alien: Earth will be released sometime in the near future.</p><p class="summary">Fans of sci-fi and space operas are likely to be interested in this upcoming series as it promises to deliver a thrilling and immersive experience.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">sci-fi</span>
+                        
+                        <span class="label-tag">television-series</span>
+                        
+                        <span class="label-tag">film-franchise-legacy</span>
+                        
+                        <span class="label-tag">production-plans</span>
+                        
+                        <span class="label-tag">tv-production</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/sci-fi-serie-alien-earth-soll-mehrere-staffeln-bekommen-2604-208019.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="85644222dba56323">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/anzeige-drohne-mit-4k-kamera-und-gps-fuer-unter-200-euro-bei-amazon-2604-207997.html" target="_blank" rel="noopener">Drone with 4K Camera and GPS for Under $200 on Amazon</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="85644222dba56323" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post does not appear to be about Kubernetes or related topics, but rather a review of a drone with a 4K camera that can be purchased on Amazon. The article discusses the drone's features, including its high-resolution camera and GPS capabilities, as well as its price point.</p><p class="summary">The drone is described as a budget-friendly option that offers good value for its price, allowing users to capture high-quality photos and videos with its 4K camera. The review also touches on the drone's flight time, which is said to be over an hour when powered by two batteries.</p><p class="summary">Overall, the article appears to be a brief product review rather than a technical or informative piece about Kubernetes or related topics.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">drones</span>
+                        
+                        <span class="label-tag">amazon</span>
+                        
+                        <span class="label-tag">photography</span>
+                        
+                        <span class="label-tag">gps</span>
+                        
+                        <span class="label-tag">4k</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/anzeige-drohne-mit-4k-kamera-und-gps-fuer-unter-200-euro-bei-amazon-2604-207997.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="465139e7c41dd6d8">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/elektronische-patientenakte-deutsche-telekom-will-die-bessere-epa-anbieten-2604-208023.html" target="_blank" rel="noopener">Deutsche Telekom aims to improve electronic patient records with better ePA offering</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="465139e7c41dd6d8" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">Deutsche Telekom is working to enhance the country's electronic patient records, which have been met with resistance from many users. The company plans to introduce a new and improved electronic patient record (ePA) system that aims to address the shortcomings of the current one. By streamlining the data management process and introducing standardized workflows, Deutsche Telekom hopes to increase user adoption and make the ePA system more efficient.</p><p class="summary">The new ePA system is designed to provide users with greater control over their personal data, improve data security, and reduce the administrative burden associated with managing patient records. Additionally, the system will incorporate advanced features such as real-time monitoring and analytics capabilities.</p><p class="summary">Deutsche Telekom's goal is to make the ePA system more user-friendly and accessible, allowing healthcare professionals to focus on providing better care to patients. By improving the ePA system, Deutsche Telekom aims to contribute to a more efficient and effective healthcare system.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">german-healthcare</span>
+                        
+                        <span class="label-tag">telekom</span>
+                        
+                        <span class="label-tag">electronic-patient-records</span>
+                        
+                        <span class="label-tag">data-security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/elektronische-patientenakte-deutsche-telekom-will-die-bessere-epa-anbieten-2604-208023.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="c6c700770dfbeda5">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/paypal-alternative-wero-kann-haendler-bisher-kaum-ueberzeugen-2604-208022.html" target="_blank" rel="noopener">PayPal Alternative Unconvincing for E-commerce Sellers</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="c6c700770dfbeda5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">Wero, a digital payment platform aiming to be an alternative to PayPal, is struggling to gain traction among German e-commerce sellers. Despite its features and benefits, the platform has yet to convince a significant number of sellers to make the switch from PayPal. This lack of adoption is attributed to various factors, including user experience issues and concerns over security.</p><p class="summary">The reason for Wero's slow pace lies in its failure to fully understand the needs and pain points of its target audience. The company's approach seems too rigid, with an emphasis on automation over flexibility. As a result, sellers are hesitant to adopt the platform due to its inflexibility. Additionally, some argue that Wero lacks the level of trust and familiarity associated with established brands like PayPal.</p><p class="summary">In order to improve its chances of success, Wero needs to listen to the concerns and feedback of its target audience. By doing so, it can address user experience issues, enhance security features, and demonstrate a commitment to flexibility and innovation.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">wero</span>
+                        
+                        <span class="label-tag">e-commerce</span>
+                        
+                        <span class="label-tag">germany</span>
+                        
+                        <span class="label-tag">digital payments</span>
+                        
+                        <span class="label-tag">online marketplaces</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/paypal-alternative-wero-kann-haendler-bisher-kaum-ueberzeugen-2604-208022.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="526d83c7a8239ef5">
+                    <div class="article-header">
+                        <h3><a href="https://www.golem.de/news/zuwachs-bei-elektroautos-tesla-sieht-trendwende-experte-erkennt-nur-einmaleffekt-2604-208021.html" target="_blank" rel="noopener">Electric Vehicle Growth Sees a Trend Turnaround - Expert Disagrees with Tesla's View</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="526d83c7a8239ef5" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">The article discusses the growth of electric vehicles, specifically Tesla's optimistic prediction of a strong and sustained increase in sales. However, Ferdinand Dudenhöffer, an expert in the automotive industry, disagrees with Tesla's assessment. According to Dudenhöffer, the trend towards electric vehicles is not as promising as it seems. He points out that while there may be some initial growth, this growth will eventually plateau due to various factors such as high production costs and limited battery range.</p><p class="summary">Dudenhöffer's views are based on his analysis of market trends and industry developments. He notes that the automotive industry is becoming increasingly complex, with new technologies and regulatory requirements emerging regularly. This complexity makes it challenging for companies like Tesla to maintain their momentum.</p><p class="summary">In contrast to Dudenhöffer's view, some experts predict a continued growth in electric vehicle sales. However, his warning suggests that investors and consumers should be cautious when making predictions about the industry's future.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">kubernetes</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                        <span class="label-tag">performance-optimization</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.golem.de/news/zuwachs-bei-elektroautos-tesla-sieht-trendwende-experte-erkennt-nur-einmaleffekt-2604-208021.html" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+        <details class="feed-section" data-feed="Heise IT">
+            <summary>
+                <span class="feed-dot"></span>
+                Heise IT
+                <span class="feed-count">(5)</span>
+                <span class="feed-read-badge" data-feed-badge="Heise IT"></span>
+                <button class="btn-read-all" data-feed-all="Heise IT" aria-label="Mark all as read">Mark all read</button>
+                <span class="feed-chevron">▼</span>
+            </summary>
+            <div class="articles-wrapper">
+                
+                <div class="article" data-id="870fd701bb1a49f9">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Geistiges-US-Eigentum-gestohlen-US-Botschaften-sollen-vor-DeepSeek-Co-warnen-11272583.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Intellectual Property Theft in US Embassies</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="870fd701bb1a49f9" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-27</p>
+                    
+                    <p class="summary">The US government is drawing criticism from AI firms such as Anthropic for its stance on competing with China in the field of artificial intelligence. The government has been urging US embassies to be cautious when using technologies like DeepSeek, which could potentially compromise intellectual property.</p><p class="summary">US diplomats are being advised to exercise caution when using these tools, and instead opt for alternative solutions that do not involve sharing sensitive information. This move is seen as a response to China's growing influence in the AI field, with many experts warning of the potential risks of IP theft. The US government is taking steps to protect its intellectual property and maintain a competitive edge in the global AI landscape.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">china</span>
+                        
+                        <span class="label-tag">ai</span>
+                        
+                        <span class="label-tag">cybersecurity</span>
+                        
+                        <span class="label-tag">intellectual-property</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Geistiges-US-Eigentum-gestohlen-US-Botschaften-sollen-vor-DeepSeek-Co-warnen-11272583.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="bdeb283a41b1bd30">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Weiterer-Schritt-Richtung-TI-2-0-D-Trust-zeigt-kartenlose-Institutionsidentitaet-11272517.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Further Steps to TI 2.0: D-Trust Demonstrates Contactless Institutional Identity</a></h3>
+                        
+                        <span class="badge-for-you">For you</span>
+                        
+                        
+                        <button class="btn-read" data-id="bdeb283a41b1bd30" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">D-Trust has demonstrated the potential of contactless institutional identity in the healthcare network, initially for institutions. The goal is to make digital identity management more secure and seamless, similar to what we see in everyday life with credit cards or mobile payments. By using a decentralized trust model, D-Trust aims to provide a trusted and efficient way to verify identities without compromising personal data.</p><p class="summary">The concept of contactless institutional identity has the potential to transform how institutions interact digitally. With this technology, institutions can easily authenticate their staff, patients, or customers, and ensure that only authorized individuals have access to sensitive information. This could also enable more secure digital payments within the healthcare network.</p><p class="summary">In addition to its potential benefits, D-Trust's approach also raises interesting questions about data protection and security. As with any new technology, there will be concerns about how personal data is handled and protected in this system.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">trust</span>
+                        
+                        <span class="label-tag">identity management</span>
+                        
+                        <span class="label-tag">decentralized technologies</span>
+                        
+                        <span class="label-tag">healthcare</span>
+                        
+                        <span class="label-tag">security</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Weiterer-Schritt-Richtung-TI-2-0-D-Trust-zeigt-kartenlose-Institutionsidentitaet-11272517.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="92140383ad499f6f">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/bestenlisten/testsieger/top-5-die-beste-nvme-ssd-im-test-kingston-ist-testsieger-vor-corsair-und-lexar/kj0r95c?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Top 5 Best NVMe SSDs in Testing - Kingston Takes the Lead</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="92140383ad499f6f" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post reviews and compares five top-performing NVMe SSDs, highlighting their speed, durability, and compatibility. The author tests these drives for various uses, including PC, laptop, and PS5, to determine which one comes out on top.</p><p class="summary">The testing process reveals that Kingston takes the lead in terms of performance, followed closely by Corsair and Lexar. The author concludes that NVMe SSDs offer excellent speed, long lifespan, and versatility across different devices. However, the optimal choice depends on specific use cases and budget constraints.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">nvme</span>
+                        
+                        <span class="label-tag">ssd</span>
+                        
+                        <span class="label-tag">testing</span>
+                        
+                        <span class="label-tag">performance</span>
+                        
+                        <span class="label-tag">best-practices</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/bestenlisten/testsieger/top-5-die-beste-nvme-ssd-im-test-kingston-ist-testsieger-vor-corsair-und-lexar/kj0r95c?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="6e7dfbd0f94b1132">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/Fast-perfekte-Faelschung-Alte-GPUs-auf-neueren-Grafikkarten-11272473.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Fast Fake GPU: Old GPUs Inside Newer Graphics Cards</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="6e7dfbd0f94b1132" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">This blog post revolves around a repair specialist who received an unusual GPU to fix. The card was found on the motherboard of an RTX 4090, but it turned out to be an older NVIDIA GeForce RTX 3000 GPU instead of a newer one. The story raises questions about how such an old component ended up in a brand-new graphics card.</p><p class="summary">The author discusses several possible explanations for this unusual occurrence, including accidental installation, a mistake during manufacturing, or even tampering with the product. However, no definitive answer is provided. The post explores various scenarios and theories behind this bizarre situation.</p><p class="summary">The article's primary focus lies in sparking curiosity and encouraging readers to think about the potential reasons behind such an anomaly. It does not delve into technical details or provide concrete solutions for preventing similar issues.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">gpu repair</span>
+                        
+                        <span class="label-tag">manufacturing defects</span>
+                        
+                        <span class="label-tag">new vs old technology</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/Fast-perfekte-Faelschung-Alte-GPUs-auf-neueren-Grafikkarten-11272473.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+                <div class="article" data-id="72bcca1d5cce8989">
+                    <div class="article-header">
+                        <h3><a href="https://www.heise.de/news/OpenAI-startet-Bug-Bounty-Programm-fuer-Bio-Sicherheit-11272469.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">OpenAI starts Bug Bounty program for bio-security</a></h3>
+                        
+                        
+                        <button class="btn-read" data-id="72bcca1d5cce8989" aria-label="Mark as read">Read</button>
+                    </div>
+                    
+                    <p class="date">2026-04-26</p>
+                    
+                    <p class="summary">OpenAI has launched a bug bounty program to identify vulnerabilities in the biosafety features of its latest chatbot model, ChatGPT 5.5. The program aims to improve the security and reliability of the model, which is designed to generate human-like text responses. By encouraging researchers and developers to report bugs and weaknesses, OpenAI hopes to strengthen the overall safety and trustworthiness of its technology.</p><p class="summary">The bug bounty program is an important step in ensuring the responsible development of AI systems, particularly those with potential applications in fields such as healthcare and biotechnology. As AI continues to advance and become increasingly integrated into various industries, it's essential to prioritize security and ethics in its design and deployment.</p>
+                    
+                    <div class="labels">
+                        
+                        <span class="label-tag">ai-security</span>
+                        
+                        <span class="label-tag">bug-bounty-programm</span>
+                        
+                        <span class="label-tag">bio-security</span>
+                        
+                        <span class="label-tag">open-source</span>
+                        
+                    </div>
+                    
+                    <a class="read-more" href="https://www.heise.de/news/OpenAI-startet-Bug-Bounty-Programm-fuer-Bio-Sicherheit-11272469.html?wt_mc=rss.red.ho.beitrag.atom.beitrag.beitrag" target="_blank" rel="noopener">Read full article →</a>
+                </div>
+                
+            </div>
+        </details>
+        
+
+        
+
+        <div id="no-results">No articles match your search.</div>
+
+        
+        <details class="run-stats" open>
+            <summary>Run statistics</summary>
+            <div class="run-stats-grid">
+                <div class="run-stat-item">
+                    <div class="label">Started</div>
+                    <div class="value">07:00:01</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Finished</div>
+                    <div class="value">07:16:58</div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">Duration</div>
+                    <div class="value">16m 56s</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Avg tokens/s</div>
+                    <div class="value">4.9</div>
+                </div>
+                
+                <div class="run-stat-item">
+                    <div class="label">Ollama</div>
+                    <div class="value">19 articles<br><span style="font-size:0.7rem;font-weight:400;color:var(--text-muted)">llama3.2:3b</span></div>
+                </div>
+                <div class="run-stat-item">
+                    <div class="label">From cache</div>
+                    <div class="value dim">6</div>
+                </div>
+                
+            </div>
+        </details>
+        
+
+
+            <footer>
+                Generated 2026-04-27 07:16 ·
+                <a href="index.html" style="color: var(--accent);">← Archive</a> ·
+                <a href="https://github.com/cool-sandro/blog-digest" style="color: var(--accent);">GitHub</a>
+            </footer>
+        </div>
+    </main>
+
+    <script>
+    (function () {
+        // ── Mobile sidebar toggle ──
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            menuToggle?.classList.remove('hidden');
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            menuToggle?.classList.toggle('hidden');
+        }
+
+        menuToggle?.addEventListener('click', toggleSidebar);
+        sidebarClose?.addEventListener('click', closeSidebar);
+        overlay?.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a link is clicked (mobile)
+        document.querySelectorAll('.sidebar-item a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        const STORAGE_KEY = 'digest-read';
+        const COLLAPSE_KEY = 'digest-collapsed';
+
+        // ── Helpers ───────────────────────────────────────────────
+
+        function getRead() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+            catch { return {}; }
+        }
+
+        function saveRead(obj) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+        }
+
+        function getCollapsed() {
+            try { return JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function saveCollapsed(arr) {
+            localStorage.setItem(COLLAPSE_KEY, JSON.stringify(arr));
+        }
+
+        // ── Apply read state ──────────────────────────────────────
+
+        function applyRead() {
+            const read = getRead();
+            let totalRead = 0;
+
+            document.querySelectorAll('.article[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                const isRead = !!read[id];
+                card.classList.toggle('is-read', isRead);
+                const btn = card.querySelector('.btn-read');
+                if (btn) btn.textContent = isRead ? 'Unread' : 'Read';
+                if (isRead) totalRead++;
+            });
+
+            // Update per-feed badges
+            document.querySelectorAll('.feed-section').forEach(details => {
+                const feed = details.dataset.feed;
+                const cards = details.querySelectorAll('.article[data-id]');
+                const readInFeed = [...cards].filter(c => c.classList.contains('is-read')).length;
+                const badge = details.querySelector('[data-feed-badge]');
+                if (badge) {
+                    badge.textContent = readInFeed > 0 ? `${readInFeed}/${cards.length} read` : '';
+                    badge.style.display = readInFeed > 0 ? '' : 'none';
+                }
+            });
+
+            // Update header stat
+            const readStat = document.getElementById('read-stat');
+            const readCount = document.getElementById('read-count');
+            if (totalRead > 0) {
+                readCount.textContent = totalRead;
+                readStat.style.display = '';
+            } else {
+                readStat.style.display = 'none';
+            }
+        }
+
+        // ── Toggle read on button click ───────────────────────────
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.id;
+            const read = getRead();
+            if (read[id]) {
+                delete read[id];
+            } else {
+                read[id] = true;
+            }
+            saveRead(read);
+            applyRead();
+        });
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-read-all');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const feedName = btn.dataset.feedAll;
+            const section = document.querySelector(`.feed-section[data-feed="${CSS.escape(feedName)}"]`);
+            if (!section) return;
+            const read = getRead();
+            section.querySelectorAll('.article[data-id]').forEach(card => {
+                read[card.dataset.id] = true;
+            });
+            saveRead(read);
+            applyRead();
+        });
+
+        // ── Persist collapsed state ───────────────────────────────
+
+        document.querySelectorAll('details.feed-section').forEach(details => {
+            const feed = details.dataset.feed;
+            const collapsed = getCollapsed();
+
+            // Restore: open by default, close if previously collapsed
+            if (collapsed.includes(feed)) {
+                details.removeAttribute('open');
+            } else {
+                details.setAttribute('open', '');
+            }
+
+            details.addEventListener('toggle', function () {
+                const list = getCollapsed();
+                if (details.open) {
+                    const idx = list.indexOf(feed);
+                    if (idx > -1) list.splice(idx, 1);
+                } else {
+                    if (!list.includes(feed)) list.push(feed);
+                }
+                saveCollapsed(list);
+            });
+        });
+        // ── Search / filter ────────────────────────────────
+
+        const searchInput = document.getElementById('search-input');
+        const noResultsEl = document.getElementById('no-results');
+
+        function filterArticles() {
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let totalVisible = 0;
+
+            document.querySelectorAll('.feed-section').forEach(section => {
+                let visibleInFeed = 0;
+                section.querySelectorAll('.article').forEach(card => {
+                    const title = (card.querySelector('h3')?.textContent || '').toLowerCase();
+                    const summary = (card.querySelector('.summary')?.textContent || '').toLowerCase();
+                    const labels = (card.querySelector('.labels')?.textContent || '').toLowerCase();
+                    const matches = !query || title.includes(query) || summary.includes(query) || labels.includes(query);
+                    card.style.display = matches ? '' : 'none';
+                    if (matches) visibleInFeed++;
+                });
+                const hasMatches = visibleInFeed > 0;
+                section.style.display = hasMatches || !query ? '' : 'none';
+                // Auto-expand sections that have matches while searching
+                if (query && hasMatches) section.setAttribute('open', '');
+                totalVisible += visibleInFeed;
+            });
+
+            if (noResultsEl) {
+                noResultsEl.style.display = query && totalVisible === 0 ? '' : 'none';
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterArticles);
+        }
+        // ── Init ──────────────────────────────────────────────────
+        applyRead();
+    })();
+    </script>
+</body>
+</html>
